@@ -6,6 +6,9 @@ dist/
 # dependencies
 node_modules/
 
+# formatter cache
+.prettier-cache
+
 # logs
 npm-debug.log*
 yarn-debug.log*

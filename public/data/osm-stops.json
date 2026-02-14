@@ -1,0 +1,4377 @@
+[
+  {
+    "id": "osm-2572552393",
+    "name": "Achern",
+    "lat": 48.6339021,
+    "lon": 8.0653792,
+    "type": "train"
+  },
+  {
+    "id": "osm-3194912000",
+    "name": "Achern Stadt",
+    "lat": 48.6254203,
+    "lon": 8.0682324,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374775",
+    "name": "Adolf-Ehrmann-Bad",
+    "lat": 49.0506921,
+    "lon": 8.3849576,
+    "type": "train"
+  },
+  {
+    "id": "osm-257245290",
+    "name": "Albersweiler (Pfalz)",
+    "lat": 49.2186082,
+    "lon": 8.0240607,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109761933",
+    "name": "Albert-Braun-Straße",
+    "lat": 48.9891264,
+    "lon": 8.3635523,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2574283873",
+    "name": "Albtalbahnhof",
+    "lat": 48.9936597,
+    "lon": 8.3960901,
+    "type": "train"
+  },
+  {
+    "id": "osm-13483546435",
+    "name": "Althengstett",
+    "lat": 48.7268854,
+    "lon": 8.7974324,
+    "type": "train"
+  },
+  {
+    "id": "osm-30408053",
+    "name": "Altingen (Württ)",
+    "lat": 48.5621011,
+    "lon": 8.9086775,
+    "type": "train"
+  },
+  {
+    "id": "osm-1747821679",
+    "name": "Altrheinbrücke",
+    "lat": 49.0008865,
+    "lon": 8.3120042,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111091959",
+    "name": "Ankerstraße",
+    "lat": 49.0066047,
+    "lon": 8.3346458,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1685964861",
+    "name": "Annweiler am Trifels",
+    "lat": 49.2054453,
+    "lon": 7.9662591,
+    "type": "train"
+  },
+  {
+    "id": "osm-2077998926",
+    "name": "Annweiler-Sarnstall",
+    "lat": 49.2086892,
+    "lon": 7.9372553,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073156",
+    "name": "Arbeitsagentur",
+    "lat": 49.0034527,
+    "lon": 8.3864319,
+    "type": "tram"
+  },
+  {
+    "id": "osm-49759742",
+    "name": "Aristide Briand",
+    "lat": 48.5686278,
+    "lon": 7.7768388,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1394502608",
+    "name": "Aristide Briand",
+    "lat": 48.5686068,
+    "lon": 7.7768551,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112926985",
+    "name": "Au im Murgtal",
+    "lat": 48.7189278,
+    "lon": 8.3622873,
+    "type": "train"
+  },
+  {
+    "id": "osm-3098401320",
+    "name": "Auer Straße/Dr. Willmar Schwabe",
+    "lat": 49.0004421,
+    "lon": 8.4634778,
+    "type": "tram"
+  },
+  {
+    "id": "osm-7683568909",
+    "name": "Augartenstraße",
+    "lat": 48.9986823,
+    "lon": 8.4036514,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374776",
+    "name": "August-Bebel-Straße",
+    "lat": 49.0240059,
+    "lon": 8.3757438,
+    "type": "tram"
+  },
+  {
+    "id": "osm-82614216",
+    "name": "Bad Bergzabern",
+    "lat": 49.1032382,
+    "lon": 8.0033719,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109265533",
+    "name": "Bad Herrenalb",
+    "lat": 48.8023066,
+    "lon": 8.4389132,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109265532",
+    "name": "Bad Herrenalb Kullenmühle",
+    "lat": 48.8089639,
+    "lon": 8.4440259,
+    "type": "train"
+  },
+  {
+    "id": "osm-26619518",
+    "name": "Bad Herrenalb Steinhäusle",
+    "lat": 48.8201112,
+    "lon": 8.4451149,
+    "type": "train"
+  },
+  {
+    "id": "osm-5046262151",
+    "name": "Bad Liebenzell",
+    "lat": 48.7729087,
+    "lon": 8.7340998,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112878988",
+    "name": "Bad Rotenfels Bahnhof/Rotherma",
+    "lat": 48.8157274,
+    "lon": 8.3033052,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112878989",
+    "name": "Bad Rotenfels Schloss",
+    "lat": 48.8199892,
+    "lon": 8.2970666,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112878990",
+    "name": "Bad Rotenfels Weinbrennerstraße",
+    "lat": 48.8112453,
+    "lon": 8.3124966,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175310442",
+    "name": "Bad Schönborn Süd",
+    "lat": 49.2001753,
+    "lon": 8.6419858,
+    "type": "train"
+  },
+  {
+    "id": "osm-2069536884",
+    "name": "Bad Schönborn-Kronau",
+    "lat": 49.2195714,
+    "lon": 8.6468851,
+    "type": "train"
+  },
+  {
+    "id": "osm-6483804854",
+    "name": "Bad Teinach-Neubulach",
+    "lat": 48.6784597,
+    "lon": 8.7271629,
+    "type": "train"
+  },
+  {
+    "id": "osm-249329332",
+    "name": "Bad Wildbad Bahnhof",
+    "lat": 48.7555586,
+    "lon": 8.5510705,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724464",
+    "name": "Bad Wildbad Kurpark",
+    "lat": 48.7486482,
+    "lon": 8.5505095,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6434724470",
+    "name": "Bad Wildbad Nord",
+    "lat": 48.7638569,
+    "lon": 8.5549507,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724458",
+    "name": "Bad Wildbad Uhlandplatz/Sommerbergbahn",
+    "lat": 48.7508058,
+    "lon": 8.5494192,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2931245709",
+    "name": "Baden-Baden",
+    "lat": 48.7904421,
+    "lon": 8.1910627,
+    "type": "train"
+  },
+  {
+    "id": "osm-2572554238",
+    "name": "Baden-Baden Haueneberstein",
+    "lat": 48.8118668,
+    "lon": 8.2090421,
+    "type": "train"
+  },
+  {
+    "id": "osm-2572553558",
+    "name": "Baden-Baden Rebland",
+    "lat": 48.7337369,
+    "lon": 8.1465943,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109761934",
+    "name": "Badeniaplatz",
+    "lat": 48.982226,
+    "lon": 8.3683894,
+    "type": "tram"
+  },
+  {
+    "id": "osm-262507963",
+    "name": "Bahnbrücken",
+    "lat": 49.1192807,
+    "lon": 8.764828,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374777",
+    "name": "Bahnhof Hagsfeld",
+    "lat": 49.0274762,
+    "lon": 8.4538553,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3016662816",
+    "name": "Bahnhofsvorplatz",
+    "lat": 48.9943672,
+    "lon": 8.3996764,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844103",
+    "name": "Bannwaldallee",
+    "lat": 48.995197,
+    "lon": 8.3725362,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109738313",
+    "name": "Barbarossaplatz",
+    "lat": 48.99493,
+    "lon": 8.3896546,
+    "type": "tram"
+  },
+  {
+    "id": "osm-338810204",
+    "name": "Barbelroth",
+    "lat": 49.1040567,
+    "lon": 8.0701115,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374778",
+    "name": "Bärenweg",
+    "lat": 49.0471069,
+    "lon": 8.3787004,
+    "type": "train"
+  },
+  {
+    "id": "osm-1312803616",
+    "name": "Bauerbach",
+    "lat": 49.0738979,
+    "lon": 8.7481914,
+    "type": "train"
+  },
+  {
+    "id": "osm-4450744929",
+    "name": "Beinheim-Roppenheim",
+    "lat": 48.8512915,
+    "lon": 8.0624475,
+    "type": "train"
+  },
+  {
+    "id": "osm-269134154",
+    "name": "Bellheim Am Mühlbuckel",
+    "lat": 49.1925868,
+    "lon": 8.2974758,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267281",
+    "name": "Bellheim Bahnhof",
+    "lat": 49.1885192,
+    "lon": 8.294523,
+    "type": "train"
+  },
+  {
+    "id": "osm-28179678",
+    "name": "Berg (Pfalz)",
+    "lat": 48.9807465,
+    "lon": 8.2127578,
+    "type": "train"
+  },
+  {
+    "id": "osm-280685443",
+    "name": "Berghausen (Baden)",
+    "lat": 49.0057612,
+    "lon": 8.5304725,
+    "type": "train"
+  },
+  {
+    "id": "osm-3265493729",
+    "name": "Berghausen (Pfalz)",
+    "lat": 49.2953844,
+    "lon": 8.4061494,
+    "type": "train"
+  },
+  {
+    "id": "osm-1454785623",
+    "name": "Berghausen Am Stadion",
+    "lat": 49.0025459,
+    "lon": 8.536068,
+    "type": "train"
+  },
+  {
+    "id": "osm-47889007",
+    "name": "Berghausen Hummelberg",
+    "lat": 49.0097402,
+    "lon": 8.526606,
+    "type": "train"
+  },
+  {
+    "id": "osm-1661176664",
+    "name": "Berghausen Pfinzbrücke",
+    "lat": 49.0064982,
+    "lon": 8.5208749,
+    "type": "train"
+  },
+  {
+    "id": "osm-148386986",
+    "name": "Bergstation MerkurBergbahn",
+    "lat": 48.765116,
+    "lon": 8.2792786,
+    "type": "train"
+  },
+  {
+    "id": "osm-13016520369",
+    "name": "Bergstation Sommerberg",
+    "lat": 48.7506649,
+    "lon": 8.5395417,
+    "type": "train"
+  },
+  {
+    "id": "osm-19087938",
+    "name": "Bietigheim",
+    "lat": 48.9105348,
+    "lon": 8.2580046,
+    "type": "train"
+  },
+  {
+    "id": "osm-248651122",
+    "name": "Bilfingen",
+    "lat": 48.9487165,
+    "lon": 8.6204628,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724481",
+    "name": "Birkenfeld (Württ)",
+    "lat": 48.8737296,
+    "lon": 8.645259,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112826799",
+    "name": "Bischweier (Baden)",
+    "lat": 48.8321778,
+    "lon": 8.2775255,
+    "type": "train"
+  },
+  {
+    "id": "osm-1390541081",
+    "name": "Bischwiller",
+    "lat": 48.7655674,
+    "lon": 7.8513733,
+    "type": "train"
+  },
+  {
+    "id": "osm-2827470327",
+    "name": "Blankenloch",
+    "lat": 49.0668996,
+    "lon": 8.4647709,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112467810",
+    "name": "Blankenloch Kirche",
+    "lat": 49.0645434,
+    "lon": 8.471343,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112467811",
+    "name": "Blankenloch Mühlenweg",
+    "lat": 49.0686548,
+    "lon": 8.4745084,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3219421511",
+    "name": "Blankenloch Nord",
+    "lat": 49.0732644,
+    "lon": 8.4677129,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112467812",
+    "name": "Blankenloch Süd",
+    "lat": 49.0574077,
+    "lon": 8.4670791,
+    "type": "tram"
+  },
+  {
+    "id": "osm-207024039",
+    "name": "Bœcklin",
+    "lat": 48.5979837,
+    "lon": 7.7780266,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1360182429",
+    "name": "Bœcklin",
+    "lat": 48.5980121,
+    "lon": 7.7780236,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2965489987",
+    "name": "Bretten Bahnhof",
+    "lat": 49.0368581,
+    "lon": 8.6931971,
+    "type": "train"
+  },
+  {
+    "id": "osm-1403140336",
+    "name": "Bretten Kupferhälde",
+    "lat": 49.0370103,
+    "lon": 8.7237032,
+    "type": "train"
+  },
+  {
+    "id": "osm-1125042731",
+    "name": "Bretten Rinklingen",
+    "lat": 49.0366902,
+    "lon": 8.6736897,
+    "type": "train"
+  },
+  {
+    "id": "osm-1427483737",
+    "name": "Bretten Schulzentrum",
+    "lat": 49.0319505,
+    "lon": 8.7186026,
+    "type": "train"
+  },
+  {
+    "id": "osm-3189815646",
+    "name": "Bretten Stadtmitte",
+    "lat": 49.0338728,
+    "lon": 8.7029594,
+    "type": "train"
+  },
+  {
+    "id": "osm-268752048",
+    "name": "Bretten Wannenweg",
+    "lat": 49.0304658,
+    "lon": 8.7091743,
+    "type": "train"
+  },
+  {
+    "id": "osm-3189815649",
+    "name": "Bretten-Rechberg",
+    "lat": 49.0330893,
+    "lon": 8.7015058,
+    "type": "train"
+  },
+  {
+    "id": "osm-25479495",
+    "name": "Bretten-Ruit",
+    "lat": 49.0094061,
+    "lon": 8.7220665,
+    "type": "train"
+  },
+  {
+    "id": "osm-310046339",
+    "name": "Brötzingen Mitte",
+    "lat": 48.8894905,
+    "lon": 8.6671189,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724456",
+    "name": "Brötzingen Sandweg",
+    "lat": 48.8859165,
+    "lon": 8.6626272,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724457",
+    "name": "Brötzingen Wohnlichstraße",
+    "lat": 48.8820194,
+    "lon": 8.6538912,
+    "type": "train"
+  },
+  {
+    "id": "osm-3069962207",
+    "name": "Bruchhausen (bei Ettlingen)",
+    "lat": 48.9239869,
+    "lon": 8.3739571,
+    "type": "train"
+  },
+  {
+    "id": "osm-25436271",
+    "name": "Bruchsal",
+    "lat": 49.1244292,
+    "lon": 8.5897927,
+    "type": "train"
+  },
+  {
+    "id": "osm-2952265601",
+    "name": "Bruchsal Am Mantel",
+    "lat": 49.1410807,
+    "lon": 8.5638114,
+    "type": "train"
+  },
+  {
+    "id": "osm-4640074154",
+    "name": "Bruchsal Gewerbliches Bildungszentrum",
+    "lat": 49.1103068,
+    "lon": 8.5744593,
+    "type": "train"
+  },
+  {
+    "id": "osm-3625844886",
+    "name": "Bruchsal Schlachthof",
+    "lat": 49.1189113,
+    "lon": 8.6097278,
+    "type": "train"
+  },
+  {
+    "id": "osm-3393656158",
+    "name": "Bruchsal Schlossgarten",
+    "lat": 49.1313899,
+    "lon": 8.5940837,
+    "type": "train"
+  },
+  {
+    "id": "osm-5154586103",
+    "name": "Bruchsal Sportzentrum",
+    "lat": 49.1355633,
+    "lon": 8.5896228,
+    "type": "train"
+  },
+  {
+    "id": "osm-5939690738",
+    "name": "Bruchsal Stegwiesen",
+    "lat": 49.1364655,
+    "lon": 8.598155,
+    "type": "train"
+  },
+  {
+    "id": "osm-3625844887",
+    "name": "Bruchsal Tunnelstraße",
+    "lat": 49.1195625,
+    "lon": 8.5944337,
+    "type": "train"
+  },
+  {
+    "id": "osm-8645338345",
+    "name": "Bruchweiler-Bärenbach",
+    "lat": 49.1149663,
+    "lon": 7.8019135,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112467813",
+    "name": "Büchig",
+    "lat": 49.0479289,
+    "lon": 8.461068,
+    "type": "tram"
+  },
+  {
+    "id": "osm-21386662",
+    "name": "Bühl (Baden)",
+    "lat": 48.6965896,
+    "lon": 8.1293925,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685888669",
+    "name": "Bundenthal-Rumbach",
+    "lat": 49.1024326,
+    "lon": 7.806084,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109265534",
+    "name": "Busenbach",
+    "lat": 48.9293043,
+    "lon": 8.4505665,
+    "type": "train"
+  },
+  {
+    "id": "osm-5583897961",
+    "name": "Busenberg-Schindhard",
+    "lat": 49.1388624,
+    "lon": 7.7996861,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724473",
+    "name": "Calmbach",
+    "lat": 48.7766881,
+    "lon": 8.5714536,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724471",
+    "name": "Calmbach Süd",
+    "lat": 48.7733862,
+    "lon": 8.5664237,
+    "type": "train"
+  },
+  {
+    "id": "osm-492064073",
+    "name": "Calw",
+    "lat": 48.714667,
+    "lon": 8.7417802,
+    "type": "train"
+  },
+  {
+    "id": "osm-13483546437",
+    "name": "Calw",
+    "lat": 48.7149597,
+    "lon": 8.7418532,
+    "type": "train"
+  },
+  {
+    "id": "osm-13483546436",
+    "name": "Calw-Heumaden",
+    "lat": 48.7092476,
+    "lon": 8.7622301,
+    "type": "train"
+  },
+  {
+    "id": "osm-2349344081",
+    "name": "Citadelle",
+    "lat": 48.5714234,
+    "lon": 7.7800534,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4142363995",
+    "name": "Citadelle",
+    "lat": 48.5714349,
+    "lon": 7.7800191,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1685855885",
+    "name": "Dahn",
+    "lat": 49.1545366,
+    "lon": 7.7712692,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685855881",
+    "name": "Dahn Süd",
+    "lat": 49.1485459,
+    "lon": 7.7771971,
+    "type": "train"
+  },
+  {
+    "id": "osm-2574283611",
+    "name": "Dammerstock",
+    "lat": 48.9844656,
+    "lon": 8.403627,
+    "type": "train"
+  },
+  {
+    "id": "osm-26617715",
+    "name": "Diedelsheim",
+    "lat": 49.0392211,
+    "lon": 8.6745613,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111162120",
+    "name": "Dornröschenweg",
+    "lat": 48.9928704,
+    "lon": 8.3353558,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1177220464",
+    "name": "Droits de l'Homme",
+    "lat": 48.5961949,
+    "lon": 7.7739588,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1360182330",
+    "name": "Droits de l'Homme",
+    "lat": 48.5962137,
+    "lon": 7.773989,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4450772916",
+    "name": "Drusenheim",
+    "lat": 48.7660986,
+    "lon": 7.9477762,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016210",
+    "name": "Duale Hochschule",
+    "lat": 49.026915,
+    "lon": 8.3861003,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3233060881",
+    "name": "Dunantstraße",
+    "lat": 49.0114578,
+    "lon": 8.4360778,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844104",
+    "name": "Durlach Turmberg",
+    "lat": 48.9999513,
+    "lon": 8.4783592,
+    "type": "tram"
+  },
+  {
+    "id": "osm-5864209615",
+    "name": "Durlacher Tor/KIT-Campus Süd",
+    "lat": 49.0088335,
+    "lon": 8.4182156,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6126664123",
+    "name": "Durlacher Tor/KIT-Campus Süd",
+    "lat": 49.0093863,
+    "lon": 8.4182001,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3234308880",
+    "name": "Durlacher Tor/KIT-Campus Süd (U)",
+    "lat": 49.0089261,
+    "lon": 8.4171168,
+    "type": "tram"
+  },
+  {
+    "id": "osm-19087937",
+    "name": "Durmersheim",
+    "lat": 48.9286309,
+    "lon": 8.2724003,
+    "type": "train"
+  },
+  {
+    "id": "osm-19087933",
+    "name": "Durmersheim Nord",
+    "lat": 48.9377105,
+    "lon": 8.2804795,
+    "type": "train"
+  },
+  {
+    "id": "osm-25479582",
+    "name": "Dürrenbüchig",
+    "lat": 49.0239687,
+    "lon": 8.6482067,
+    "type": "train"
+  },
+  {
+    "id": "osm-3016662817",
+    "name": "Ebertstraße",
+    "lat": 48.9945334,
+    "lon": 8.3952742,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251390",
+    "name": "Eckenerstraße",
+    "lat": 49.005903,
+    "lon": 8.3506757,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3309672998",
+    "name": "Edenkoben",
+    "lat": 49.2818549,
+    "lon": 8.1405545,
+    "type": "train"
+  },
+  {
+    "id": "osm-1900264257",
+    "name": "Edesheim (Pfalz)",
+    "lat": 49.2637975,
+    "lon": 8.1390175,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112587020",
+    "name": "Eggenstein",
+    "lat": 49.0758006,
+    "lon": 8.398002,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112598476",
+    "name": "Eggenstein Schweriner Straße",
+    "lat": 49.0857463,
+    "lon": 8.402158,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112591161",
+    "name": "Eggenstein Spöcker Weg",
+    "lat": 49.0797478,
+    "lon": 8.3996559,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112587021",
+    "name": "Eggenstein Süd",
+    "lat": 49.0711451,
+    "lon": 8.3960623,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111251391",
+    "name": "Eggensteiner Straße",
+    "lat": 49.0333379,
+    "lon": 8.3383577,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6796824470",
+    "name": "Egon-Eiermann-Allee",
+    "lat": 49.0358182,
+    "lon": 8.3503362,
+    "type": "tram"
+  },
+  {
+    "id": "osm-301469901",
+    "name": "Ehningen (bei Böblingen)",
+    "lat": 48.6623463,
+    "lon": 8.9435063,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016211",
+    "name": "Elbinger Straße (Ost)",
+    "lat": 49.0407265,
+    "lon": 8.4506163,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844105",
+    "name": "Ellmendinger Straße",
+    "lat": 48.9941846,
+    "lon": 8.4587228,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112474567",
+    "name": "Entenfang",
+    "lat": 49.0108495,
+    "lon": 8.3596813,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3589523104",
+    "name": "Entenfang",
+    "lat": 49.0099329,
+    "lon": 8.3593738,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3848294457",
+    "name": "Entenfang",
+    "lat": 49.0107151,
+    "lon": 8.3581946,
+    "type": "tram"
+  },
+  {
+    "id": "osm-29107044",
+    "name": "Enzberg",
+    "lat": 48.9339754,
+    "lon": 8.799958,
+    "type": "train"
+  },
+  {
+    "id": "osm-1256447230",
+    "name": "Eppingen",
+    "lat": 49.1360608,
+    "lon": 8.914743,
+    "type": "train"
+  },
+  {
+    "id": "osm-3246721208",
+    "name": "Eppingen West",
+    "lat": 49.1326389,
+    "lon": 8.9046621,
+    "type": "train"
+  },
+  {
+    "id": "osm-310046365",
+    "name": "Ersingen",
+    "lat": 48.9304987,
+    "lon": 8.6389892,
+    "type": "train"
+  },
+  {
+    "id": "osm-94822439",
+    "name": "Ersingen West",
+    "lat": 48.931426,
+    "lon": 8.6339206,
+    "type": "train"
+  },
+  {
+    "id": "osm-602228079",
+    "name": "Esplanade",
+    "lat": 48.5783872,
+    "lon": 7.7694458,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357499175",
+    "name": "Esplanade",
+    "lat": 48.5783877,
+    "lon": 7.7694083,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4986775568",
+    "name": "Essenweinstraße",
+    "lat": 49.0097245,
+    "lon": 8.4318901,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30478727",
+    "name": "Étoile Bourse",
+    "lat": 48.5748266,
+    "lon": 7.7534122,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2791371283",
+    "name": "Étoile Bourse",
+    "lat": 48.5748303,
+    "lon": 7.7534545,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1387236865",
+    "name": "Étoile Polygone",
+    "lat": 48.5715254,
+    "lon": 7.7555579,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1387236866",
+    "name": "Étoile Polygone",
+    "lat": 48.5715506,
+    "lon": 7.755566,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109464772",
+    "name": "Ettlingen Albgaubad",
+    "lat": 48.936862,
+    "lon": 8.4152033,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109464774",
+    "name": "Ettlingen Erbprinz",
+    "lat": 48.9410002,
+    "lon": 8.4040532,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109389306",
+    "name": "Ettlingen Neuwiesenreben",
+    "lat": 48.9530911,
+    "lon": 8.4006058,
+    "type": "train"
+  },
+  {
+    "id": "osm-8442697173",
+    "name": "Ettlingen Spinnerei",
+    "lat": 48.9346871,
+    "lon": 8.4418521,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109464775",
+    "name": "Ettlingen Stadt",
+    "lat": 48.9386284,
+    "lon": 8.4091203,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109464776",
+    "name": "Ettlingen Wasen",
+    "lat": 48.9452444,
+    "lon": 8.3987505,
+    "type": "train"
+  },
+  {
+    "id": "osm-2417382807",
+    "name": "Ettlingen West",
+    "lat": 48.9471361,
+    "lon": 8.3878674,
+    "type": "train"
+  },
+  {
+    "id": "osm-9332302158",
+    "name": "Ettlinger Tor/Staatstheater",
+    "lat": 49.0054625,
+    "lon": 8.4030183,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3157639986",
+    "name": "Ettlinger Tor/Staatstheater (U)",
+    "lat": 49.0054833,
+    "lon": 8.403511,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109265537",
+    "name": "Etzenrot",
+    "lat": 48.914137,
+    "lon": 8.4576608,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016212",
+    "name": "Europäische Schule",
+    "lat": 49.0449499,
+    "lon": 8.4469038,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2930680344",
+    "name": "Europaplatz (Kaiserstraße)",
+    "lat": 49.0100409,
+    "lon": 8.3941837,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2930680345",
+    "name": "Europaplatz (Karlstraße)",
+    "lat": 49.0094579,
+    "lon": 8.3949535,
+    "type": "tram"
+  },
+  {
+    "id": "osm-248656588",
+    "name": "Eutingen (Baden)",
+    "lat": 48.9098727,
+    "lon": 8.7438155,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016213",
+    "name": "Fächerbad",
+    "lat": 49.0254409,
+    "lon": 8.4481137,
+    "type": "tram"
+  },
+  {
+    "id": "osm-10062245124",
+    "name": "Fédération",
+    "lat": 48.5617844,
+    "lon": 7.7503758,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110852713",
+    "name": "Feierabendweg",
+    "lat": 49.0219957,
+    "lon": 8.3605129,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109265538",
+    "name": "Fischweier",
+    "lat": 48.8880491,
+    "lon": 8.4513221,
+    "type": "train"
+  },
+  {
+    "id": "osm-1763160931",
+    "name": "Flehingen",
+    "lat": 49.0846969,
+    "lon": 8.7835616,
+    "type": "train"
+  },
+  {
+    "id": "osm-2958399194",
+    "name": "Forbach (Schwarzwald)",
+    "lat": 48.680346,
+    "lon": 8.3614868,
+    "type": "train"
+  },
+  {
+    "id": "osm-75655504",
+    "name": "Forchheim (b Karlsruhe)",
+    "lat": 48.964715,
+    "lon": 8.3387483,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111136798",
+    "name": "Forchheim Hallenbad",
+    "lat": 48.978633,
+    "lon": 8.3173657,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3149922580",
+    "name": "Forchheim Hauptstraße",
+    "lat": 48.9748843,
+    "lon": 8.3122848,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111136800",
+    "name": "Forchheim Messe",
+    "lat": 48.9821438,
+    "lon": 8.3234469,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111136801",
+    "name": "Forchheim Oberfeldstraße",
+    "lat": 48.9702521,
+    "lon": 8.3078486,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3233060882",
+    "name": "Forststraße",
+    "lat": 49.0140378,
+    "lon": 8.442103,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2925674883",
+    "name": "Frauenalb-Schielberg",
+    "lat": 48.8373923,
+    "lon": 8.4404816,
+    "type": "train"
+  },
+  {
+    "id": "osm-3100250760",
+    "name": "Friedrichschule",
+    "lat": 48.9992947,
+    "lon": 8.4688588,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2969217752",
+    "name": "Friedrichstal (Baden)",
+    "lat": 49.1006247,
+    "lon": 8.4740971,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112425590",
+    "name": "Friedrichstal (Baden) Saint-Riquier-Platz",
+    "lat": 49.1008567,
+    "lon": 8.4743671,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4131379990",
+    "name": "Friedrichstal Mitte",
+    "lat": 49.1041047,
+    "lon": 8.475203,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2933110322",
+    "name": "Friedrichstal Nord",
+    "lat": 49.1088621,
+    "lon": 8.4765136,
+    "type": "tram"
+  },
+  {
+    "id": "osm-250434630",
+    "name": "Furschenbach",
+    "lat": 48.5799041,
+    "lon": 8.1349235,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485287",
+    "name": "Futura Glacière",
+    "lat": 48.6049911,
+    "lon": 7.759363,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357118369",
+    "name": "Futura Glacière",
+    "lat": 48.6050337,
+    "lon": 7.7592708,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2933929704",
+    "name": "Gaggenau",
+    "lat": 48.8055136,
+    "lon": 8.3202802,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112898866",
+    "name": "Gaggenau Mercedes-Benz-Werk",
+    "lat": 48.7980444,
+    "lon": 8.3274417,
+    "type": "train"
+  },
+  {
+    "id": "osm-411894701",
+    "name": "Gallia",
+    "lat": 48.5843562,
+    "lon": 7.758314,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1356159219",
+    "name": "Gallia",
+    "lat": 48.5843778,
+    "lon": 7.7583311,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4450772917",
+    "name": "Gambsheim",
+    "lat": 48.6951892,
+    "lon": 7.8792961,
+    "type": "train"
+  },
+  {
+    "id": "osm-301468145",
+    "name": "Gärtringen",
+    "lat": 48.6408376,
+    "lon": 8.9089238,
+    "type": "train"
+  },
+  {
+    "id": "osm-2848020285",
+    "name": "Gäufelden",
+    "lat": 48.5599535,
+    "lon": 8.8503135,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112929562",
+    "name": "Gausbach",
+    "lat": 48.6866366,
+    "lon": 8.362458,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485925",
+    "name": "Général de Gaulle",
+    "lat": 48.6216164,
+    "lon": 7.7639444,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1651395755",
+    "name": "Général de Gaulle",
+    "lat": 48.6215957,
+    "lon": 7.7639797,
+    "type": "tram"
+  },
+  {
+    "id": "osm-25480391",
+    "name": "Germersheim",
+    "lat": 49.2258963,
+    "lon": 8.3646891,
+    "type": "train"
+  },
+  {
+    "id": "osm-5154586062",
+    "name": "Germersheim Mitte/Rhein",
+    "lat": 49.2200437,
+    "lon": 8.3793913,
+    "type": "train"
+  },
+  {
+    "id": "osm-2846175501",
+    "name": "Germersheim Süd/Nolte",
+    "lat": 49.2083537,
+    "lon": 8.3738075,
+    "type": "train"
+  },
+  {
+    "id": "osm-2817727914",
+    "name": "Gernsbach",
+    "lat": 48.7685903,
+    "lon": 8.3368619,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112910927",
+    "name": "Gernsbach Mitte",
+    "lat": 48.7631026,
+    "lon": 8.3390336,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374779",
+    "name": "Geroldsäcker",
+    "lat": 49.0328085,
+    "lon": 8.4553548,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111016214",
+    "name": "Glogauer Straße",
+    "lat": 49.0318566,
+    "lon": 8.4419423,
+    "type": "tram"
+  },
+  {
+    "id": "osm-313815955",
+    "name": "Gochsheim",
+    "lat": 49.10953,
+    "lon": 8.7443363,
+    "type": "train"
+  },
+  {
+    "id": "osm-1427483739",
+    "name": "Gölshausen",
+    "lat": 49.0448835,
+    "lon": 8.7247207,
+    "type": "train"
+  },
+  {
+    "id": "osm-1312803692",
+    "name": "Gölshausen Industriegebiet",
+    "lat": 49.0518885,
+    "lon": 8.7399165,
+    "type": "train"
+  },
+  {
+    "id": "osm-26617702",
+    "name": "Gondelsheim (Baden)",
+    "lat": 49.0596779,
+    "lon": 8.6602238,
+    "type": "train"
+  },
+  {
+    "id": "osm-26617695",
+    "name": "Gondelsheim Schloßstadion",
+    "lat": 49.0655849,
+    "lon": 8.6628299,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109738314",
+    "name": "Gottesauer Platz/BGV",
+    "lat": 49.0074872,
+    "lon": 8.4248911,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2827599605",
+    "name": "Graben-Neudorf",
+    "lat": 49.1617062,
+    "lon": 8.4905665,
+    "type": "train"
+  },
+  {
+    "id": "osm-25480308",
+    "name": "Graben-Neudorf Nord",
+    "lat": 49.1779394,
+    "lon": 8.4940652,
+    "type": "train"
+  },
+  {
+    "id": "osm-269849416",
+    "name": "Gravière Stade de la Meinau",
+    "lat": 48.5613831,
+    "lon": 7.7643967,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357434898",
+    "name": "Gravière Stade de la Meinau",
+    "lat": 48.561393,
+    "lon": 7.7643726,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844107",
+    "name": "Gritznerstraße",
+    "lat": 48.9993399,
+    "lon": 8.4640317,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2847096861",
+    "name": "Grötzingen",
+    "lat": 49.0061339,
+    "lon": 8.4927936,
+    "type": "train"
+  },
+  {
+    "id": "osm-1662990300",
+    "name": "Grötzingen Krappmühlenweg",
+    "lat": 49.005877,
+    "lon": 8.5124311,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112467816",
+    "name": "Grötzingen Oberausstraße",
+    "lat": 49.0052153,
+    "lon": 8.5036759,
+    "type": "train"
+  },
+  {
+    "id": "osm-30408073",
+    "name": "Gültstein",
+    "lat": 48.5774463,
+    "lon": 8.8818522,
+    "type": "train"
+  },
+  {
+    "id": "osm-624802086",
+    "name": "Hagenbach",
+    "lat": 49.0163162,
+    "lon": 8.2531379,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374780",
+    "name": "Hagsfeld Süd",
+    "lat": 49.0244344,
+    "lon": 8.4495275,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2661523876",
+    "name": "Haguenau",
+    "lat": 48.8133551,
+    "lon": 7.7822244,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111091960",
+    "name": "Hammweg",
+    "lat": 49.0037838,
+    "lon": 8.3275059,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111279834",
+    "name": "Händelstraße",
+    "lat": 49.0112153,
+    "lon": 8.3694137,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109761935",
+    "name": "Hardecksiedlung",
+    "lat": 48.9926717,
+    "lon": 8.3688318,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1687282224",
+    "name": "Hauenstein (Pfalz)",
+    "lat": 49.2013949,
+    "lon": 7.8298108,
+    "type": "train"
+  },
+  {
+    "id": "osm-278944632",
+    "name": "Hauenstein Mitte",
+    "lat": 49.1991332,
+    "lon": 7.8493785,
+    "type": "train"
+  },
+  {
+    "id": "osm-3231281598",
+    "name": "Hauptfriedhof",
+    "lat": 49.013764,
+    "lon": 8.4304658,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374781",
+    "name": "Haus Bethlehem",
+    "lat": 49.0334417,
+    "lon": 8.3766317,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111016215",
+    "name": "Heidehof",
+    "lat": 49.0312249,
+    "lon": 8.3870033,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3625844889",
+    "name": "Heidelsheim",
+    "lat": 49.1019087,
+    "lon": 8.6492046,
+    "type": "train"
+  },
+  {
+    "id": "osm-3625844888",
+    "name": "Heidelsheim Nord",
+    "lat": 49.1052194,
+    "lon": 8.6450729,
+    "type": "train"
+  },
+  {
+    "id": "osm-3265511512",
+    "name": "Heiligenstein (Pfalz)",
+    "lat": 49.285856,
+    "lon": 8.394006,
+    "type": "train"
+  },
+  {
+    "id": "osm-3625844890",
+    "name": "Helmsheim",
+    "lat": 49.0856779,
+    "lon": 8.6514102,
+    "type": "train"
+  },
+  {
+    "id": "osm-1449139682",
+    "name": "Herrenberg",
+    "lat": 48.594059,
+    "lon": 8.8629217,
+    "type": "train"
+  },
+  {
+    "id": "osm-348053953",
+    "name": "Herrenberg Zwerchweg",
+    "lat": 48.5850708,
+    "lon": 8.8676047,
+    "type": "train"
+  },
+  {
+    "id": "osm-456031261",
+    "name": "Herrlisheim (Bas-Rhin)",
+    "lat": 48.7276696,
+    "lon": 7.91025,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016216",
+    "name": "Hertzstraße",
+    "lat": 49.019951,
+    "lon": 8.364297,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251392",
+    "name": "Herweghstraße",
+    "lat": 49.0304449,
+    "lon": 8.3411751,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112922144",
+    "name": "Hilpertsau",
+    "lat": 48.7399894,
+    "lon": 8.3486793,
+    "type": "train"
+  },
+  {
+    "id": "osm-3092958985",
+    "name": "Hinterweidenthal Ort",
+    "lat": 49.1974035,
+    "lon": 7.7506638,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685971614",
+    "name": "Hinterweidenthal Ost",
+    "lat": 49.2031405,
+    "lon": 7.7731067,
+    "type": "train"
+  },
+  {
+    "id": "osm-6483804855",
+    "name": "Hirsau",
+    "lat": 48.7340534,
+    "lon": 8.7368358,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016217",
+    "name": "Hirtenweg - Technologiepark",
+    "lat": 49.0172155,
+    "lon": 8.4389219,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6086320079",
+    "name": "Hochschule / Läger",
+    "lat": 48.5754388,
+    "lon": 7.8160054,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6086320080",
+    "name": "Hochschule / Läger",
+    "lat": 48.5754465,
+    "lon": 7.8159657,
+    "type": "tram"
+  },
+  {
+    "id": "osm-26022754",
+    "name": "Hochstetten",
+    "lat": 49.1335371,
+    "lon": 8.4157709,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112626627",
+    "name": "Hochstetten",
+    "lat": 49.1335369,
+    "lon": 8.4157389,
+    "type": "train"
+  },
+  {
+    "id": "osm-26022745",
+    "name": "Hochstetten Altenheim",
+    "lat": 49.1326036,
+    "lon": 8.4181585,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112626624",
+    "name": "Hochstetten Altenheim",
+    "lat": 49.1326109,
+    "lon": 8.4181746,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112626625",
+    "name": "Hochstetten Altenheim",
+    "lat": 49.132617,
+    "lon": 8.4181872,
+    "type": "tram"
+  },
+  {
+    "id": "osm-26022737",
+    "name": "Hochstetten Grenzstraße",
+    "lat": 49.1295614,
+    "lon": 8.4156928,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374748",
+    "name": "Hochstetten Grenzstraße",
+    "lat": 49.1295518,
+    "lon": 8.415719,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112626626",
+    "name": "Hochstetten Grenzstraße",
+    "lat": 49.1295467,
+    "lon": 8.4157366,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3502478426",
+    "name": "Hoelschloch - Surbourg",
+    "lat": 48.9163252,
+    "lon": 7.8314949,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485924",
+    "name": "Hoenheim Gare",
+    "lat": 48.6281106,
+    "lon": 7.7585228,
+    "type": "tram"
+  },
+  {
+    "id": "osm-10094891459",
+    "name": "Hoenheim Gare",
+    "lat": 48.6281258,
+    "lon": 7.7585681,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4450794833",
+    "name": "Hœnheim Tram",
+    "lat": 48.6286697,
+    "lon": 7.7578772,
+    "type": "train"
+  },
+  {
+    "id": "osm-8221501539",
+    "name": "Hoerdt",
+    "lat": 48.703055,
+    "lon": 7.7795843,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724474",
+    "name": "Höfen (Enz)",
+    "lat": 48.7988242,
+    "lon": 8.5812747,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724475",
+    "name": "Höfen Nord",
+    "lat": 48.8078344,
+    "lon": 8.5818209,
+    "type": "train"
+  },
+  {
+    "id": "osm-1617569985",
+    "name": "Hoffenheim",
+    "lat": 49.2722164,
+    "lon": 8.8384355,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112911313",
+    "name": "Hörden",
+    "lat": 48.7814781,
+    "lon": 8.3451792,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073157",
+    "name": "Hübschstraße",
+    "lat": 49.0055644,
+    "lon": 8.3725795,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112425591",
+    "name": "Hubstraße",
+    "lat": 49.0072203,
+    "lon": 8.4724438,
+    "type": "train"
+  },
+  {
+    "id": "osm-25480373",
+    "name": "Huttenheim",
+    "lat": 49.1971011,
+    "lon": 8.4727163,
+    "type": "train"
+  },
+  {
+    "id": "osm-19096063",
+    "name": "Huzenbach",
+    "lat": 48.5826359,
+    "lon": 8.3912653,
+    "type": "train"
+  },
+  {
+    "id": "osm-3049355064",
+    "name": "Illingen (Württemberg)",
+    "lat": 48.9566217,
+    "lon": 8.9219059,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016218",
+    "name": "Im Eichbäumle",
+    "lat": 49.0295632,
+    "lon": 8.4478712,
+    "type": "tram"
+  },
+  {
+    "id": "osm-262225219",
+    "name": "Insheim",
+    "lat": 49.157235,
+    "lon": 8.1521417,
+    "type": "train"
+  },
+  {
+    "id": "osm-3244693539",
+    "name": "Ispringen",
+    "lat": 48.9144172,
+    "lon": 8.6722125,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169329",
+    "name": "Ittersbach",
+    "lat": 48.8691036,
+    "lon": 8.5110637,
+    "type": "train"
+  },
+  {
+    "id": "osm-31097851",
+    "name": "Ittersbach Industrie",
+    "lat": 48.8847725,
+    "lon": 8.5086506,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169330",
+    "name": "Ittersbach Rathaus",
+    "lat": 48.8659546,
+    "lon": 8.5100623,
+    "type": "train"
+  },
+  {
+    "id": "osm-136054872",
+    "name": "Ittlingen",
+    "lat": 49.1875904,
+    "lon": 8.9344662,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016219",
+    "name": "Jägerhaus",
+    "lat": 49.0371403,
+    "lon": 8.4472589,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4736254540",
+    "name": "Jardiniers",
+    "lat": 48.5994848,
+    "lon": 7.7831454,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6327135949",
+    "name": "Jardiniers",
+    "lat": 48.5994646,
+    "lon": 7.7831682,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1352190837",
+    "name": "Jean Jaurès",
+    "lat": 48.5672078,
+    "lon": 7.7722326,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357499190",
+    "name": "Jean Jaurès",
+    "lat": 48.5671869,
+    "lon": 7.7722123,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374782",
+    "name": "Jenaer Straße",
+    "lat": 49.0360941,
+    "lon": 8.4562503,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3389267282",
+    "name": "Jockgrim Bahnhof",
+    "lat": 49.0917733,
+    "lon": 8.2722425,
+    "type": "train"
+  },
+  {
+    "id": "osm-2648185981",
+    "name": "Jöhlingen Bahnhof",
+    "lat": 49.0282351,
+    "lon": 8.5751116,
+    "type": "train"
+  },
+  {
+    "id": "osm-2648185982",
+    "name": "Jöhlingen West",
+    "lat": 49.0309063,
+    "lon": 8.5700105,
+    "type": "train"
+  },
+  {
+    "id": "osm-1686486984",
+    "name": "Kandel",
+    "lat": 49.0790752,
+    "lon": 8.1978044,
+    "type": "train"
+  },
+  {
+    "id": "osm-338810205",
+    "name": "Kapellen-Drusweiler",
+    "lat": 49.105589,
+    "lon": 8.03093,
+    "type": "train"
+  },
+  {
+    "id": "osm-4705198808",
+    "name": "Kappelrodeck",
+    "lat": 48.5933455,
+    "lon": 8.1162934,
+    "type": "train"
+  },
+  {
+    "id": "osm-4705198807",
+    "name": "Kappelrodeck Ost",
+    "lat": 48.5868265,
+    "lon": 8.1258937,
+    "type": "train"
+  },
+  {
+    "id": "osm-287145094",
+    "name": "Kapsweyer",
+    "lat": 49.0388668,
+    "lon": 8.0219864,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111162122",
+    "name": "Karl-Delisle-Straße",
+    "lat": 48.996128,
+    "lon": 8.3381979,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844108",
+    "name": "Karl-Weysser-Straße",
+    "lat": 48.9985668,
+    "lon": 8.4769268,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2361780442",
+    "name": "Karl-Wilhelm-Platz",
+    "lat": 49.0113121,
+    "lon": 8.4231984,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3309376963",
+    "name": "Karlsdorf",
+    "lat": 49.1443615,
+    "lon": 8.5483516,
+    "type": "train"
+  },
+  {
+    "id": "osm-1886517311",
+    "name": "Karlsruhe Hafen",
+    "lat": 49.0145697,
+    "lon": 8.3432262,
+    "type": "train"
+  },
+  {
+    "id": "osm-2827402189",
+    "name": "Karlsruhe Hagsfeld",
+    "lat": 49.0262453,
+    "lon": 8.4537121,
+    "type": "train"
+  },
+  {
+    "id": "osm-2574283615",
+    "name": "Karlsruhe Hauptbahnhof",
+    "lat": 48.9936164,
+    "lon": 8.4020518,
+    "type": "train"
+  },
+  {
+    "id": "osm-25242218",
+    "name": "Karlsruhe West",
+    "lat": 49.0023942,
+    "lon": 8.3628863,
+    "type": "train"
+  },
+  {
+    "id": "osm-413929211",
+    "name": "Karlsruhe-Durlach",
+    "lat": 49.0026082,
+    "lon": 8.4625733,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2958859136",
+    "name": "Karlsruhe-Durlach",
+    "lat": 49.0020956,
+    "lon": 8.4622543,
+    "type": "train"
+  },
+  {
+    "id": "osm-269735124",
+    "name": "Karlsruhe-Knielingen",
+    "lat": 49.0266524,
+    "lon": 8.3411955,
+    "type": "train"
+  },
+  {
+    "id": "osm-3321341099",
+    "name": "Karlsruhe-Mühlburg",
+    "lat": 49.0145576,
+    "lon": 8.3511104,
+    "type": "train"
+  },
+  {
+    "id": "osm-3247639123",
+    "name": "Karlstor/Bundesgerichtshof",
+    "lat": 49.0048223,
+    "lon": 8.3945718,
+    "type": "tram"
+  },
+  {
+    "id": "osm-9332286106",
+    "name": "Karlstor/Bundesgerichtshof",
+    "lat": 49.0054827,
+    "lon": 8.3957545,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2931354552",
+    "name": "Kehl",
+    "lat": 48.5768371,
+    "lon": 7.8071226,
+    "type": "train"
+  },
+  {
+    "id": "osm-2349344069",
+    "name": "Kehl Bahnhof",
+    "lat": 48.575953,
+    "lon": 7.8073512,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2349344196",
+    "name": "Kehl Bahnhof",
+    "lat": 48.5759274,
+    "lon": 7.8073701,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6086320077",
+    "name": "Kehl Rathaus",
+    "lat": 48.5722217,
+    "lon": 7.814019,
+    "type": "tram"
+  },
+  {
+    "id": "osm-618947631",
+    "name": "Kibitzenau",
+    "lat": 48.555082,
+    "lon": 7.7672108,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357434897",
+    "name": "Kibitzenau",
+    "lat": 48.555084,
+    "lon": 7.7671706,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844109",
+    "name": "Killisfeldstraße",
+    "lat": 48.9973487,
+    "lon": 8.4619656,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3454823893",
+    "name": "Kilstett",
+    "lat": 48.6794831,
+    "lon": 7.8550389,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111091961",
+    "name": "Kirchplatz",
+    "lat": 49.0052906,
+    "lon": 8.3323278,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112946099",
+    "name": "Kirschbaumwasen",
+    "lat": 48.6230437,
+    "lon": 8.3557569,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112467814",
+    "name": "KIT-Campus Nord",
+    "lat": 49.0970709,
+    "lon": 8.4303607,
+    "type": "train"
+  },
+  {
+    "id": "osm-1313119578",
+    "name": "Kleinsteinbach",
+    "lat": 48.9668154,
+    "lon": 8.5548251,
+    "type": "train"
+  },
+  {
+    "id": "osm-7600180597",
+    "name": "Knielingen Nord",
+    "lat": 49.0379334,
+    "lon": 8.3475595,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374783",
+    "name": "Knielinger Allee/Städtisches Klinikum",
+    "lat": 49.0188502,
+    "lon": 8.3753445,
+    "type": "tram"
+  },
+  {
+    "id": "osm-25479463",
+    "name": "Knittlingen-Kleinvillars",
+    "lat": 48.9935909,
+    "lon": 8.7443656,
+    "type": "train"
+  },
+  {
+    "id": "osm-262477821",
+    "name": "Knöringen-Essingen",
+    "lat": 49.237567,
+    "lon": 8.1482536,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112467815",
+    "name": "Kolpingplatz",
+    "lat": 48.9975686,
+    "lon": 8.3937618,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111073168",
+    "name": "Kongresszentrum",
+    "lat": 49.0038237,
+    "lon": 8.4039262,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3157639987",
+    "name": "Kongresszentrum (U)",
+    "lat": 49.0025897,
+    "lon": 8.4031707,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1420864259",
+    "name": "Königsbach (Baden)",
+    "lat": 48.9626255,
+    "lon": 8.6087349,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109738316",
+    "name": "Konzerthaus",
+    "lat": 49.0035853,
+    "lon": 8.3997707,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3070526308",
+    "name": "Kork",
+    "lat": 48.5702411,
+    "lon": 7.8742292,
+    "type": "train"
+  },
+  {
+    "id": "osm-2931339093",
+    "name": "Krimmeri Meinau",
+    "lat": 48.5635816,
+    "lon": 7.7526323,
+    "type": "train"
+  },
+  {
+    "id": "osm-30478709",
+    "name": "Krimmeri Stade de la Meinau",
+    "lat": 48.5631086,
+    "lon": 7.7525989,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1473101942",
+    "name": "Krimmeri Stade de la Meinau",
+    "lat": 48.5631143,
+    "lon": 7.7526447,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3230107006",
+    "name": "Kronenplatz",
+    "lat": 49.0088553,
+    "lon": 8.4100759,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3234308883",
+    "name": "Kronenplatz (U)",
+    "lat": 49.0093181,
+    "lon": 8.4104151,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111073158",
+    "name": "Kühler Krug",
+    "lat": 49.0060261,
+    "lon": 8.3669359,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111016220",
+    "name": "Kunstakademie / Hochschule Karlsruhe",
+    "lat": 49.0142706,
+    "lon": 8.3856869,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2958387932",
+    "name": "Kuppenheim",
+    "lat": 48.8340378,
+    "lon": 8.2563705,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374784",
+    "name": "Kurt-Schumacher-Straße",
+    "lat": 49.0301412,
+    "lon": 8.3762817,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3502956093",
+    "name": "Kurtzenhouse",
+    "lat": 48.7419018,
+    "lon": 7.8132756,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016224",
+    "name": "Kußmaulstraße/Städtisches Klinikum",
+    "lat": 49.0168375,
+    "lon": 8.3693895,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3502488423",
+    "name": "La Wantzenau",
+    "lat": 48.6653542,
+    "lon": 7.8249589,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111251393",
+    "name": "Lameyplatz",
+    "lat": 49.0131336,
+    "lon": 8.3547338,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1685962311",
+    "name": "Landau (Pfalz) Godramstein",
+    "lat": 49.2068804,
+    "lon": 8.0758063,
+    "type": "train"
+  },
+  {
+    "id": "osm-117372662",
+    "name": "Landau (Pfalz) Hauptbahnhof",
+    "lat": 49.1979317,
+    "lon": 8.1261523,
+    "type": "train"
+  },
+  {
+    "id": "osm-2051812039",
+    "name": "Landau (Pfalz) Süd",
+    "lat": 49.188963,
+    "lon": 8.1144069,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685962312",
+    "name": "Landau (Pfalz) West",
+    "lat": 49.1957695,
+    "lon": 8.1069933,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110844110",
+    "name": "Landesbausparkasse",
+    "lat": 49.0016749,
+    "lon": 8.3775692,
+    "type": "tram"
+  },
+  {
+    "id": "osm-269697098",
+    "name": "Landsberg",
+    "lat": 48.5701622,
+    "lon": 7.7634998,
+    "type": "tram"
+  },
+  {
+    "id": "osm-470330162",
+    "name": "Landsberg",
+    "lat": 48.569853,
+    "lon": 7.7622931,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357499209",
+    "name": "Landsberg",
+    "lat": 48.5693729,
+    "lon": 7.7639126,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112928986",
+    "name": "Langenbrand",
+    "lat": 48.7023452,
+    "lon": 8.3556926,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169331",
+    "name": "Langensteinbach",
+    "lat": 48.9153418,
+    "lon": 8.5030953,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169333",
+    "name": "Langensteinbach Schießhüttenäcker",
+    "lat": 48.9200526,
+    "lon": 8.4994017,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169335",
+    "name": "Langensteinbach St. Barbara",
+    "lat": 48.9096991,
+    "lon": 8.4995358,
+    "type": "train"
+  },
+  {
+    "id": "osm-2661523881",
+    "name": "Lauterbourg",
+    "lat": 48.9675899,
+    "lon": 8.1830867,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485893",
+    "name": "Le Marais",
+    "lat": 48.6098393,
+    "lon": 7.7656835,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3071994052",
+    "name": "Le Marais",
+    "lat": 48.6099055,
+    "lon": 7.7656379,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30485926",
+    "name": "Le Ried",
+    "lat": 48.6213931,
+    "lon": 7.7677345,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1651395762",
+    "name": "Le Ried",
+    "lat": 48.6213688,
+    "lon": 7.7677156,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2924460613",
+    "name": "Legelshurst",
+    "lat": 48.5587356,
+    "lon": 7.9130958,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112613487",
+    "name": "Leopoldshafen Frankfurter Straße",
+    "lat": 49.1009357,
+    "lon": 8.4038801,
+    "type": "train"
+  },
+  {
+    "id": "osm-2912487342",
+    "name": "Leopoldshafen Leopoldstraße",
+    "lat": 49.0971964,
+    "lon": 8.4011159,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112600889",
+    "name": "Leopoldshafen Viermorgen",
+    "lat": 49.0903162,
+    "lon": 8.4008716,
+    "type": "train"
+  },
+  {
+    "id": "osm-5200824955",
+    "name": "Lessingstraße",
+    "lat": 49.0043751,
+    "lon": 8.3842354,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111016221",
+    "name": "Lilienthalstraße",
+    "lat": 49.0225326,
+    "lon": 8.3851738,
+    "type": "tram"
+  },
+  {
+    "id": "osm-283398144",
+    "name": "Lingenfeld",
+    "lat": 49.2527861,
+    "lon": 8.3495346,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112626628",
+    "name": "Linkenheim Friedrichstraße",
+    "lat": 49.1196316,
+    "lon": 8.409426,
+    "type": "train"
+  },
+  {
+    "id": "osm-72740466",
+    "name": "Linkenheim Rathaus",
+    "lat": 49.1231927,
+    "lon": 8.4082362,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112635529",
+    "name": "Linkenheim Rathaus",
+    "lat": 49.1231913,
+    "lon": 8.4082273,
+    "type": "tram"
+  },
+  {
+    "id": "osm-26022733",
+    "name": "Linkenheim Schulzentrum",
+    "lat": 49.1275914,
+    "lon": 8.4135713,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112635530",
+    "name": "Linkenheim Schulzentrum",
+    "lat": 49.1275961,
+    "lon": 8.4135597,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112635531",
+    "name": "Linkenheim Süd",
+    "lat": 49.1168911,
+    "lon": 8.4115608,
+    "type": "train"
+  },
+  {
+    "id": "osm-269849417",
+    "name": "Lycée Jean Monnet",
+    "lat": 48.5644168,
+    "lon": 7.7694878,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357434896",
+    "name": "Lycée Jean Monnet",
+    "lat": 48.5644327,
+    "lon": 7.7694695,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30485264",
+    "name": "Lycée Kléber",
+    "lat": 48.5940899,
+    "lon": 7.7577736,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1356159227",
+    "name": "Lycée Kléber",
+    "lat": 48.5940878,
+    "lon": 7.7577355,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30485902",
+    "name": "Lycée Marc Bloch",
+    "lat": 48.6164757,
+    "lon": 7.7679544,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1651395752",
+    "name": "Lycée Marc Bloch",
+    "lat": 48.6164907,
+    "lon": 7.7678594,
+    "type": "tram"
+  },
+  {
+    "id": "osm-305641035",
+    "name": "Malmsheim",
+    "lat": 48.7717903,
+    "lon": 8.9046322,
+    "type": "train"
+  },
+  {
+    "id": "osm-3069955997",
+    "name": "Malsch",
+    "lat": 48.8895571,
+    "lon": 8.3238105,
+    "type": "train"
+  },
+  {
+    "id": "osm-3069955996",
+    "name": "Malsch Süd",
+    "lat": 48.8874974,
+    "lon": 8.3158828,
+    "type": "train"
+  },
+  {
+    "id": "osm-3502960193",
+    "name": "Marienthal",
+    "lat": 48.781863,
+    "lon": 7.8231894,
+    "type": "train"
+  },
+  {
+    "id": "osm-3234308884",
+    "name": "Marktplatz (Kaiserstraße U)",
+    "lat": 49.00966,
+    "lon": 8.4022596,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3334807013",
+    "name": "Marktplatz (Pyramide U)",
+    "lat": 49.0090979,
+    "lon": 8.4037457,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109265541",
+    "name": "Marxzell",
+    "lat": 48.8633185,
+    "lon": 8.4473202,
+    "type": "train"
+  },
+  {
+    "id": "osm-3240104171",
+    "name": "Mathystraße",
+    "lat": 49.0025905,
+    "lon": 8.3936237,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3247639124",
+    "name": "Mathystraße",
+    "lat": 49.0019751,
+    "lon": 8.3942811,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111091962",
+    "name": "Mauerweg",
+    "lat": 49.0077607,
+    "lon": 8.3392577,
+    "type": "tram"
+  },
+  {
+    "id": "osm-310846313",
+    "name": "Maulbronn Stadt/Kloster",
+    "lat": 48.9965651,
+    "lon": 8.8026758,
+    "type": "train"
+  },
+  {
+    "id": "osm-25479409",
+    "name": "Maulbronn West",
+    "lat": 48.9838385,
+    "lon": 8.7814485,
+    "type": "train"
+  },
+  {
+    "id": "osm-2237445645",
+    "name": "Maulbronn West AVG",
+    "lat": 48.9838813,
+    "lon": 8.7821552,
+    "type": "train"
+  },
+  {
+    "id": "osm-1686486985",
+    "name": "Maxau",
+    "lat": 49.0359981,
+    "lon": 8.3074759,
+    "type": "train"
+  },
+  {
+    "id": "osm-247420373",
+    "name": "Maximiliansau Eisenbahnstraße",
+    "lat": 49.0371733,
+    "lon": 8.2986477,
+    "type": "train"
+  },
+  {
+    "id": "osm-29542815",
+    "name": "Maximiliansau Im Rüsten",
+    "lat": 49.0349146,
+    "lon": 8.2795954,
+    "type": "train"
+  },
+  {
+    "id": "osm-1686486997",
+    "name": "Maximiliansau West",
+    "lat": 49.0389585,
+    "lon": 8.2917293,
+    "type": "train"
+  },
+  {
+    "id": "osm-6327139259",
+    "name": "Mélanie",
+    "lat": 48.6033131,
+    "lon": 7.7848841,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6327139260",
+    "name": "Mélanie",
+    "lat": 48.6033128,
+    "lon": 7.7848453,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3175310456",
+    "name": "Menzingen",
+    "lat": 49.1362587,
+    "lon": 8.7751908,
+    "type": "train"
+  },
+  {
+    "id": "osm-5078851210",
+    "name": "Moltkestraße/Städtisches Klinikum",
+    "lat": 49.0151875,
+    "lon": 8.3746846,
+    "type": "tram"
+  },
+  {
+    "id": "osm-5078851211",
+    "name": "Moltkestraße/Städtisches Klinikum",
+    "lat": 49.0154668,
+    "lon": 8.3751374,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6483804856",
+    "name": "Monbach-Neuhausen",
+    "lat": 48.7992171,
+    "lon": 8.7282462,
+    "type": "train"
+  },
+  {
+    "id": "osm-6712255504",
+    "name": "Moosbachtal",
+    "lat": 49.165883,
+    "lon": 7.7550817,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111110599",
+    "name": "Mörsch Am Hang",
+    "lat": 48.9565352,
+    "lon": 8.285483,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111110600",
+    "name": "Mörsch Bach West",
+    "lat": 48.9589439,
+    "lon": 8.2839851,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111110601",
+    "name": "Mörsch Merkurstraße",
+    "lat": 48.9531558,
+    "lon": 8.2913019,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4065456718",
+    "name": "Mörsch Narzissenstraße",
+    "lat": 48.9656583,
+    "lon": 8.301764,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4065727697",
+    "name": "Mörsch Narzissenstraße",
+    "lat": 48.9659862,
+    "lon": 8.3024404,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111110602",
+    "name": "Mörsch Rheinaustraße",
+    "lat": 48.9585492,
+    "lon": 8.2943532,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4065727698",
+    "name": "Mörsch Römerstraße",
+    "lat": 48.96143,
+    "lon": 8.2974273,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111136803",
+    "name": "Mörsch Rösselsbrünnle",
+    "lat": 48.9677774,
+    "lon": 8.305181,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3502482961",
+    "name": "Mothern",
+    "lat": 48.9348745,
+    "lon": 8.1618365,
+    "type": "train"
+  },
+  {
+    "id": "osm-2417737498",
+    "name": "Muggensturm",
+    "lat": 48.8768037,
+    "lon": 8.2744012,
+    "type": "train"
+  },
+  {
+    "id": "osm-2586504086",
+    "name": "Muggensturm Badesee",
+    "lat": 48.8799985,
+    "lon": 8.2867979,
+    "type": "train"
+  },
+  {
+    "id": "osm-26617815",
+    "name": "Mühlacker",
+    "lat": 48.9530851,
+    "lon": 8.8458301,
+    "type": "train"
+  },
+  {
+    "id": "osm-29107524",
+    "name": "Mühlacker Rößlesweg",
+    "lat": 48.956417,
+    "lon": 8.8607185,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111251394",
+    "name": "Mühlburg West",
+    "lat": 49.0202972,
+    "lon": 8.3507313,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111073160",
+    "name": "Mühlburger Feld",
+    "lat": 49.0076572,
+    "lon": 8.364214,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3139904087",
+    "name": "Mühlburger Tor",
+    "lat": 49.010598,
+    "lon": 8.3827201,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3170124329",
+    "name": "Mühlburger Tor (Grashofstraße)",
+    "lat": 49.011122,
+    "lon": 8.3845824,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3505919294",
+    "name": "Munchhausen",
+    "lat": 48.9240149,
+    "lon": 8.1412953,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175310460",
+    "name": "Münzesheim",
+    "lat": 49.1259712,
+    "lon": 8.7161585,
+    "type": "train"
+  },
+  {
+    "id": "osm-313815759",
+    "name": "Münzesheim Ost",
+    "lat": 49.1213234,
+    "lon": 8.7265141,
+    "type": "train"
+  },
+  {
+    "id": "osm-26594930",
+    "name": "Nagold",
+    "lat": 48.55539,
+    "lon": 8.7279041,
+    "type": "train"
+  },
+  {
+    "id": "osm-6483804668",
+    "name": "Nagold Stadtmitte",
+    "lat": 48.5514246,
+    "lon": 8.7284476,
+    "type": "train"
+  },
+  {
+    "id": "osm-310972295",
+    "name": "Neuburg (Rhein)",
+    "lat": 48.9921576,
+    "lon": 8.2383714,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724476",
+    "name": "Neuenbürg (Württ.) Eyachbrücke",
+    "lat": 48.8172354,
+    "lon": 8.5779048,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724478",
+    "name": "Neuenbürg (Württ.) Freibad",
+    "lat": 48.8369523,
+    "lon": 8.5904817,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724480",
+    "name": "Neuenbürg (Württ)",
+    "lat": 48.8491534,
+    "lon": 8.6009486,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724479",
+    "name": "Neuenbürg Süd",
+    "lat": 48.8445744,
+    "lon": 8.5989195,
+    "type": "train"
+  },
+  {
+    "id": "osm-2867865605",
+    "name": "Neulußheim",
+    "lat": 49.2929427,
+    "lon": 8.5307043,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374785",
+    "name": "Neureut Kirchfeld",
+    "lat": 49.052715,
+    "lon": 8.3885012,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016222",
+    "name": "Neureut-Heide",
+    "lat": 49.0363213,
+    "lon": 8.3880915,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110852715",
+    "name": "Neureuter Straße",
+    "lat": 49.0236462,
+    "lon": 8.357447,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1446238635",
+    "name": "Niefern",
+    "lat": 48.9202311,
+    "lon": 8.769707,
+    "type": "train"
+  },
+  {
+    "id": "osm-27308158",
+    "name": "Nufringen",
+    "lat": 48.6203959,
+    "lon": 8.8902783,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111136804",
+    "name": "Nussbaumweg",
+    "lat": 48.9894094,
+    "lon": 8.3332276,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3194912002",
+    "name": "Oberachern",
+    "lat": 48.614087,
+    "lon": 8.0793068,
+    "type": "train"
+  },
+  {
+    "id": "osm-3194912001",
+    "name": "Oberachern Bindfadenfabrik",
+    "lat": 48.6034994,
+    "lon": 8.0931795,
+    "type": "train"
+  },
+  {
+    "id": "osm-136052947",
+    "name": "Oberderdingen-Flehingen",
+    "lat": 49.0839555,
+    "lon": 8.7750136,
+    "type": "train"
+  },
+  {
+    "id": "osm-4046430020",
+    "name": "Oberöwisheim",
+    "lat": 49.1401358,
+    "lon": 8.6862581,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109761936",
+    "name": "Oberreut Zentrum",
+    "lat": 48.9857411,
+    "lon": 8.362285,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112922145",
+    "name": "Obertsrot",
+    "lat": 48.7459862,
+    "lon": 8.3474758,
+    "type": "train"
+  },
+  {
+    "id": "osm-30486843",
+    "name": "Observatoire",
+    "lat": 48.5814423,
+    "lon": 7.7689548,
+    "type": "tram"
+  },
+  {
+    "id": "osm-495627315",
+    "name": "Observatoire",
+    "lat": 48.5813404,
+    "lon": 7.7688957,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3175311262",
+    "name": "Odenheim",
+    "lat": 49.1789982,
+    "lon": 8.7464684,
+    "type": "train"
+  },
+  {
+    "id": "osm-7413474458",
+    "name": "Odenheim West",
+    "lat": 49.1822158,
+    "lon": 8.7366146,
+    "type": "train"
+  },
+  {
+    "id": "osm-25479442",
+    "name": "Ölbronn-Dürrn",
+    "lat": 48.9858243,
+    "lon": 8.7532742,
+    "type": "train"
+  },
+  {
+    "id": "osm-13483546434",
+    "name": "Ostelsheim",
+    "lat": 48.7283409,
+    "lon": 8.8550233,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109314616",
+    "name": "Ostendorfplatz",
+    "lat": 48.9758046,
+    "lon": 8.4066151,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073161",
+    "name": "Ostendstraße",
+    "lat": 49.0050369,
+    "lon": 8.4163088,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111016223",
+    "name": "Osteroder Straße",
+    "lat": 49.0433427,
+    "lon": 8.4472039,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844111",
+    "name": "Ostmarkstraße",
+    "lat": 48.9916854,
+    "lon": 8.4526482,
+    "type": "tram"
+  },
+  {
+    "id": "osm-19087940",
+    "name": "Ötigheim",
+    "lat": 48.8885741,
+    "lon": 8.2405252,
+    "type": "train"
+  },
+  {
+    "id": "osm-25479399",
+    "name": "Ötisheim",
+    "lat": 48.9664061,
+    "lon": 8.8138045,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112899431",
+    "name": "Ottenau",
+    "lat": 48.7928699,
+    "lon": 8.3383585,
+    "type": "train"
+  },
+  {
+    "id": "osm-2935948297",
+    "name": "Ottenhöfen",
+    "lat": 48.5669133,
+    "lon": 8.1508209,
+    "type": "train"
+  },
+  {
+    "id": "osm-3194912003",
+    "name": "Ottenhöfen West",
+    "lat": 48.5677884,
+    "lon": 8.142808,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073162",
+    "name": "Otto-Sachs-Straße",
+    "lat": 49.0034407,
+    "lon": 8.3893802,
+    "type": "tram"
+  },
+  {
+    "id": "osm-13016520344",
+    "name": "Panoramastation",
+    "lat": 48.7502046,
+    "lon": 8.5462193,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485261",
+    "name": "Parc du Contades",
+    "lat": 48.5902649,
+    "lon": 7.7559609,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1356159231",
+    "name": "Parc du Contades",
+    "lat": 48.5902727,
+    "lon": 7.755925,
+    "type": "tram"
+  },
+  {
+    "id": "osm-206168830",
+    "name": "Parlement Européen",
+    "lat": 48.5993479,
+    "lon": 7.766887,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1654034014",
+    "name": "Parlement Européen",
+    "lat": 48.5993667,
+    "lon": 7.7668688,
+    "type": "tram"
+  },
+  {
+    "id": "osm-25972727",
+    "name": "Pforzheim Hauptbahnhof",
+    "lat": 48.8939815,
+    "lon": 8.7032583,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724455",
+    "name": "Pforzheim Maihälden",
+    "lat": 48.8933799,
+    "lon": 8.6782873,
+    "type": "train"
+  },
+  {
+    "id": "osm-6483804863",
+    "name": "Pforzheim Weißenstein",
+    "lat": 48.8651887,
+    "lon": 8.6763875,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073163",
+    "name": "Philipp-Reis-Straße / die neue welle",
+    "lat": 49.0044836,
+    "lon": 8.4115497,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3256326993",
+    "name": "Philippsburg (Baden)",
+    "lat": 49.2316845,
+    "lon": 8.4538428,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111265483",
+    "name": "Philippstraße",
+    "lat": 49.0113978,
+    "lon": 8.3648026,
+    "type": "tram"
+  },
+  {
+    "id": "osm-8177042033",
+    "name": "Pionierstraße",
+    "lat": 49.0333718,
+    "lon": 8.3479563,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1661950579",
+    "name": "Place d'Islande",
+    "lat": 48.5802816,
+    "lon": 7.7764016,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1661950583",
+    "name": "Place d'Islande",
+    "lat": 48.5803767,
+    "lon": 7.7763903,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1529605117",
+    "name": "Pont Phario",
+    "lat": 48.6129301,
+    "lon": 7.7672106,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1832165529",
+    "name": "Pont Phario",
+    "lat": 48.6129265,
+    "lon": 7.7671082,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4746782995",
+    "name": "Port du Rhin",
+    "lat": 48.5727471,
+    "lon": 7.795105,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4746782996",
+    "name": "Port du Rhin",
+    "lat": 48.5727196,
+    "lon": 7.7951083,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30478738",
+    "name": "Porte de l'Hôpital",
+    "lat": 48.5780731,
+    "lon": 7.7501149,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1652708028",
+    "name": "Porte de l'Hôpital",
+    "lat": 48.578096,
+    "lon": 7.7501357,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110852716",
+    "name": "Poststraße",
+    "lat": 48.9951621,
+    "lon": 8.4035887,
+    "type": "tram"
+  },
+  {
+    "id": "osm-256572194",
+    "name": "Rappenwört",
+    "lat": 48.9989112,
+    "lon": 8.2954119,
+    "type": "tram"
+  },
+  {
+    "id": "osm-21322676",
+    "name": "Rastatt",
+    "lat": 48.8605562,
+    "lon": 8.2156411,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112821922",
+    "name": "Rastatt Beinle",
+    "lat": 48.8521619,
+    "lon": 8.2250752,
+    "type": "train"
+  },
+  {
+    "id": "osm-25812955",
+    "name": "Raumünzach",
+    "lat": 48.6448896,
+    "lon": 8.3514448,
+    "type": "train"
+  },
+  {
+    "id": "osm-2912494171",
+    "name": "Reichenbach (b. Ettlingen)",
+    "lat": 48.9204483,
+    "lon": 8.4795911,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169336",
+    "name": "Reichenbach Kurpark",
+    "lat": 48.9188083,
+    "lon": 8.4730662,
+    "type": "train"
+  },
+  {
+    "id": "osm-3328407318",
+    "name": "Reihen",
+    "lat": 49.216544,
+    "lon": 8.9205213,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374786",
+    "name": "Reitschulschlag",
+    "lat": 49.0428986,
+    "lon": 8.4608348,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3780858667",
+    "name": "Renchen",
+    "lat": 48.5925501,
+    "lon": 8.0070119,
+    "type": "train"
+  },
+  {
+    "id": "osm-41345804",
+    "name": "Renningen",
+    "lat": 48.7751364,
+    "lon": 8.9322767,
+    "type": "train"
+  },
+  {
+    "id": "osm-2011432092",
+    "name": "Renningen Süd",
+    "lat": 48.7626683,
+    "lon": 8.9319595,
+    "type": "train"
+  },
+  {
+    "id": "osm-1356159235",
+    "name": "République",
+    "lat": 48.5864159,
+    "lon": 7.7537178,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1446298787",
+    "name": "République",
+    "lat": 48.5864853,
+    "lon": 7.7547072,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1446298811",
+    "name": "République",
+    "lat": 48.5858938,
+    "lon": 7.7550162,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251395",
+    "name": "Rheinbergstraße",
+    "lat": 49.0351374,
+    "lon": 8.3364356,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251396",
+    "name": "Rheinhafen",
+    "lat": 49.0156004,
+    "lon": 8.347428,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251398",
+    "name": "Rheinhafenstraße",
+    "lat": 49.0015588,
+    "lon": 8.3450898,
+    "type": "tram"
+  },
+  {
+    "id": "osm-25480338",
+    "name": "Rheinsheim",
+    "lat": 49.2291125,
+    "lon": 8.4158403,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267284",
+    "name": "Rheinzabern Alte Römerstraße",
+    "lat": 49.1094715,
+    "lon": 8.2730193,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267283",
+    "name": "Rheinzabern Bahnhof",
+    "lat": 49.1197746,
+    "lon": 8.2742318,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267286",
+    "name": "Rheinzabern Rappengasse",
+    "lat": 49.1144206,
+    "lon": 8.2732424,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111317724",
+    "name": "Richard-Hecht-Schule",
+    "lat": 49.1125251,
+    "lon": 8.5046044,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3328453794",
+    "name": "Richen (bei Eppingen)",
+    "lat": 49.1681625,
+    "lon": 8.9365763,
+    "type": "train"
+  },
+  {
+    "id": "osm-3502477861",
+    "name": "Riedseltz",
+    "lat": 48.9910751,
+    "lon": 7.9629995,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685966560",
+    "name": "Rinnthal",
+    "lat": 49.2170764,
+    "lon": 7.9280032,
+    "type": "train"
+  },
+  {
+    "id": "osm-4138938939",
+    "name": "Rintheim",
+    "lat": 49.0164264,
+    "lon": 8.4437075,
+    "type": "tram"
+  },
+  {
+    "id": "osm-30485288",
+    "name": "Rives de l'Aar",
+    "lat": 48.6007447,
+    "lon": 7.7545999,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357118463",
+    "name": "Rives de l'Aar",
+    "lat": 48.6007456,
+    "lon": 7.7545593,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4736254580",
+    "name": "Robertsau L'Escale",
+    "lat": 48.6093076,
+    "lon": 7.7852518,
+    "type": "tram"
+  },
+  {
+    "id": "osm-6327135969",
+    "name": "Robertsau L'Escale",
+    "lat": 48.6092979,
+    "lon": 7.7852895,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4290859610",
+    "name": "Rœschwoog",
+    "lat": 48.8341672,
+    "lon": 8.0308103,
+    "type": "train"
+  },
+  {
+    "id": "osm-1900264306",
+    "name": "Rohrbach (Pfalz)",
+    "lat": 49.1381199,
+    "lon": 8.1416451,
+    "type": "train"
+  },
+  {
+    "id": "osm-19096025",
+    "name": "Röt",
+    "lat": 48.5557083,
+    "lon": 8.3974067,
+    "type": "train"
+  },
+  {
+    "id": "osm-25436705",
+    "name": "Rot-Malsch",
+    "lat": 49.2433584,
+    "lon": 8.6522152,
+    "type": "train"
+  },
+  {
+    "id": "osm-6434724477",
+    "name": "Rotenbach (Enz)",
+    "lat": 48.8301792,
+    "lon": 8.5788663,
+    "type": "train"
+  },
+  {
+    "id": "osm-3505968093",
+    "name": "Rountzenheim",
+    "lat": 48.8203626,
+    "lon": 8.0117495,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267288",
+    "name": "Rülzheim Bahnhof",
+    "lat": 49.1607846,
+    "lon": 8.2902582,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267287",
+    "name": "Rülzheim, Freizeitzentrum",
+    "lat": 49.151576,
+    "lon": 8.2793493,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109314615",
+    "name": "Rüppurr Battstraße",
+    "lat": 48.9651763,
+    "lon": 8.4048217,
+    "type": "train"
+  },
+  {
+    "id": "osm-9332297058",
+    "name": "Rüppurrer Tor",
+    "lat": 49.005867,
+    "lon": 8.4091874,
+    "type": "tram"
+  },
+  {
+    "id": "osm-618403088",
+    "name": "Saint-Christophe",
+    "lat": 48.5510832,
+    "lon": 7.7663522,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357434900",
+    "name": "Saint-Christophe",
+    "lat": 48.5510932,
+    "lon": 7.7663196,
+    "type": "tram"
+  },
+  {
+    "id": "osm-287145096",
+    "name": "Schaidt (Pfalz)",
+    "lat": 49.0610639,
+    "lon": 8.0795114,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110844113",
+    "name": "Schillerstraße",
+    "lat": 49.0101,
+    "lon": 8.3797396,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844114",
+    "name": "Schlesier Straße (West)",
+    "lat": 48.9885738,
+    "lon": 8.4522136,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111073167",
+    "name": "Schloss Gottesaue/Hochschule für Musik",
+    "lat": 49.0036387,
+    "lon": 8.4274462,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109314617",
+    "name": "Schloss Rüppurr",
+    "lat": 48.9811721,
+    "lon": 8.4037864,
+    "type": "train"
+  },
+  {
+    "id": "osm-10833510602",
+    "name": "Schlossgartenbahn",
+    "lat": 49.0142372,
+    "lon": 8.401038,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110844115",
+    "name": "Schlossplatz",
+    "lat": 48.9991185,
+    "lon": 8.4739792,
+    "type": "tram"
+  },
+  {
+    "id": "osm-266572349",
+    "name": "Schluthfeld",
+    "lat": 48.5685409,
+    "lon": 7.7516531,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1395773869",
+    "name": "Schluthfeld",
+    "lat": 48.5685363,
+    "lon": 7.7516871,
+    "type": "tram"
+  },
+  {
+    "id": "osm-268098219",
+    "name": "Schönmünzach",
+    "lat": 48.6050155,
+    "lon": 8.3695873,
+    "type": "train"
+  },
+  {
+    "id": "osm-19096224",
+    "name": "Schwarzenberg",
+    "lat": 48.5988352,
+    "lon": 8.3837041,
+    "type": "train"
+  },
+  {
+    "id": "osm-261665294",
+    "name": "Schweighofen",
+    "lat": 49.0327875,
+    "lon": 7.9995336,
+    "type": "train"
+  },
+  {
+    "id": "osm-3464931494",
+    "name": "Seltz",
+    "lat": 48.8967134,
+    "lon": 8.0984592,
+    "type": "train"
+  },
+  {
+    "id": "osm-3502483255",
+    "name": "Sessenheim",
+    "lat": 48.7963776,
+    "lon": 7.9894032,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685962353",
+    "name": "Siebeldingen-Birkweiler",
+    "lat": 49.2088922,
+    "lon": 8.0432745,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111251399",
+    "name": "Siemens",
+    "lat": 49.025263,
+    "lon": 8.3462679,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110852717",
+    "name": "Siemensallee",
+    "lat": 49.0277206,
+    "lon": 8.350026,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3175312889",
+    "name": "Sinsheim (Elsenz) Hauptbahnhof",
+    "lat": 49.2501683,
+    "lon": 8.8754995,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175312890",
+    "name": "Sinsheim Museum/Arena",
+    "lat": 49.2416461,
+    "lon": 8.8993041,
+    "type": "train"
+  },
+  {
+    "id": "osm-2827402196",
+    "name": "Sinsheimer Straße",
+    "lat": 49.0208005,
+    "lon": 8.4447867,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2572553557",
+    "name": "Sinzheim",
+    "lat": 48.759779,
+    "lon": 8.1584224,
+    "type": "train"
+  },
+  {
+    "id": "osm-2572553845",
+    "name": "Sinzheim Nord",
+    "lat": 48.7706184,
+    "lon": 8.169696,
+    "type": "train"
+  },
+  {
+    "id": "osm-247039554",
+    "name": "Söllingen (Pfinztal)",
+    "lat": 48.9881154,
+    "lon": 8.5432491,
+    "type": "train"
+  },
+  {
+    "id": "osm-1310987485",
+    "name": "Söllingen (Pfinztal)",
+    "lat": 48.9880713,
+    "lon": 8.5431471,
+    "type": "train"
+  },
+  {
+    "id": "osm-3244699381",
+    "name": "Söllingen Reetzstraße",
+    "lat": 48.9908713,
+    "lon": 8.5408545,
+    "type": "train"
+  },
+  {
+    "id": "osm-3244699385",
+    "name": "Söllingen Reetzstraße",
+    "lat": 48.9909071,
+    "lon": 8.540977,
+    "type": "train"
+  },
+  {
+    "id": "osm-1454828869",
+    "name": "Söllingen-Kapellenstraße",
+    "lat": 48.9839145,
+    "lon": 8.5496525,
+    "type": "train"
+  },
+  {
+    "id": "osm-3389267289",
+    "name": "Sondernheim",
+    "lat": 49.1952317,
+    "lon": 8.3603125,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110844116",
+    "name": "Sophienstraße",
+    "lat": 49.0076117,
+    "lon": 8.3791673,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1935883986",
+    "name": "Soultz-sous-Forêts",
+    "lat": 48.9345566,
+    "lon": 7.8824623,
+    "type": "train"
+  },
+  {
+    "id": "osm-3104169337",
+    "name": "Spielberg",
+    "lat": 48.8975966,
+    "lon": 8.4746371,
+    "type": "train"
+  },
+  {
+    "id": "osm-3003146659",
+    "name": "Spöck Hochhaus",
+    "lat": 49.1114859,
+    "lon": 8.5004323,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111091963",
+    "name": "Stadtwerke",
+    "lat": 49.0071605,
+    "lon": 8.3435589,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111251400",
+    "name": "Starckstraße",
+    "lat": 49.0168335,
+    "lon": 8.3528631,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4679801965",
+    "name": "Starcoop",
+    "lat": 48.5741428,
+    "lon": 7.7856872,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4679801966",
+    "name": "Starcoop",
+    "lat": 48.574115,
+    "lon": 7.7856934,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844117",
+    "name": "Steiermärker Straße",
+    "lat": 48.9858257,
+    "lon": 8.4559768,
+    "type": "tram"
+  },
+  {
+    "id": "osm-287145095",
+    "name": "Steinfeld (Pfalz)",
+    "lat": 49.0448052,
+    "lon": 8.0395441,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175312891",
+    "name": "Steinsfurt",
+    "lat": 49.2360211,
+    "lon": 8.9077843,
+    "type": "train"
+  },
+  {
+    "id": "osm-25454809",
+    "name": "Steinweiler",
+    "lat": 49.1210186,
+    "lon": 8.1307162,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175312892",
+    "name": "Stettfeld (Baden)",
+    "lat": 49.1790189,
+    "lon": 8.6439318,
+    "type": "train"
+  },
+  {
+    "id": "osm-4107689579",
+    "name": "Stettfeld-Weiher",
+    "lat": 49.1835268,
+    "lon": 8.636902,
+    "type": "train"
+  },
+  {
+    "id": "osm-8177042032",
+    "name": "Sudetenstraße",
+    "lat": 49.0304017,
+    "lon": 8.3453482,
+    "type": "tram"
+  },
+  {
+    "id": "osm-248155138",
+    "name": "Sulzfeld (Baden)",
+    "lat": 49.1080902,
+    "lon": 8.8529711,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111016225",
+    "name": "Synagoge",
+    "lat": 49.0177662,
+    "lon": 8.3849059,
+    "type": "tram"
+  },
+  {
+    "id": "osm-148386976",
+    "name": "Talstation MerkurBergbahn",
+    "lat": 48.7629951,
+    "lon": 8.2646827,
+    "type": "train"
+  },
+  {
+    "id": "osm-13016520367",
+    "name": "Talstation Uhlandsplatz",
+    "lat": 48.7502996,
+    "lon": 8.5488264,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111251401",
+    "name": "Thomas-Mann-Straße",
+    "lat": 48.9990603,
+    "lon": 8.3413627,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2943932401",
+    "name": "Tivoli",
+    "lat": 48.9968102,
+    "lon": 8.4105535,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112425588",
+    "name": "Tolnaplatz",
+    "lat": 49.0602726,
+    "lon": 8.469371,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109738318",
+    "name": "Tullastraße/Alter Schlachthof",
+    "lat": 49.0061053,
+    "lon": 8.4325007,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3247639125",
+    "name": "Tullastraße/Alter Schlachthof",
+    "lat": 49.0070101,
+    "lon": 8.4314198,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3109314618",
+    "name": "Tulpenstraße",
+    "lat": 48.9710473,
+    "lon": 8.4040252,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175312894",
+    "name": "Ubstadt Ort",
+    "lat": 49.1567123,
+    "lon": 8.6254717,
+    "type": "train"
+  },
+  {
+    "id": "osm-2708890853",
+    "name": "Ubstadt Salzbrunnenstraße",
+    "lat": 49.1551883,
+    "lon": 8.6331002,
+    "type": "train"
+  },
+  {
+    "id": "osm-3463908373",
+    "name": "Ubstadt Uhlandstraße",
+    "lat": 49.1626903,
+    "lon": 8.6287948,
+    "type": "train"
+  },
+  {
+    "id": "osm-25436312",
+    "name": "Ubstadt-Weiher",
+    "lat": 49.1668501,
+    "lon": 8.6232621,
+    "type": "train"
+  },
+  {
+    "id": "osm-30486837",
+    "name": "Université",
+    "lat": 48.5828039,
+    "lon": 7.763958,
+    "type": "tram"
+  },
+  {
+    "id": "osm-495627317",
+    "name": "Université",
+    "lat": 48.5827009,
+    "lon": 7.7639002,
+    "type": "tram"
+  },
+  {
+    "id": "osm-277434358",
+    "name": "Untergrombach",
+    "lat": 49.0876562,
+    "lon": 8.548342,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110852718",
+    "name": "Untermühlstraße",
+    "lat": 49.001981,
+    "lon": 8.4554205,
+    "type": "tram"
+  },
+  {
+    "id": "osm-291912850",
+    "name": "Unteröwisheim Bahnhof",
+    "lat": 49.1463638,
+    "lon": 8.6689032,
+    "type": "train"
+  },
+  {
+    "id": "osm-291921122",
+    "name": "Unteröwisheim Martin-Luther-Straße",
+    "lat": 49.1464851,
+    "lon": 8.6620631,
+    "type": "train"
+  },
+  {
+    "id": "osm-26594671",
+    "name": "Unterreichenbach",
+    "lat": 48.8268571,
+    "lon": 8.7113133,
+    "type": "train"
+  },
+  {
+    "id": "osm-30485271",
+    "name": "Wacken",
+    "lat": 48.5985775,
+    "lon": 7.7606367,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357118484",
+    "name": "Wacken",
+    "lat": 48.5985834,
+    "lon": 7.760598,
+    "type": "tram"
+  },
+  {
+    "id": "osm-2827625953",
+    "name": "Waghäusel",
+    "lat": 49.2481441,
+    "lon": 8.5082092,
+    "type": "train"
+  },
+  {
+    "id": "osm-2952306547",
+    "name": "Waidweg",
+    "lat": 49.0042913,
+    "lon": 8.3227901,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3502478419",
+    "name": "Walbourg",
+    "lat": 48.8862593,
+    "lon": 7.8092869,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109738319",
+    "name": "Waldstadt Zentrum",
+    "lat": 49.0351296,
+    "lon": 8.445237,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3034314606",
+    "name": "Weil der Stadt",
+    "lat": 48.7555815,
+    "lon": 8.8730002,
+    "type": "train"
+  },
+  {
+    "id": "osm-4210720056",
+    "name": "Weinbrennerplatz",
+    "lat": 49.0051683,
+    "lon": 8.3778503,
+    "type": "tram"
+  },
+  {
+    "id": "osm-5738963866",
+    "name": "Weinbrennerplatz",
+    "lat": 49.0056464,
+    "lon": 8.3767112,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3321121276",
+    "name": "Weingarten (Baden)",
+    "lat": 49.0591531,
+    "lon": 8.5212709,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109738320",
+    "name": "Weinweg",
+    "lat": 49.0044426,
+    "lon": 8.4413205,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112924512",
+    "name": "Weisenbach",
+    "lat": 48.72727,
+    "lon": 8.3552946,
+    "type": "train"
+  },
+  {
+    "id": "osm-124411794",
+    "name": "Weissach",
+    "lat": 48.8464695,
+    "lon": 8.9337905,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073169",
+    "name": "Welfenstraße",
+    "lat": 48.995262,
+    "lon": 8.3853643,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3112374787",
+    "name": "Welschneureuter Straße",
+    "lat": 49.0447287,
+    "lon": 8.3745314,
+    "type": "train"
+  },
+  {
+    "id": "osm-3112374788",
+    "name": "Werderstraße",
+    "lat": 49.0004657,
+    "lon": 8.4106171,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3507541000",
+    "name": "Weyersheim",
+    "lat": 48.7177903,
+    "lon": 7.7971027,
+    "type": "train"
+  },
+  {
+    "id": "osm-2827606896",
+    "name": "Wiesental",
+    "lat": 49.2257001,
+    "lon": 8.5024357,
+    "type": "train"
+  },
+  {
+    "id": "osm-1688514504",
+    "name": "Wiesloch-Walldorf",
+    "lat": 49.2910549,
+    "lon": 8.6642181,
+    "type": "train"
+  },
+  {
+    "id": "osm-4599545670",
+    "name": "Wildberg (Württ)",
+    "lat": 48.6253789,
+    "lon": 8.7429446,
+    "type": "train"
+  },
+  {
+    "id": "osm-26487859",
+    "name": "Wilferdingen-Singen",
+    "lat": 48.9537401,
+    "lon": 8.5728082,
+    "type": "train"
+  },
+  {
+    "id": "osm-1685970965",
+    "name": "Wilgartswiesen",
+    "lat": 49.2091919,
+    "lon": 7.883052,
+    "type": "train"
+  },
+  {
+    "id": "osm-3109761937",
+    "name": "Wilhelm-Leuschner-Straße",
+    "lat": 48.9834769,
+    "lon": 8.3649073,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1717082646",
+    "name": "Winden (Pfalz)",
+    "lat": 49.0953702,
+    "lon": 8.122422,
+    "type": "train"
+  },
+  {
+    "id": "osm-269697096",
+    "name": "Winston Churchill",
+    "lat": 48.5737411,
+    "lon": 7.7667232,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1357499219",
+    "name": "Winston Churchill",
+    "lat": 48.5737449,
+    "lon": 7.7666836,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3175312897",
+    "name": "Wissembourg",
+    "lat": 49.0315702,
+    "lon": 7.9501746,
+    "type": "train"
+  },
+  {
+    "id": "osm-3110844118",
+    "name": "Wolfartsweier Nord",
+    "lat": 48.9791142,
+    "lon": 8.4587542,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3797979860",
+    "name": "Wolfartsweier Nord",
+    "lat": 48.978928,
+    "lon": 8.4585658,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3111073170",
+    "name": "Wolfartsweierer Straße",
+    "lat": 49.0035245,
+    "lon": 8.4231484,
+    "type": "tram"
+  },
+  {
+    "id": "osm-117367378",
+    "name": "Wörth (Rhein)",
+    "lat": 49.0456919,
+    "lon": 8.2731506,
+    "type": "train"
+  },
+  {
+    "id": "osm-1845817175",
+    "name": "Wörth (Rhein) Alte Bahnmeisterei",
+    "lat": 49.0485842,
+    "lon": 8.2664847,
+    "type": "train"
+  },
+  {
+    "id": "osm-1854004994",
+    "name": "Wörth (Rhein) Badallee",
+    "lat": 49.0559953,
+    "lon": 8.2498171,
+    "type": "tram"
+  },
+  {
+    "id": "osm-247418497",
+    "name": "Wörth (Rhein) Badepark",
+    "lat": 49.0585814,
+    "lon": 8.2439865,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1330171644",
+    "name": "Wörth (Rhein) Bienwaldhalle",
+    "lat": 49.049799,
+    "lon": 8.2608187,
+    "type": "tram"
+  },
+  {
+    "id": "osm-338095830",
+    "name": "Wörth Mozartstraße",
+    "lat": 49.0550804,
+    "lon": 8.2518908,
+    "type": "train"
+  },
+  {
+    "id": "osm-246210429",
+    "name": "Wörth Rathaus",
+    "lat": 49.0522585,
+    "lon": 8.2497906,
+    "type": "tram"
+  },
+  {
+    "id": "osm-4067626372",
+    "name": "Wörth Zügelstraße",
+    "lat": 49.0528034,
+    "lon": 8.2619714,
+    "type": "train"
+  },
+  {
+    "id": "osm-8632089436",
+    "name": "Wörth(Rhein) Bürgerpark",
+    "lat": 49.0508729,
+    "lon": 8.2538849,
+    "type": "tram"
+  },
+  {
+    "id": "osm-25479601",
+    "name": "Wössingen Bahnhof",
+    "lat": 49.0155171,
+    "lon": 8.6048083,
+    "type": "train"
+  },
+  {
+    "id": "osm-2965499218",
+    "name": "Wössingen Ost",
+    "lat": 49.0157632,
+    "lon": 8.6098391,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111290042",
+    "name": "Yorckstraße",
+    "lat": 49.0109285,
+    "lon": 8.3755904,
+    "type": "tram"
+  },
+  {
+    "id": "osm-281874050",
+    "name": "Zaisenhausen",
+    "lat": 49.1047251,
+    "lon": 8.8166113,
+    "type": "train"
+  },
+  {
+    "id": "osm-3175312898",
+    "name": "Zeutern Bahnhof",
+    "lat": 49.1781818,
+    "lon": 8.677568,
+    "type": "train"
+  },
+  {
+    "id": "osm-7413474456",
+    "name": "Zeutern Ost",
+    "lat": 49.178984,
+    "lon": 8.7030139,
+    "type": "train"
+  },
+  {
+    "id": "osm-7413474453",
+    "name": "Zeutern Sportplatz",
+    "lat": 49.1779504,
+    "lon": 8.6707885,
+    "type": "train"
+  },
+  {
+    "id": "osm-3111073171",
+    "name": "ZKM",
+    "lat": 48.9991629,
+    "lon": 8.3859889,
+    "type": "tram"
+  },
+  {
+    "id": "osm-3110844119",
+    "name": "Zündhütle",
+    "lat": 48.9826007,
+    "lon": 8.4605385,
+    "type": "tram"
+  },
+  {
+    "id": "osm-1587310490",
+    "name": "Zuzenhausen",
+    "lat": 49.2974972,
+    "lon": 8.8213335,
+    "type": "train"
+  }
+]

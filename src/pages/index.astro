@@ -1,17 +1,206 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="KA Laufweite">
+  <div id="map-shell">
+    <div id="map"></div>
+    <div id="legend">
+      <h3>Legende</h3>
+      <div class="legend-item">
+        <span class="dot tram"></span> Straßenbahn
+      </div>
+      <div class="legend-item">
+        <span class="dot train"></span> Bahn / S-Bahn
+      </div>
+      <div class="legend-item">
+        <span class="dot custom"></span> Eigene Haltestelle
+      </div>
+      <p class="coverage" data-coverage-info></p>
+      <p class="radius" data-radius-info></p>
+      <p class="hint">
+        Klicke auf die Karte, um eine eigene Haltestelle hinzuzufügen. Klicke auf eigene
+        Haltestellen, um sie zu entfernen. Darstellung und Distanz stellst du unter Konfiguration
+        ein.
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { initMap } from '../scripts/map';
+  initMap();
+</script>
+
+<style>
+  #map-shell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+  }
+
+  #legend {
+    position: absolute;
+    bottom: 24px;
+    left: 12px;
+    z-index: 1000;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    max-width: min(320px, calc(100% - 24px));
+    max-height: min(330px, 52%);
+    overflow: auto;
+  }
+
+  #legend h3 {
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .dot.tram {
+    background: #e63946;
+  }
+  .dot.train {
+    background: #457b9d;
+  }
+  .dot.custom {
+    background: #2a9d8f;
+  }
+
+  .hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+    max-width: 200px;
+  }
+
+  .radius {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2933;
+  }
+
+  .coverage {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2933;
+  }
+
+  @media (max-width: 720px) {
+    #legend {
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      max-width: none;
+      max-height: 42%;
+    }
+
+    #legend h3 {
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .hint {
+      max-width: none;
+      font-size: 11px;
+    }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    #legend {
+      top: 8px;
+      left: 8px;
+      right: auto;
+      bottom: auto;
+      width: min(300px, calc(100% - 16px));
+      max-height: calc(100% - 16px);
+    }
+  }
+</style>
+
+<style is:global>
+  .leaflet-popup-content .stop-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    min-width: 180px;
+  }
+
+  .leaflet-popup-content .stop-popup em {
+    color: #5f6e7d;
+    font-size: 12px;
+  }
+
+  .leaflet-popup-content .stop-popup__remove {
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 6px;
+    background: #e63946;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .leaflet-popup-content .stop-popup__remove:disabled {
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  .leaflet-popup-content .stop-popup-form {
+    min-width: 200px;
+  }
+
+  .leaflet-popup-content .stop-popup-form__label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .leaflet-popup-content .stop-popup-form__input {
+    width: 100%;
+    border: 1px solid #c5d0df;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .leaflet-popup-content .stop-popup-form__submit {
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 6px;
+    background: #2a9d8f;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
