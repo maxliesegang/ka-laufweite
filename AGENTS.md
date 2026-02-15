@@ -12,12 +12,15 @@ Guidance for coding agents and contributors working in this repository.
 - Runtime stop data source: `public/data/osm-stops.json`
 - Runtime custom stops: browser `localStorage` (see `src/lib/custom-stops-client.ts`)
 - Stop access and validation: `src/lib/stops-repository.ts`
-- Map constants/templates: `src/lib/map-config.ts`, `src/lib/map-popups.ts`
-- Walkshed polygon generation: `src/lib/walkshed.ts` (Overpass + footpath graph)
-- Walkshed response cache: `src/lib/walkshed-cache.ts` (localStorage, resettable via config page)
+- Map popup templates: `src/lib/map-popups.ts`
+- Stop-type metadata and UI building blocks: `src/lib/stop-type-config.ts`, `src/components/StopLegendItems.astro`, `src/components/StopRadiusInputs.astro`, `src/components/PopupStyles.astro`
+- Walkshed polygon generation: `src/lib/walkshed/service.ts` with helpers in `src/lib/walkshed/*` (Overpass + footpath graph)
+- Walkshed response cache: `src/lib/walkshed-cache.ts` (localStorage, resettable via config page, supports per-stop invalidation)
 - Map orchestration: `src/scripts/map.ts`
+- Map UI helpers: `src/scripts/map/custom-stop-marker-icon.ts`
+- Walkshed overlay orchestration: `src/scripts/map/walkshed-overlay-manager.ts`
 - Config page logic: `src/scripts/config.ts`
-- Shared settings/types: `src/lib/settings.ts`, `src/lib/types.ts`
+- Shared settings/types: `src/lib/settings.ts` (radius, coverage shape, stop-type visibility), `src/lib/types.ts`
 
 ## Required Practices
 
@@ -47,7 +50,7 @@ npm run build
 For GitHub Pages-style build checks:
 
 ```sh
-BASE_PATH=/karlsruhe-opnv-map SITE_URL=https://<username>.github.io npm run build
+BASE_PATH=/ka-laufweite SITE_URL=https://<username>.github.io npm run build
 ```
 
 ## License

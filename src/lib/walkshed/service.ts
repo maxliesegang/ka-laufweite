@@ -58,6 +58,15 @@ export function clearWalkshedRuntimeCache(): void {
   polygonCache.clear();
 }
 
+export function removeWalkshedRuntimeCacheForStop(stopId: string): void {
+  const prefix = `${stopId}:`;
+  for (const key of [...polygonCache.keys()]) {
+    if (key.startsWith(prefix)) {
+      polygonCache.delete(key);
+    }
+  }
+}
+
 export async function buildWalkshedPolygon(
   stop: Stop,
   distanceMeters: number,

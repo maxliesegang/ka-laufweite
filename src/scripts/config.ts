@@ -1,17 +1,30 @@
 import {
   DEFAULT_COVERAGE_SHAPE,
-  DEFAULT_STOP_RADIUS_METERS,
+  DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
   MAX_STOP_RADIUS_METERS,
   MIN_STOP_RADIUS_METERS,
+  STOP_RADIUS_INPUT_IDS,
   STOP_RADIUS_STEP_METERS,
   type CoverageShape,
+  type StopRadiusByType,
   COVERAGE_SHAPE_COMPACT_LABELS,
   getConfiguredCoverageShape,
-  getConfiguredStopRadius,
+  getConfiguredStopRadii,
   setConfiguredCoverageShape,
   setConfiguredStopRadius,
 } from '../lib/settings';
-import { clearWalkshedCache, getWalkshedCacheSize } from '../lib/walkshed-cache';
+import {
+  formatStopRadiusSummary,
+  STOP_TYPE_CONFIG,
+  STOP_TYPES_CONFIG_ORDER,
+} from '../lib/stop-type-config';
+import { mapStopTypes, stopTypeRecordChanged, type StopType } from '../lib/types';
+import { clearCustomStops } from '../lib/custom-stops-client';
+import {
+  clearWalkshedCache,
+  getWalkshedCacheSize,
+  removeCachedWalkshedPolygonsForStops,
+} from '../lib/walkshed-cache';
 
 const AUTOSAVE_DEBOUNCE_MS = 800;
 
@@ -21,22 +34,32 @@ function requireElement<T extends HTMLElement>(id: string, type: new (...args: n
   return el;
 }
 
-function statusText(prefix: string, radius: number, shape: CoverageShape): string {
-  return `${prefix}: ${radius} m, ${COVERAGE_SHAPE_COMPACT_LABELS[shape]}`;
+function statusText(prefix: string, radii: StopRadiusByType, shape: CoverageShape): string {
+  return `${prefix}: ${formatStopRadiusSummary(radii, STOP_TYPES_CONFIG_ORDER)}, ${COVERAGE_SHAPE_COMPACT_LABELS[shape]}`;
+}
+
+function invalidRadiusHint(invalidTypes: StopType[]): string {
+  if (invalidTypes.length === 0) return '';
+  const labels = invalidTypes.map((stopType) => STOP_TYPE_CONFIG[stopType].compactLabel).join(', ');
+  return ` Ungültig und unverändert: ${labels}.`;
 }
 
 export function initConfigPage(): void {
-  let input: HTMLInputElement;
+  let radiusInputs: Record<StopType, HTMLInputElement>;
   let shapeSelect: HTMLSelectElement;
   let resetDefaultsBtn: HTMLButtonElement;
+  let deleteCustomStopsBtn: HTMLButtonElement;
   let resetCacheBtn: HTMLButtonElement;
   let saveStatus: HTMLParagraphElement;
   let cacheStatus: HTMLParagraphElement;
 
   try {
-    input = requireElement('radius-input', HTMLInputElement);
+    radiusInputs = mapStopTypes((stopType) =>
+      requireElement(STOP_RADIUS_INPUT_IDS[stopType], HTMLInputElement),
+    );
     shapeSelect = requireElement('coverage-shape', HTMLSelectElement);
     resetDefaultsBtn = requireElement('reset-radius', HTMLButtonElement);
+    deleteCustomStopsBtn = requireElement('delete-custom-stops', HTMLButtonElement);
     resetCacheBtn = requireElement('reset-walkshed-cache', HTMLButtonElement);
     saveStatus = requireElement('save-status', HTMLParagraphElement);
     cacheStatus = requireElement('cache-status', HTMLParagraphElement);
@@ -45,13 +68,16 @@ export function initConfigPage(): void {
   }
 
   let autosaveTimer: number | null = null;
-  let currentRadius = getConfiguredStopRadius();
+  let currentRadiusByType = getConfiguredStopRadii();
   let currentShape = getConfiguredCoverageShape();
 
-  input.value = String(currentRadius);
+  for (const stopType of STOP_TYPES_CONFIG_ORDER) {
+    radiusInputs[stopType].value = String(currentRadiusByType[stopType]);
+  }
+
   shapeSelect.value = currentShape;
   cacheStatus.textContent = `Polygon-Cache Einträge: ${getWalkshedCacheSize()}`;
-  saveStatus.textContent = statusText('Automatisch aktiv', currentRadius, currentShape);
+  saveStatus.textContent = statusText('Automatisch aktiv', currentRadiusByType, currentShape);
 
   const clearTimer = () => {
     if (autosaveTimer !== null) {
@@ -65,30 +91,51 @@ export function initConfigPage(): void {
   };
 
   const persistSettings = (prefix: string, normalizeRadius = false): void => {
-    const canSaveRadius = normalizeRadius || input.validity.valid;
-    const radius = canSaveRadius ? setConfiguredStopRadius(input.value) : currentRadius;
-    const shape = setConfiguredCoverageShape(shapeSelect.value);
+    const nextRadiusByType: StopRadiusByType = { ...currentRadiusByType };
+    const invalidTypes: StopType[] = [];
 
-    input.value = String(radius);
-    shapeSelect.value = shape;
+    for (const stopType of STOP_TYPES_CONFIG_ORDER) {
+      const input = radiusInputs[stopType];
+      const canSaveRadius = normalizeRadius || input.validity.valid;
 
-    const changed = radius !== currentRadius || shape !== currentShape;
-    currentRadius = radius;
-    currentShape = shape;
-
-    if (!canSaveRadius && !changed) {
-      saveStatus.textContent = `Radius muss zwischen ${MIN_STOP_RADIUS_METERS} m und ${MAX_STOP_RADIUS_METERS} m in ${STOP_RADIUS_STEP_METERS} m Schritten liegen.`;
-      return;
+      if (canSaveRadius) {
+        nextRadiusByType[stopType] = setConfiguredStopRadius(stopType, input.value);
+      } else {
+        invalidTypes.push(stopType);
+      }
     }
 
-    const hint = canSaveRadius ? '' : ' Radius unverändert (ungültiger Wert).';
+    const shape = setConfiguredCoverageShape(shapeSelect.value);
+
+    for (const stopType of STOP_TYPES_CONFIG_ORDER) {
+      radiusInputs[stopType].value = String(nextRadiusByType[stopType]);
+    }
+    shapeSelect.value = shape;
+
+    const changed =
+      stopTypeRecordChanged(nextRadiusByType, currentRadiusByType, STOP_TYPES_CONFIG_ORDER) ||
+      shape !== currentShape;
+
+    currentRadiusByType = nextRadiusByType;
+    currentShape = shape;
+
+    const allInvalid = invalidTypes.length === STOP_TYPES_CONFIG_ORDER.length;
+    if (allInvalid && !changed) {
+      saveStatus.textContent =
+        `Jeder Radius muss zwischen ${MIN_STOP_RADIUS_METERS} m und ${MAX_STOP_RADIUS_METERS} m ` +
+        `in ${STOP_RADIUS_STEP_METERS} m Schritten liegen.`;
+      return;
+    }
 
     if (changed) {
       clearWalkshedCache();
       updateCacheStatus();
-      saveStatus.textContent = statusText(`${prefix} (Cache zurückgesetzt).${hint}`, radius, shape);
+      saveStatus.textContent =
+        statusText(`${prefix} (Cache zurückgesetzt)`, nextRadiusByType, shape) +
+        invalidRadiusHint(invalidTypes);
     } else {
-      saveStatus.textContent = statusText(`${prefix}.${hint}`, radius, shape);
+      saveStatus.textContent =
+        statusText(prefix, nextRadiusByType, shape) + invalidRadiusHint(invalidTypes);
     }
   };
 
@@ -100,11 +147,14 @@ export function initConfigPage(): void {
     }, AUTOSAVE_DEBOUNCE_MS);
   };
 
-  input.addEventListener('input', scheduleAutosave);
-  input.addEventListener('blur', () => {
-    clearTimer();
-    persistSettings('Automatisch gespeichert', true);
-  });
+  for (const stopType of STOP_TYPES_CONFIG_ORDER) {
+    radiusInputs[stopType].addEventListener('input', scheduleAutosave);
+    radiusInputs[stopType].addEventListener('blur', () => {
+      clearTimer();
+      persistSettings('Automatisch gespeichert', true);
+    });
+  }
+
   shapeSelect.addEventListener('change', () => {
     clearTimer();
     persistSettings('Automatisch gespeichert');
@@ -112,9 +162,32 @@ export function initConfigPage(): void {
 
   resetDefaultsBtn.addEventListener('click', () => {
     clearTimer();
-    input.value = String(DEFAULT_STOP_RADIUS_METERS);
+    for (const stopType of STOP_TYPES_CONFIG_ORDER) {
+      radiusInputs[stopType].value = String(DEFAULT_STOP_RADIUS_METERS_BY_TYPE[stopType]);
+    }
     shapeSelect.value = DEFAULT_COVERAGE_SHAPE;
     persistSettings('Standardwerte übernommen', true);
+  });
+
+  deleteCustomStopsBtn.addEventListener('click', () => {
+    clearTimer();
+
+    const removedStops = clearCustomStops();
+    if (removedStops.length === 0) {
+      saveStatus.textContent = 'Keine eigenen Haltestellen vorhanden.';
+      return;
+    }
+
+    const removedPolygons = removeCachedWalkshedPolygonsForStops(
+      removedStops.map((stop) => stop.id),
+    );
+    updateCacheStatus();
+
+    const cacheHint =
+      removedPolygons > 0
+        ? ` Zugehörige Polygon-Cache-Einträge gelöscht: ${removedPolygons}.`
+        : ' Keine zugehörigen Polygon-Cache-Einträge vorhanden.';
+    saveStatus.textContent = `Eigene Haltestellen gelöscht: ${removedStops.length}.${cacheHint}`;
   });
 
   resetCacheBtn.addEventListener('click', () => {

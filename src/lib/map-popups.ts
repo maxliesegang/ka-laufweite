@@ -1,9 +1,13 @@
-import { STOP_TYPE_LABELS } from './map-config';
+import { STOP_TYPE_CONFIG, STOP_TYPE_ENTRIES } from './stop-type-config';
 import type { Stop } from './types';
 
 export const STOP_REMOVE_BUTTON_SELECTOR = '[data-remove-stop-id]';
 export const ADD_STOP_FORM_SELECTOR = '[data-add-stop-form]';
 export const ADD_STOP_NAME_SELECTOR = '[data-stop-name-input]';
+export const ADD_STOP_TYPE_SELECTOR = '[data-stop-type-input]';
+const ADD_STOP_TYPE_OPTIONS = STOP_TYPE_ENTRIES.map(
+  (stopType) => `<option value="${stopType.type}">${stopType.label}</option>`,
+).join('');
 
 function escapeHtml(value: string): string {
   return value
@@ -15,14 +19,16 @@ function escapeHtml(value: string): string {
 }
 
 export function createStopPopupHtml(stop: Stop): string {
+  const typeLabel = STOP_TYPE_CONFIG[stop.type].label;
+  const details = stop.isCustom ? `${typeLabel} (Eigene Haltestelle)` : typeLabel;
   const base = `
     <div class="stop-popup">
       <strong>${escapeHtml(stop.name)}</strong>
-      <em>${STOP_TYPE_LABELS[stop.type]}</em>
+      <em>${details}</em>
     </div>
   `;
 
-  if (stop.type !== 'custom') {
+  if (!stop.isCustom) {
     return base;
   }
 
@@ -45,6 +51,10 @@ export function createAddStopPopupHtml(): string {
         placeholder="Name der Haltestelle"
         required
       />
+      <label class="stop-popup-form__label" for="stop-type-select">Typ</label>
+      <select data-stop-type-input id="stop-type-select" class="stop-popup-form__select" required>
+        ${ADD_STOP_TYPE_OPTIONS}
+      </select>
       <button class="stop-popup-form__submit" type="submit">
         Hinzufügen
       </button>

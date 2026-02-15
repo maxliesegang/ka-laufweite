@@ -1,6 +1,6 @@
 # KA Laufweite
 
-Interactive map showing walkable coverage around every tram and train stop in the KVV network (Karlsruhe region). Instead of simple radius circles, it calculates real walking distances along OpenStreetMap footpaths — so you see what you can actually reach on foot.
+Interactive map showing walkable coverage around tram, train, and bus stops in the KVV network (Karlsruhe region). Instead of simple radius circles, it calculates real walking distances along OpenStreetMap footpaths — so you see what you can actually reach on foot.
 
 Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/ka-laufweite/)
 
@@ -8,10 +8,12 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 
 - **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation
 - **Circle mode** — simple air-line radius as a faster alternative
-- **Custom stops** — click anywhere on the map to add your own stops
-- **Configurable walking distance** — adjust from 50 m to 5000 m
+- **Custom stops** — click anywhere on the map to add your own stops and choose their type
+- **Configurable walking distance per type** — set separate values for tram, train, and bus (50 m to 5000 m)
+- **Type filters in the legend** — show/hide train, tram, and bus markers with persisted state across reloads
+- **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
 - **Fully static** — no backend required, deploys to GitHub Pages
-- **Offline caching** — walkshed results are cached in localStorage for instant revisits
+- **Local cache for API protection** — walkshed polygons are cached in localStorage and can be reset from the config page
 
 ## Getting Started
 
@@ -60,7 +62,7 @@ Stop positions are fetched from the Overpass API and stored as a static JSON sna
 npm run update:stops
 ```
 
-This queries OSM for all `railway=tram_stop`, `railway=station`, and `railway=halt` nodes in the KVV bounding box.
+This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `highway=bus_stop`, and `amenity=bus_station` in the KVV bounding box.
 
 ## Tech Stack
 
@@ -81,6 +83,9 @@ This queries OSM for all `railway=tram_stop`, `railway=station`, and `railway=ha
 
 ```
 src/
+  components/
+    StopLegendItems.astro       # legend rows generated from shared stop-type config
+    StopRadiusInputs.astro      # reusable radius input fields per stop type
   pages/
     index.astro                 # map page
     config.astro                # settings page
@@ -90,15 +95,17 @@ src/
     map.ts                      # map controller and interaction logic
     config.ts                   # settings page behavior
     map/
+      custom-stop-marker-icon.ts   # custom marker icon builder for draggable stops
       walkshed-overlay-manager.ts  # async polygon loading and rendering
   lib/
     types.ts                    # shared types and type guards
-    settings.ts                 # user preferences (radius, coverage mode)
+    settings.ts                 # user preferences (radius, coverage mode, type visibility)
+    stop-type-config.ts         # single source of truth for stop-type labels/colors/inputs
     stops-repository.ts         # stop loading (OSM + custom)
-    custom-stops-client.ts      # localStorage CRUD for custom stops
+    custom-stops-client.ts      # localStorage CRUD + migration for custom stops
     map-config.ts               # map constants, colors, marker sizes
     map-popups.ts               # popup HTML templates
-    walkshed-cache.ts           # localStorage polygon cache
+    walkshed-cache.ts           # localStorage polygon cache + reset marker
     walkshed/
       service.ts                # walkshed orchestration and caching
       overpass.ts               # Overpass API client

@@ -1,10 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import StopRadiusInputs from '../components/StopRadiusInputs.astro';
 import {
-  DEFAULT_STOP_RADIUS_METERS,
+  DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
   MIN_STOP_RADIUS_METERS,
   MAX_STOP_RADIUS_METERS,
-  STOP_RADIUS_STEP_METERS,
 } from '../lib/settings';
 const mapHref = import.meta.env.BASE_URL;
 ---
@@ -12,56 +12,68 @@ const mapHref = import.meta.env.BASE_URL;
 <Layout title="Konfiguration">
   <section class="config-page">
     <article class="config-card">
-      <h1>Einstellungen</h1>
-      <p class="description">
-        Lege fest, wie die Abdeckung rund um Haltestellen berechnet wird. Alle Aenderungen werden
-        automatisch gespeichert.
-      </p>
-      <p class="autosave-note">
-        Wenn Radius oder Darstellung geaendert werden, wird der Polygon-Cache automatisch geleert
-        und neu aufgebaut.
-      </p>
-
-      <div class="config-form">
-        <label for="coverage-shape">Abdeckungsdarstellung</label>
-        <select id="coverage-shape" name="coverageShape">
-          <option value="circle">Kreis (Luftlinie)</option>
-          <option value="walkshed">Polygon entlang Fußwegen (OSM)</option>
-        </select>
-        <p class="help">
-          Kreis ist schnell und einfach. Polygon nutzt reale Fusswege aus OpenStreetMap und zeigt
-          die Erreichbarkeit genauer.
+      <header class="config-header">
+        <h1>Einstellungen</h1>
+        <p class="description">
+          Lege fest, wie die Abdeckung rund um Haltestellen berechnet wird. Alle Aenderungen werden
+          automatisch gespeichert.
         </p>
+      </header>
 
-        <label for="radius-input" class="label-spaced">Gehdistanz in Metern</label>
-        <input
-          id="radius-input"
-          name="radius"
-          type="number"
-          inputmode="numeric"
-          enterkeyhint="done"
-          min={MIN_STOP_RADIUS_METERS}
-          max={MAX_STOP_RADIUS_METERS}
-          step={STOP_RADIUS_STEP_METERS}
-          required
-        />
-        <p class="help">
-          Je groesser der Wert, desto weiter reicht die Abdeckung pro Haltestelle. Bereich: {
-            MIN_STOP_RADIUS_METERS
-          } m bis {MAX_STOP_RADIUS_METERS} m, Standard: {DEFAULT_STOP_RADIUS_METERS} m.
-        </p>
+      <div class="config-grid">
+        <section class="panel panel-main" aria-labelledby="coverage-heading">
+          <h2 id="coverage-heading">Abdeckung und Distanz</h2>
 
-        <div class="actions">
-          <button id="reset-radius" type="button" class="secondary">Standardwerte setzen</button>
-          <button id="reset-walkshed-cache" type="button" class="secondary"
-            >Nur Polygon-Cache löschen</button
-          >
+          <div class="field-group">
+            <label for="coverage-shape">Abdeckungsdarstellung</label>
+            <select id="coverage-shape" name="coverageShape">
+              <option value="circle">Kreis (Luftlinie)</option>
+              <option value="walkshed">Polygon entlang Fusswegen (OSM)</option>
+            </select>
+            <p class="help">
+              Kreis ist schnell und einfach. Polygon nutzt reale Fusswege aus OpenStreetMap und
+              bildet erreichbare Wege genauer ab.
+            </p>
+          </div>
+
+          <div class="field-group" aria-labelledby="radius-heading">
+            <h3 id="radius-heading">Gehdistanzen pro Typ (Meter)</h3>
+            <StopRadiusInputs />
+            <p class="help">
+              Bereich: {MIN_STOP_RADIUS_METERS} m bis {MAX_STOP_RADIUS_METERS} m. Standard: Bahn {
+                DEFAULT_STOP_RADIUS_METERS_BY_TYPE.train
+              } m, Tram {DEFAULT_STOP_RADIUS_METERS_BY_TYPE.tram} m, Bus {
+                DEFAULT_STOP_RADIUS_METERS_BY_TYPE.bus
+              } m.
+            </p>
+          </div>
+        </section>
+
+        <aside class="panel panel-side" aria-labelledby="actions-heading">
+          <h2 id="actions-heading">Aktionen</h2>
+          <p class="panel-note">
+            Bei Radius- oder Darstellungs-Aenderungen wird der Polygon-Cache automatisch
+            zurueckgesetzt.
+          </p>
+
+          <div class="actions">
+            <button id="reset-radius" type="button" class="secondary">Standardwerte setzen</button>
+            <button id="delete-custom-stops" type="button" class="secondary danger"
+              >Alle eigenen Haltestellen loeschen</button
+            >
+            <button id="reset-walkshed-cache" type="button" class="secondary"
+              >Nur Polygon-Cache loeschen</button
+            >
+          </div>
+
+          <div class="status-box" aria-live="polite">
+            <p id="save-status" class="status"></p>
+            <p id="cache-status" class="cache-status"></p>
+          </div>
+
           <a class="link-button" href={mapHref}>Zur Karte</a>
-        </div>
+        </aside>
       </div>
-
-      <p id="save-status" class="status" aria-live="polite"></p>
-      <p id="cache-status" class="cache-status"></p>
     </article>
   </section>
 </Layout>
@@ -75,125 +87,208 @@ const mapHref = import.meta.env.BASE_URL;
   .config-page {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding: clamp(12px, 3vw, 24px);
+    align-items: stretch;
+    padding: clamp(12px, 3vw, 26px);
     min-height: 100%;
   }
 
   .config-card {
-    width: min(680px, 100%);
+    width: min(980px, 100%);
     background: white;
-    border-radius: 12px;
-    border: 1px solid #d7dee8;
-    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.1);
-    padding: clamp(16px, 3vw, 24px);
+    border-radius: 14px;
+    border: 1px solid #d3dde8;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    padding: clamp(16px, 3vw, 26px);
+  }
+
+  .config-header {
+    margin-bottom: 16px;
   }
 
   .config-card h1 {
-    font-size: 26px;
-    margin-bottom: 8px;
+    font-size: clamp(24px, 2.8vw, 30px);
+    line-height: 1.2;
+    margin-bottom: 6px;
   }
 
   .description {
     color: #4f5d6c;
-    margin-bottom: 10px;
     line-height: 1.45;
   }
 
-  .autosave-note {
-    margin-top: 0;
-    margin-bottom: 18px;
-    color: #2f5f55;
-    font-size: 14px;
-    line-height: 1.45;
-    background: #ecf8f4;
-    border: 1px solid #cae7dd;
-    border-radius: 8px;
-    padding: 10px 12px;
+  .config-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+    align-items: start;
   }
 
-  .config-form label {
+  .panel {
+    border: 1px solid #d9e2ec;
+    border-radius: 12px;
+    background: #fbfcfe;
+    padding: 16px;
+  }
+
+  .panel h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #102a43;
+  }
+
+  .panel-main {
+    display: grid;
+    gap: 16px;
+  }
+
+  .field-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  .field-group label {
     display: block;
-    margin-bottom: 6px;
     font-weight: 600;
+    color: #243b53;
   }
 
-  .config-form .label-spaced {
-    margin-top: 12px;
+  .field-group h3 {
+    font-size: 15px;
+    color: #243b53;
   }
 
-  .config-form input {
+  .field-group select {
     width: 100%;
-    max-width: 100%;
     border: 1px solid #bcc8d7;
     border-radius: 8px;
-    padding: 8px 10px;
+    background: #fff;
+    padding: 9px 10px;
     font-size: 15px;
   }
 
-  .config-form select {
-    width: 100%;
-    max-width: 100%;
-    border: 1px solid #bcc8d7;
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 15px;
+  .field-group select:focus-visible {
+    outline: 2px solid #2d5f94;
+    outline-offset: 1px;
   }
 
   .help {
-    margin-top: 8px;
     color: #66778c;
     font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .panel-side {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .panel-note {
+    font-size: 13px;
+    color: #486581;
+    background: #edf2f7;
+    border: 1px solid #d6e0ea;
+    border-radius: 8px;
+    padding: 10px 11px;
+    line-height: 1.45;
   }
 
   .actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
-
-  .actions button,
-  .link-button {
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 9px 14px;
-    cursor: pointer;
-    text-decoration: none;
+    display: grid;
+    gap: 8px;
   }
 
   .actions button {
-    background: #2a9d8f;
-    color: white;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease;
+  }
+
+  .actions button:focus-visible,
+  .link-button:focus-visible {
+    outline: 2px solid #2d5f94;
+    outline-offset: 1px;
   }
 
   .actions button.secondary {
-    background: #e6ebf2;
+    background: #e8edf4;
     color: #1f2933;
+    border-color: #d1dbe7;
   }
 
-  .link-button {
-    background: #2d5f94;
-    color: white;
-    display: inline-flex;
-    align-items: center;
+  .actions button.secondary:hover {
+    background: #dde6f1;
+  }
+
+  .actions button.secondary.danger {
+    background: #fde9ea;
+    color: #9f1d23;
+    border-color: #f6c9cd;
+  }
+
+  .actions button.secondary.danger:hover {
+    background: #f9d7da;
+  }
+
+  .status-box {
+    border: 1px solid #d6e0ea;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 10px 12px;
+    min-height: 82px;
   }
 
   .status {
-    margin-top: 14px;
     min-height: 20px;
     font-size: 14px;
     color: #1b6f64;
     font-weight: 600;
+    line-height: 1.35;
   }
 
   .cache-status {
     margin-top: 6px;
-    min-height: 18px;
+    min-height: 16px;
     font-size: 12px;
     color: #56606b;
+  }
+
+  .link-button {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #1f4f80;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    background: #2d5f94;
+    color: white;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 120ms ease;
+  }
+
+  .link-button:hover {
+    background: #244e7a;
+  }
+
+  @media (max-width: 920px) {
+    .config-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panel-side {
+      order: 2;
+    }
   }
 
   @media (max-width: 640px) {
@@ -201,20 +296,18 @@ const mapHref = import.meta.env.BASE_URL;
       padding: 10px;
     }
 
-    .config-card h1 {
-      font-size: 22px;
+    .config-card {
+      padding: 14px;
+      border-radius: 12px;
     }
 
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
+    .panel {
+      padding: 12px;
     }
 
-    .actions button,
-    .link-button {
-      width: 100%;
-      justify-content: center;
+    .panel h2 {
+      margin-bottom: 10px;
+      font-size: 16px;
     }
   }
 </style>

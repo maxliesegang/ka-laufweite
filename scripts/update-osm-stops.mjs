@@ -11,6 +11,7 @@ const OVERPASS_ENDPOINTS = [
 const REQUEST_TIMEOUT_MS = 45_000;
 const MAX_ROUNDS = 2;
 const KVV_BBOX = { south: 48.55, west: 7.75, north: 49.3, east: 8.95 };
+const UNKNOWN_STOP_NAME = 'Unbekannte Haltestelle';
 
 const KVV_QUERY = `
 [out:json][timeout:30];
@@ -18,6 +19,8 @@ const KVV_QUERY = `
   node["railway"="tram_stop"](${KVV_BBOX.south},${KVV_BBOX.west},${KVV_BBOX.north},${KVV_BBOX.east});
   node["railway"="station"](${KVV_BBOX.south},${KVV_BBOX.west},${KVV_BBOX.north},${KVV_BBOX.east});
   node["railway"="halt"](${KVV_BBOX.south},${KVV_BBOX.west},${KVV_BBOX.north},${KVV_BBOX.east});
+  node["highway"="bus_stop"](${KVV_BBOX.south},${KVV_BBOX.west},${KVV_BBOX.north},${KVV_BBOX.east});
+  node["amenity"="bus_station"](${KVV_BBOX.south},${KVV_BBOX.west},${KVV_BBOX.north},${KVV_BBOX.east});
 );
 out body;
 `;
@@ -25,7 +28,8 @@ out body;
 function classifyStop(tags = {}) {
   if (tags.railway === 'tram_stop') return 'tram';
   if (tags.railway === 'station' || tags.railway === 'halt') return 'train';
-  return 'tram';
+  if (tags.highway === 'bus_stop' || tags.amenity === 'bus_station') return 'bus';
+  return null;
 }
 
 function isElement(value) {
@@ -65,18 +69,15 @@ async function fetchStops() {
       try {
         const payload = await fetchOverpass(endpoint, KVV_QUERY);
         const elements = Array.isArray(payload?.elements) ? payload.elements.filter(isElement) : [];
-
         return elements
           .map((element) => ({
             id: `osm-${element.id}`,
-            name:
-              typeof element?.tags?.name === 'string'
-                ? element.tags.name
-                : 'Unbekannte Haltestelle',
+            name: typeof element?.tags?.name === 'string' ? element.tags.name : UNKNOWN_STOP_NAME,
             lat: element.lat,
             lon: element.lon,
             type: classifyStop(element.tags ?? {}),
           }))
+          .filter((stop) => stop.type !== null)
           .sort((a, b) => a.name.localeCompare(b.name, 'de'));
       } catch (error) {
         lastError = error;

@@ -1,0 +1,120 @@
+---
+import {
+  MAX_STOP_RADIUS_METERS,
+  MIN_STOP_RADIUS_METERS,
+  STOP_RADIUS_STEP_METERS,
+} from '../lib/settings';
+import { STOP_TYPE_CONFIG_ENTRIES } from '../lib/stop-type-config';
+---
+
+<div class="radius-grid">
+  {
+    STOP_TYPE_CONFIG_ENTRIES.map((stopType) => (
+      <label class="radius-row" for={stopType.radiusInputId}>
+        <span class="radius-row__meta">
+          <span class="radius-row__dot" aria-hidden="true" style={`background:${stopType.color}`} />
+          <span class="radius-row__label">{stopType.label}</span>
+        </span>
+
+        <span class="radius-row__control">
+          <input
+            id={stopType.radiusInputId}
+            name={stopType.radiusInputName}
+            type="number"
+            inputmode="numeric"
+            enterkeyhint="done"
+            min={MIN_STOP_RADIUS_METERS}
+            max={MAX_STOP_RADIUS_METERS}
+            step={STOP_RADIUS_STEP_METERS}
+            required
+          />
+          <span class="radius-row__unit">m</span>
+        </span>
+      </label>
+    ))
+  }
+</div>
+
+<style>
+  .radius-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .radius-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #d9e2ec;
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 10px 12px;
+  }
+
+  .radius-row__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .radius-row__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: 0 0 10px;
+  }
+
+  .radius-row__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #243b53;
+  }
+
+  .radius-row__control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .radius-row input {
+    width: 110px;
+    border: 1px solid #bcc8d7;
+    border-radius: 8px;
+    background: #fff;
+    padding: 7px 9px;
+    font-size: 15px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .radius-row__unit {
+    font-size: 13px;
+    font-weight: 600;
+    color: #52606d;
+    min-width: 14px;
+  }
+
+  .radius-row input:focus-visible {
+    outline: 2px solid #2d5f94;
+    outline-offset: 1px;
+  }
+
+  @media (max-width: 560px) {
+    .radius-row {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radius-row__control {
+      width: 100%;
+    }
+
+    .radius-row input {
+      width: 100%;
+      text-align: left;
+    }
+  }
+</style>

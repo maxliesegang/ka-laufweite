@@ -1,6 +1,6 @@
 import L from 'leaflet';
-import { STOP_COLORS } from '../../lib/map-config';
-import type { Stop } from '../../lib/types';
+import { STOP_TYPE_CONFIG } from '../../lib/stop-type-config';
+import type { Stop, StopType } from '../../lib/types';
 import { buildWalkshedPolygon } from '../../lib/walkshed/service';
 
 const FILL_OPACITY = 0.16;
@@ -11,14 +11,16 @@ const BOUNDS_PADDING = 0.08;
 
 interface OverlayManagerOptions {
   map: L.Map;
-  getRadiusMeters: () => number;
+  getRadiusMetersForType: (stopType: StopType) => number;
   isEnabled: () => boolean;
+  paneName?: string;
 }
 
 export class WalkshedOverlayManager {
   private readonly map: L.Map;
-  private readonly getRadiusMeters: () => number;
+  private readonly getRadiusMetersForType: (stopType: StopType) => number;
   private readonly isEnabled: () => boolean;
+  private readonly paneName?: string;
   private readonly rootLayer: L.LayerGroup;
 
   private readonly stopsById = new Map<string, Stop>();
@@ -33,8 +35,9 @@ export class WalkshedOverlayManager {
 
   constructor(options: OverlayManagerOptions) {
     this.map = options.map;
-    this.getRadiusMeters = options.getRadiusMeters;
+    this.getRadiusMetersForType = options.getRadiusMetersForType;
     this.isEnabled = options.isEnabled;
+    this.paneName = options.paneName;
     this.rootLayer = L.layerGroup().addTo(this.map);
   }
 
@@ -140,8 +143,12 @@ export class WalkshedOverlayManager {
     this.layersByStopId.delete(stopId);
   }
 
+  private radiusForStop(stop: Stop): number {
+    return this.getRadiusMetersForType(stop.type);
+  }
+
   private enqueueStop(stop: Stop): void {
-    const radius = this.getRadiusMeters();
+    const radius = this.radiusForStop(stop);
     if (this.layersByStopId.has(stop.id)) return;
     if (this.inFlightStopIds.has(stop.id)) return;
     if (this.isUnavailable(stop.id, radius)) return;
@@ -202,7 +209,7 @@ export class WalkshedOverlayManager {
 
     if (version !== this.pipelineVersion) return;
     if (!this.isEnabled()) return;
-    if (radiusMeters !== this.getRadiusMeters()) return;
+    if (radiusMeters !== this.radiusForStop(stop)) return;
     if (!this.stopsById.has(stop.id)) return;
     if (!this.isStopInBounds(stop)) return;
 
@@ -214,7 +221,7 @@ export class WalkshedOverlayManager {
     this.unavailableKeys.delete(unavailableKey);
     this.removeLayer(stop.id);
 
-    const color = STOP_COLORS[stop.type];
+    const color = STOP_TYPE_CONFIG[stop.type].color;
     const layer = L.polygon(polygon, {
       color,
       fillColor: color,
@@ -222,6 +229,7 @@ export class WalkshedOverlayManager {
       opacity: STROKE_OPACITY,
       weight: 2,
       interactive: false,
+      pane: this.paneName,
     });
 
     this.layersByStopId.set(stop.id, layer);
@@ -236,9 +244,8 @@ export class WalkshedOverlayManager {
       if (!stopId) return;
 
       const stop = this.stopsById.get(stopId);
-      const radius = this.getRadiusMeters();
-
       if (!stop) continue;
+      const radius = this.radiusForStop(stop);
       if (this.layersByStopId.has(stopId)) continue;
       if (this.inFlightStopIds.has(stopId)) continue;
       if (this.isUnavailable(stopId, radius)) continue;

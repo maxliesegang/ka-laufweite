@@ -2,14 +2,14 @@ import { getCustomStops } from './custom-stops-client';
 import { isStop, type Stop } from './types';
 
 const OSM_STOPS_URL = `${import.meta.env.BASE_URL}data/osm-stops.json`;
-const OSM_FETCH_CACHE_MODE: RequestCache = 'force-cache';
+const OSM_FETCH_CACHE_MODE: RequestCache = 'default';
 
 let cachedOsmStops: Stop[] | null = null;
 let inFlightRequest: Promise<Stop[]> | null = null;
 
 function sanitizeOsmStops(payload: unknown): Stop[] {
   if (!Array.isArray(payload)) return [];
-  return payload.filter(isStop).filter((stop) => stop.type !== 'custom');
+  return payload.filter(isStop).filter((stop) => stop.isCustom !== true);
 }
 
 async function fetchOsmStops(): Promise<Stop[]> {
@@ -33,6 +33,6 @@ async function fetchOsmStops(): Promise<Stop[]> {
 }
 
 export async function loadAllStops(): Promise<Stop[]> {
-  const [osmStops, customStops] = await Promise.all([fetchOsmStops(), getCustomStops()]);
-  return [...osmStops, ...customStops];
+  const osmStops = await fetchOsmStops();
+  return [...osmStops, ...getCustomStops()];
 }

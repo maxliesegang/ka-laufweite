@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import StopLegendItems from '../components/StopLegendItems.astro';
+import PopupStyles from '../components/PopupStyles.astro';
 ---
 
 <Layout title="KA Laufweite">
@@ -7,24 +9,17 @@ import Layout from '../layouts/Layout.astro';
     <div id="map"></div>
     <div id="legend">
       <h3>Legende</h3>
-      <div class="legend-item">
-        <span class="dot tram"></span> Straßenbahn
-      </div>
-      <div class="legend-item">
-        <span class="dot train"></span> Bahn / S-Bahn
-      </div>
-      <div class="legend-item">
-        <span class="dot custom"></span> Eigene Haltestelle
-      </div>
+      <StopLegendItems />
       <p class="coverage" data-coverage-info></p>
       <p class="radius" data-radius-info></p>
       <p class="hint">
-        Klicke auf die Karte, um eine eigene Haltestelle hinzuzufügen. Klicke auf eigene
-        Haltestellen, um sie zu entfernen. Darstellung und Distanz stellst du unter Konfiguration
-        ein.
+        Klicke auf die Karte, um eine eigene Haltestelle hinzuzufügen und ihren Typ zu wählen.
+        Eigene Haltestellen sind verschiebbar und lassen sich per Popup entfernen. Darstellung und
+        Distanzen stellst du unter Konfiguration ein.
       </p>
     </div>
   </div>
+  <PopupStyles />
 </Layout>
 
 <script>
@@ -65,28 +60,40 @@ import Layout from '../layouts/Layout.astro';
     font-size: 15px;
   }
 
-  .legend-item {
+  #legend :global(.legend-toggle) {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 4px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    padding: 2px 4px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
   }
 
-  .dot {
+  #legend :global(.legend-toggle:hover) {
+    background: #f2f6fb;
+  }
+
+  #legend :global(.legend-toggle[aria-pressed='false']) {
+    opacity: 0.45;
+  }
+
+  #legend :global(.legend-toggle:focus-visible) {
+    outline: 2px solid #457b9d;
+    outline-offset: 1px;
+  }
+
+  #legend :global(.dot) {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     display: inline-block;
-  }
-
-  .dot.tram {
-    background: #e63946;
-  }
-  .dot.train {
-    background: #457b9d;
-  }
-  .dot.custom {
-    background: #2a9d8f;
   }
 
   .hint {
@@ -141,66 +148,5 @@ import Layout from '../layouts/Layout.astro';
       width: min(300px, calc(100% - 16px));
       max-height: calc(100% - 16px);
     }
-  }
-</style>
-
-<style is:global>
-  .leaflet-popup-content .stop-popup {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-bottom: 8px;
-    min-width: 180px;
-  }
-
-  .leaflet-popup-content .stop-popup em {
-    color: #5f6e7d;
-    font-size: 12px;
-  }
-
-  .leaflet-popup-content .stop-popup__remove {
-    width: 100%;
-    border: none;
-    border-radius: 4px;
-    padding: 6px;
-    background: #e63946;
-    color: white;
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  .leaflet-popup-content .stop-popup__remove:disabled {
-    cursor: default;
-    opacity: 0.75;
-  }
-
-  .leaflet-popup-content .stop-popup-form {
-    min-width: 200px;
-  }
-
-  .leaflet-popup-content .stop-popup-form__label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 600;
-  }
-
-  .leaflet-popup-content .stop-popup-form__input {
-    width: 100%;
-    border: 1px solid #c5d0df;
-    border-radius: 4px;
-    padding: 6px 8px;
-    margin-bottom: 8px;
-    font-size: 14px;
-  }
-
-  .leaflet-popup-content .stop-popup-form__submit {
-    width: 100%;
-    border: none;
-    border-radius: 4px;
-    padding: 6px;
-    background: #2a9d8f;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
   }
 </style>
