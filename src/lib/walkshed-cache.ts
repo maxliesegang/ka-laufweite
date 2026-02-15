@@ -1,4 +1,11 @@
 import type { LatLng } from './walkshed/types';
+import {
+  getStorageItem,
+  removeStorageItem,
+  readStorageJson,
+  setStorageItem,
+  writeStorageJson,
+} from './storage';
 
 interface CacheEntry {
   polygon: LatLng[];
@@ -7,7 +14,7 @@ interface CacheEntry {
 
 type CacheStore = Record<string, CacheEntry>;
 
-export const WALKSHED_CACHE_STORAGE_KEY = 'karlsruhe-opnv-walkshed-cache-v3';
+export const WALKSHED_CACHE_STORAGE_KEY = 'karlsruhe-opnv-walkshed-cache-v5';
 export const WALKSHED_CACHE_RESET_MARKER_KEY = 'karlsruhe-opnv-walkshed-cache-reset-marker';
 const MAX_ENTRIES = 400;
 
@@ -23,34 +30,30 @@ function isLatLng(value: unknown): value is LatLng {
 }
 
 function readStore(): CacheStore {
-  try {
-    const raw = localStorage.getItem(WALKSHED_CACHE_STORAGE_KEY);
-    if (!raw) return {};
+  const parsed = readStorageJson(WALKSHED_CACHE_STORAGE_KEY);
+  if (!parsed || typeof parsed !== 'object') return {};
 
-    const parsed = JSON.parse(raw);
-    if (!parsed?.entries || typeof parsed.entries !== 'object') return {};
+  const entriesRaw = (parsed as { entries?: unknown }).entries;
+  if (!entriesRaw || typeof entriesRaw !== 'object') return {};
 
-    const entries: CacheStore = {};
-    for (const [key, value] of Object.entries(parsed.entries)) {
-      const entry = value as Partial<CacheEntry>;
-      if (
-        Array.isArray(entry?.polygon) &&
-        entry.polygon.every(isLatLng) &&
-        typeof entry.updatedAt === 'number' &&
-        Number.isFinite(entry.updatedAt)
-      ) {
-        entries[key] = { polygon: entry.polygon, updatedAt: entry.updatedAt };
-      }
+  const entries: CacheStore = {};
+  for (const [key, value] of Object.entries(entriesRaw)) {
+    const entry = value as Partial<CacheEntry>;
+    if (
+      Array.isArray(entry?.polygon) &&
+      entry.polygon.every(isLatLng) &&
+      typeof entry.updatedAt === 'number' &&
+      Number.isFinite(entry.updatedAt)
+    ) {
+      entries[key] = { polygon: entry.polygon, updatedAt: entry.updatedAt };
     }
-
-    return entries;
-  } catch {
-    return {};
   }
+
+  return entries;
 }
 
 function writeStore(entries: CacheStore): void {
-  localStorage.setItem(WALKSHED_CACHE_STORAGE_KEY, JSON.stringify({ entries }));
+  writeStorageJson(WALKSHED_CACHE_STORAGE_KEY, { entries });
 }
 
 function pruneEntries(entries: CacheStore): CacheStore {
@@ -76,10 +79,10 @@ export function getWalkshedCacheSize(): number {
 }
 
 export function getWalkshedCacheResetMarker(): string {
-  return localStorage.getItem(WALKSHED_CACHE_RESET_MARKER_KEY) ?? '';
+  return getStorageItem(WALKSHED_CACHE_RESET_MARKER_KEY) ?? '';
 }
 
 export function clearWalkshedCache(): void {
-  localStorage.removeItem(WALKSHED_CACHE_STORAGE_KEY);
-  localStorage.setItem(WALKSHED_CACHE_RESET_MARKER_KEY, String(Date.now()));
+  removeStorageItem(WALKSHED_CACHE_STORAGE_KEY);
+  setStorageItem(WALKSHED_CACHE_RESET_MARKER_KEY, String(Date.now()));
 }

@@ -1,4 +1,5 @@
 import { isStop, type CustomStop, type NewCustomStop } from './types';
+import { readStorageJson, writeStorageJson } from './storage';
 
 const CUSTOM_STOPS_STORAGE_KEY = 'karlsruhe-opnv-custom-stops';
 
@@ -7,19 +8,12 @@ function isCustomStop(value: unknown): value is CustomStop {
 }
 
 export function getCustomStops(): CustomStop[] {
-  try {
-    const raw = localStorage.getItem(CUSTOM_STOPS_STORAGE_KEY);
-    if (!raw) return [];
-
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(isCustomStop) : [];
-  } catch {
-    return [];
-  }
+  const parsed = readStorageJson(CUSTOM_STOPS_STORAGE_KEY);
+  return Array.isArray(parsed) ? parsed.filter(isCustomStop) : [];
 }
 
 function writeCustomStops(stops: CustomStop[]): void {
-  localStorage.setItem(CUSTOM_STOPS_STORAGE_KEY, JSON.stringify(stops));
+  writeStorageJson(CUSTOM_STOPS_STORAGE_KEY, stops);
 }
 
 export function addCustomStop(input: NewCustomStop): CustomStop {
@@ -43,4 +37,25 @@ export function removeCustomStop(stopId: string): boolean {
 
   writeCustomStops(filtered);
   return true;
+}
+
+export function updateCustomStopPosition(
+  stopId: string,
+  lat: number,
+  lon: number,
+): CustomStop | null {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+  const stops = getCustomStops();
+  const index = stops.findIndex((stop) => stop.id === stopId);
+  if (index < 0) return null;
+
+  const updated: CustomStop = {
+    ...stops[index],
+    lat,
+    lon,
+  };
+  stops[index] = updated;
+  writeCustomStops(stops);
+  return updated;
 }

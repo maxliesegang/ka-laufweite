@@ -1,12 +1,13 @@
 import {
   GRAPH_CACHE_COORD_PRECISION,
+  MAX_START_NODE_FALLBACK_DISTANCE_DELTA_METERS,
   MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON,
   START_NODE_CANDIDATE_LIMIT,
 } from './constants';
-import { buildWalkGraph, nearestNode, nearestNodeCandidates } from './graph';
+import { buildWalkGraph, nearestNodeCandidates } from './graph';
 import { fetchFootways } from './overpass';
-import { buildPolygonFromStartNode } from './polygon';
-import type { LatLng, WalkGraph } from './types';
+import { buildPolygonFromSeedNodes } from './polygon';
+import type { LatLng, NearestNodeMatch, WalkGraph } from './types';
 import { getCachedWalkshedPolygon, setCachedWalkshedPolygon } from '../walkshed-cache';
 import type { Stop } from '../types';
 
@@ -19,6 +20,13 @@ function graphCacheKey(stop: Stop, distanceMeters: number): string {
 
 function polygonCacheKey(stop: Stop, distanceMeters: number): string {
   return `${stop.id}:${distanceMeters}`;
+}
+
+function selectPreferredSeedNodes(candidates: NearestNodeMatch[]): NearestNodeMatch[] {
+  if (candidates.length === 0) return [];
+  const nearestDistance = candidates[0].distanceMeters;
+  const maxSeedDistance = nearestDistance + MAX_START_NODE_FALLBACK_DISTANCE_DELTA_METERS;
+  return candidates.filter((candidate) => candidate.distanceMeters <= maxSeedDistance);
 }
 
 async function loadWalkGraph(stop: Stop, distanceMeters: number): Promise<WalkGraph | null> {
@@ -71,39 +79,35 @@ export async function buildWalkshedPolygon(
     return null;
   }
 
-  const nearest = nearestNode(graph, stop.lat, stop.lon);
-  if (!nearest) {
+  const candidates = nearestNodeCandidates(graph, stop.lat, stop.lon, START_NODE_CANDIDATE_LIMIT);
+  if (candidates.length === 0) {
     return null;
   }
 
-  const nearestAttempt = buildPolygonFromStartNode(
+  const preferredSeeds = selectPreferredSeedNodes(candidates);
+  const preferredAttempt = buildPolygonFromSeedNodes(
     graph,
     stop.lat,
     stop.lon,
     distanceMeters,
-    nearest,
+    preferredSeeds,
   );
-  let polygon = nearestAttempt.polygon;
+  let polygon = preferredAttempt.polygon;
+  let bestBoundaryPointCount = preferredAttempt.boundaryPointCount;
 
-  if (nearestAttempt.boundaryPointCount < MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON) {
-    const candidates = nearestNodeCandidates(graph, stop.lat, stop.lon, START_NODE_CANDIDATE_LIMIT);
-    for (const candidate of candidates) {
-      if (candidate.index === nearest.index) continue;
-
-      const attempt = buildPolygonFromStartNode(
-        graph,
-        stop.lat,
-        stop.lon,
-        distanceMeters,
-        candidate,
-      );
-      if (
-        attempt.polygon &&
-        attempt.boundaryPointCount >= MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON
-      ) {
-        polygon = attempt.polygon;
-        break;
-      }
+  if (
+    preferredAttempt.boundaryPointCount < MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON &&
+    preferredSeeds.length < candidates.length
+  ) {
+    const expandedAttempt = buildPolygonFromSeedNodes(
+      graph,
+      stop.lat,
+      stop.lon,
+      distanceMeters,
+      candidates,
+    );
+    if (expandedAttempt.polygon && expandedAttempt.boundaryPointCount > bestBoundaryPointCount) {
+      polygon = expandedAttempt.polygon;
     }
   }
 

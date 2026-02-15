@@ -5,6 +5,87 @@ import {
 } from './constants';
 import { bboxForStop } from './geo';
 import type { OverpassNodeElement, OverpassResponse, OverpassWayElement } from './types';
+import { getStorageItem, setStorageItem } from '../storage';
+
+const OVERPASS_PREFERRED_ENDPOINT_STORAGE_KEY = 'karlsruhe-opnv-overpass-endpoint-v1';
+const LATENCY_SMOOTHING = 0.25;
+const UNKNOWN_ENDPOINT_LATENCY_MS = 700;
+const FAILURE_PENALTY_MS = 1_500;
+const MAX_FAILURE_STREAK = 6;
+
+interface EndpointStats {
+  latencyMs: number;
+  failureStreak: number;
+}
+
+const endpointStatsByUrl = new Map<string, EndpointStats>();
+let preferredEndpointUrl: string | null = null;
+let preferredEndpointLoaded = false;
+
+function uniqueEndpointUrls(): string[] {
+  return [...new Set(OVERPASS_ENDPOINT_URLS)];
+}
+
+function loadPreferredEndpointFromStorage(): void {
+  if (preferredEndpointLoaded) return;
+  preferredEndpointLoaded = true;
+
+  const saved = getStorageItem(OVERPASS_PREFERRED_ENDPOINT_STORAGE_KEY);
+  if (saved && uniqueEndpointUrls().includes(saved)) {
+    preferredEndpointUrl = saved;
+  }
+}
+
+function persistPreferredEndpoint(endpointUrl: string): void {
+  setStorageItem(OVERPASS_PREFERRED_ENDPOINT_STORAGE_KEY, endpointUrl);
+}
+
+function endpointScore(endpointUrl: string): number {
+  const stats = endpointStatsByUrl.get(endpointUrl);
+  if (!stats) {
+    return UNKNOWN_ENDPOINT_LATENCY_MS;
+  }
+
+  return stats.latencyMs + stats.failureStreak * FAILURE_PENALTY_MS;
+}
+
+function orderedEndpointUrls(): string[] {
+  const endpoints = uniqueEndpointUrls();
+  const defaultOrder = new Map(endpoints.map((endpoint, index) => [endpoint, index]));
+
+  return [...endpoints].sort((a, b) => {
+    if (preferredEndpointUrl === a && preferredEndpointUrl !== b) return -1;
+    if (preferredEndpointUrl === b && preferredEndpointUrl !== a) return 1;
+
+    const scoreDelta = endpointScore(a) - endpointScore(b);
+    if (scoreDelta !== 0) return scoreDelta;
+
+    return (defaultOrder.get(a) ?? 0) - (defaultOrder.get(b) ?? 0);
+  });
+}
+
+function markEndpointSuccess(endpointUrl: string, durationMs: number): void {
+  const duration = Math.max(1, Math.round(durationMs));
+  const previous = endpointStatsByUrl.get(endpointUrl);
+  const latencyMs = previous
+    ? Math.round(previous.latencyMs * (1 - LATENCY_SMOOTHING) + duration * LATENCY_SMOOTHING)
+    : duration;
+
+  endpointStatsByUrl.set(endpointUrl, { latencyMs, failureStreak: 0 });
+
+  if (preferredEndpointUrl !== endpointUrl) {
+    preferredEndpointUrl = endpointUrl;
+    persistPreferredEndpoint(endpointUrl);
+  }
+}
+
+function markEndpointFailure(endpointUrl: string): void {
+  const previous = endpointStatsByUrl.get(endpointUrl);
+  endpointStatsByUrl.set(endpointUrl, {
+    latencyMs: previous?.latencyMs ?? UNKNOWN_ENDPOINT_LATENCY_MS,
+    failureStreak: Math.min(MAX_FAILURE_STREAK, (previous?.failureStreak ?? 0) + 1),
+  });
+}
 
 function overpassFootwayQuery(lat: number, lon: number, radiusMeters: number): string {
   const bbox = bboxForStop(lat, lon, radiusMeters);
@@ -91,11 +172,17 @@ export async function fetchFootways(
   lon: number,
   distanceMeters: number,
 ): Promise<OverpassResponse | null> {
+  loadPreferredEndpointFromStorage();
   const query = overpassFootwayQuery(lat, lon, distanceMeters);
-  for (const endpointUrl of OVERPASS_ENDPOINT_URLS) {
+
+  for (const endpointUrl of orderedEndpointUrls()) {
+    const startedAt = Date.now();
     try {
-      return await fetchFromEndpoint(endpointUrl, query);
+      const result = await fetchFromEndpoint(endpointUrl, query);
+      markEndpointSuccess(endpointUrl, Date.now() - startedAt);
+      return result;
     } catch {
+      markEndpointFailure(endpointUrl);
       continue;
     }
   }

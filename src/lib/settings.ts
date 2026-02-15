@@ -1,3 +1,5 @@
+import { getStorageItem, setStorageItem } from './storage';
+
 export const STOP_RADIUS_STORAGE_KEY = 'karlsruhe-opnv-stop-radius-meters';
 export const DEFAULT_STOP_RADIUS_METERS = 300;
 export const MIN_STOP_RADIUS_METERS = 50;
@@ -20,12 +22,12 @@ export function clampStopRadius(value: unknown): number {
 }
 
 export function getConfiguredStopRadius(): number {
-  return clampStopRadius(localStorage.getItem(STOP_RADIUS_STORAGE_KEY));
+  return clampStopRadius(getStorageItem(STOP_RADIUS_STORAGE_KEY));
 }
 
 export function setConfiguredStopRadius(value: unknown): number {
   const radius = clampStopRadius(value);
-  localStorage.setItem(STOP_RADIUS_STORAGE_KEY, String(radius));
+  setStorageItem(STOP_RADIUS_STORAGE_KEY, String(radius));
   return radius;
 }
 
@@ -34,12 +36,12 @@ function parseCoverageShape(value: unknown): CoverageShape {
 }
 
 export function getConfiguredCoverageShape(): CoverageShape {
-  return parseCoverageShape(localStorage.getItem(COVERAGE_SHAPE_STORAGE_KEY));
+  return parseCoverageShape(getStorageItem(COVERAGE_SHAPE_STORAGE_KEY));
 }
 
 export function setConfiguredCoverageShape(value: unknown): CoverageShape {
   const shape = parseCoverageShape(value);
-  localStorage.setItem(COVERAGE_SHAPE_STORAGE_KEY, shape);
+  setStorageItem(COVERAGE_SHAPE_STORAGE_KEY, shape);
   return shape;
 }
 

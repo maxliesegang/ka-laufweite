@@ -62,25 +62,6 @@ export function buildWalkGraph(response: OverpassResponse): WalkGraph | null {
   return { nodes, adjacency };
 }
 
-export function nearestNode(graph: WalkGraph, lat: number, lon: number): NearestNodeMatch | null {
-  let nearestIndex: number | null = null;
-  let nearestDistance = Number.POSITIVE_INFINITY;
-  const point: LatLng = [lat, lon];
-
-  for (let i = 0; i < graph.nodes.length; i += 1) {
-    const distance = haversineMeters(point, graph.nodes[i]);
-    if (distance >= nearestDistance) continue;
-    nearestDistance = distance;
-    nearestIndex = i;
-  }
-
-  if (nearestIndex === null || nearestDistance > SNAP_DISTANCE_METERS) {
-    return null;
-  }
-
-  return { index: nearestIndex, distanceMeters: nearestDistance };
-}
-
 export function nearestNodeCandidates(
   graph: WalkGraph,
   lat: number,
@@ -105,12 +86,27 @@ export function shortestPathDistances(
   start: number,
   maxDistance: number,
 ): Float64Array {
+  return shortestPathDistancesFromSeeds(graph, [{ index: start, distanceMeters: 0 }], maxDistance);
+}
+
+export function shortestPathDistancesFromSeeds(
+  graph: WalkGraph,
+  seeds: NearestNodeMatch[],
+  maxDistance: number,
+): Float64Array {
   const distances = new Float64Array(graph.nodes.length);
   distances.fill(Number.POSITIVE_INFINITY);
-  distances[start] = 0;
 
   const queue = new MinPriorityQueue();
-  queue.push({ node: start, distance: 0 });
+  for (const seed of seeds) {
+    if (seed.index < 0 || seed.index >= graph.nodes.length) continue;
+    if (!Number.isFinite(seed.distanceMeters)) continue;
+    if (seed.distanceMeters < 0 || seed.distanceMeters > maxDistance) continue;
+    if (seed.distanceMeters >= distances[seed.index]) continue;
+
+    distances[seed.index] = seed.distanceMeters;
+    queue.push({ node: seed.index, distance: seed.distanceMeters });
+  }
 
   while (queue.size > 0) {
     const current = queue.pop();

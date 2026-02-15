@@ -7,7 +7,7 @@ import {
   POINT_KEY_DECIMALS,
 } from './constants';
 import { metersPerLonDegree } from './geo';
-import { shortestPathDistances } from './graph';
+import { shortestPathDistancesFromSeeds } from './graph';
 import type { LatLng, LocalPoint, NearestNodeMatch, WalkGraph, WalkshedAttempt } from './types';
 
 function clamp01(value: number): number {
@@ -188,20 +188,22 @@ function polygonFromBoundaryPoints(
   return fallbackHull.map((point) => fromLocalMeters(point, centerLat, centerLon));
 }
 
-export function buildPolygonFromStartNode(
+export function buildPolygonFromSeedNodes(
   graph: WalkGraph,
   centerLat: number,
   centerLon: number,
   distanceMeters: number,
-  start: NearestNodeMatch,
+  seeds: NearestNodeMatch[],
 ): WalkshedAttempt {
-  const effectiveDistance = distanceMeters - start.distanceMeters;
-  if (effectiveDistance < MIN_EFFECTIVE_WALK_DISTANCE_METERS) {
+  const effectiveSeeds = seeds.filter(
+    (seed) => distanceMeters - seed.distanceMeters >= MIN_EFFECTIVE_WALK_DISTANCE_METERS,
+  );
+  if (effectiveSeeds.length === 0) {
     return { polygon: null, boundaryPointCount: 0 };
   }
 
-  const distances = shortestPathDistances(graph, start.index, effectiveDistance);
-  const boundaryPoints = collectReachableBoundaryPoints(graph, distances, effectiveDistance);
+  const distances = shortestPathDistancesFromSeeds(graph, effectiveSeeds, distanceMeters);
+  const boundaryPoints = collectReachableBoundaryPoints(graph, distances, distanceMeters);
   const boundaryPointSet = new Set(boundaryPoints.map((point) => pointKey(point)));
   addUniquePoint(boundaryPoints, boundaryPointSet, [centerLat, centerLon]);
 
