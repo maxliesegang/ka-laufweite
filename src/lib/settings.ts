@@ -11,9 +11,11 @@ export const STOP_RADIUS_INPUT_IDS: Record<StopType, string> = mapStopTypes(
 );
 
 const DEFAULT_STOP_RADIUS_METERS = 300;
-export const DEFAULT_STOP_RADIUS_METERS_BY_TYPE: Record<StopType, number> = mapStopTypes(
-  () => DEFAULT_STOP_RADIUS_METERS,
-);
+export const DEFAULT_STOP_RADIUS_METERS_BY_TYPE: Record<StopType, number> = {
+  train: 400,
+  tram: 300,
+  bus: 200,
+};
 
 export const MIN_STOP_RADIUS_METERS = 50;
 export const MAX_STOP_RADIUS_METERS = 5000;
