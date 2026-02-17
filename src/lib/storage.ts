@@ -6,19 +6,21 @@ export function getStorageItem(key: string): string | null {
   }
 }
 
-export function setStorageItem(key: string, value: string): void {
+export function setStorageItem(key: string, value: string): boolean {
   try {
     localStorage.setItem(key, value);
+    return true;
   } catch {
-    // Ignore storage failures (private mode, blocked storage, quota).
+    return false;
   }
 }
 
-export function removeStorageItem(key: string): void {
+export function removeStorageItem(key: string): boolean {
   try {
     localStorage.removeItem(key);
+    return true;
   } catch {
-    // Ignore storage failures (private mode, blocked storage, quota).
+    return false;
   }
 }
 
@@ -33,6 +35,6 @@ export function readStorageJson(key: string): unknown | null {
   }
 }
 
-export function writeStorageJson(key: string, value: unknown): void {
-  setStorageItem(key, JSON.stringify(value));
+export function writeStorageJson(key: string, value: unknown): boolean {
+  return setStorageItem(key, JSON.stringify(value));
 }

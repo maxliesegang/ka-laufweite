@@ -77,7 +77,7 @@ export function initConfigPage(): void {
   }
 
   shapeSelect.value = currentShape;
-  cacheStatus.textContent = `Polygon-Cache Einträge: ${getWalkshedCacheSize()}`;
+  cacheStatus.textContent = 'Polygon-Cache Einträge: ...';
   saveStatus.textContent = statusText('Automatisch aktiv', currentRadiusByType, currentShape);
 
   const clearTimer = () => {
@@ -87,11 +87,19 @@ export function initConfigPage(): void {
     }
   };
 
-  const updateCacheStatus = () => {
-    cacheStatus.textContent = `Polygon-Cache Einträge: ${getWalkshedCacheSize()}`;
+  const runAsyncAction = (action: () => Promise<void>) => {
+    void action().catch((error) => {
+      console.error('Config action failed:', error);
+      saveStatus.textContent = 'Aktion fehlgeschlagen. Bitte erneut versuchen.';
+    });
   };
 
-  const persistSettings = (prefix: string, normalizeRadius = false): void => {
+  const updateCacheStatus = async () => {
+    cacheStatus.textContent = `Polygon-Cache Einträge: ${await getWalkshedCacheSize()}`;
+  };
+  runAsyncAction(updateCacheStatus);
+
+  const persistSettings = async (prefix: string, normalizeRadius = false): Promise<void> => {
     const nextRadiusByType: StopRadiusByType = { ...currentRadiusByType };
     const invalidTypes: StopType[] = [];
 
@@ -129,8 +137,8 @@ export function initConfigPage(): void {
     }
 
     if (changed) {
-      clearWalkshedCache();
-      updateCacheStatus();
+      await clearWalkshedCache();
+      await updateCacheStatus();
       saveStatus.textContent =
         statusText(`${prefix} (Cache zurückgesetzt)`, nextRadiusByType, shape) +
         invalidRadiusHint(invalidTypes);
@@ -144,7 +152,7 @@ export function initConfigPage(): void {
     clearTimer();
     autosaveTimer = window.setTimeout(() => {
       autosaveTimer = null;
-      persistSettings('Automatisch gespeichert');
+      runAsyncAction(() => persistSettings('Automatisch gespeichert'));
     }, AUTOSAVE_DEBOUNCE_MS);
   };
 
@@ -152,13 +160,13 @@ export function initConfigPage(): void {
     radiusInputs[stopType].addEventListener('input', scheduleAutosave);
     radiusInputs[stopType].addEventListener('blur', () => {
       clearTimer();
-      persistSettings('Automatisch gespeichert', true);
+      runAsyncAction(() => persistSettings('Automatisch gespeichert', true));
     });
   }
 
   shapeSelect.addEventListener('change', () => {
     clearTimer();
-    persistSettings('Automatisch gespeichert');
+    runAsyncAction(() => persistSettings('Automatisch gespeichert'));
   });
 
   resetDefaultsBtn.addEventListener('click', () => {
@@ -167,48 +175,54 @@ export function initConfigPage(): void {
       radiusInputs[stopType].value = String(DEFAULT_STOP_RADIUS_METERS_BY_TYPE[stopType]);
     }
     shapeSelect.value = DEFAULT_COVERAGE_SHAPE;
-    persistSettings('Standardwerte übernommen', true);
+    runAsyncAction(() => persistSettings('Standardwerte übernommen', true));
   });
 
   deleteCustomStopsBtn.addEventListener('click', () => {
-    clearTimer();
+    runAsyncAction(async () => {
+      clearTimer();
 
-    const removedStops = clearCustomStops();
-    const resetWalkshedPolygons = clearWalkshedDisabledStops();
+      const removedStops = clearCustomStops();
+      const resetWalkshedPolygons = clearWalkshedDisabledStops();
 
-    const removedPolygons =
-      removedStops.length === 0
-        ? 0
-        : removeCachedWalkshedPolygonsForStops(removedStops.map((stop) => stop.id));
-    updateCacheStatus();
+      const removedPolygons =
+        removedStops.length === 0
+          ? 0
+          : await removeCachedWalkshedPolygonsForStops(removedStops.map((stop) => stop.id));
+      await updateCacheStatus();
 
-    if (removedStops.length === 0 && resetWalkshedPolygons === 0) {
-      saveStatus.textContent =
-        'Keine eigenen Haltestellen oder ausgeblendeten Fussweg-Polygone vorhanden.';
-      return;
-    }
-
-    const statusParts: string[] = [];
-    if (removedStops.length > 0) {
-      statusParts.push(`Eigene Haltestellen geloescht: ${removedStops.length}.`);
-      if (removedPolygons > 0) {
-        statusParts.push(`Zugehoerige Polygon-Cache-Eintraege geloescht: ${removedPolygons}.`);
-      } else {
-        statusParts.push('Keine zugehoerigen Polygon-Cache-Eintraege vorhanden.');
+      if (removedStops.length === 0 && resetWalkshedPolygons === 0) {
+        saveStatus.textContent =
+          'Keine eigenen Haltestellen oder ausgeblendeten Fussweg-Polygone vorhanden.';
+        return;
       }
-    }
 
-    if (resetWalkshedPolygons > 0) {
-      statusParts.push(`Ausgeblendete Fussweg-Polygone zurueckgesetzt: ${resetWalkshedPolygons}.`);
-    }
+      const statusParts: string[] = [];
+      if (removedStops.length > 0) {
+        statusParts.push(`Eigene Haltestellen geloescht: ${removedStops.length}.`);
+        if (removedPolygons > 0) {
+          statusParts.push(`Zugehoerige Polygon-Cache-Eintraege geloescht: ${removedPolygons}.`);
+        } else {
+          statusParts.push('Keine zugehoerigen Polygon-Cache-Eintraege vorhanden.');
+        }
+      }
 
-    saveStatus.textContent = statusParts.join(' ');
+      if (resetWalkshedPolygons > 0) {
+        statusParts.push(
+          `Ausgeblendete Fussweg-Polygone zurueckgesetzt: ${resetWalkshedPolygons}.`,
+        );
+      }
+
+      saveStatus.textContent = statusParts.join(' ');
+    });
   });
 
   resetCacheBtn.addEventListener('click', () => {
-    clearTimer();
-    clearWalkshedCache();
-    updateCacheStatus();
-    saveStatus.textContent = 'Polygon-Cache wurde gelöscht. Einstellungen bleiben unverändert.';
+    runAsyncAction(async () => {
+      clearTimer();
+      await clearWalkshedCache();
+      await updateCacheStatus();
+      saveStatus.textContent = 'Polygon-Cache wurde gelöscht. Einstellungen bleiben unverändert.';
+    });
   });
 }

@@ -225,10 +225,16 @@ class TransitMapController {
     });
   }
 
-  private invalidateStopWalkshedCache(stopId: string): void {
-    removeCachedWalkshedPolygonsForStop(stopId);
+  private async invalidateStopWalkshedCache(stopId: string): Promise<void> {
     removeWalkshedRuntimeCacheForStop(stopId);
+    await removeCachedWalkshedPolygonsForStop(stopId);
     this.walkshedCacheResetMarker = getWalkshedCacheResetMarker();
+  }
+
+  private runBackground(task: Promise<unknown>, context: string): void {
+    void task.catch((error) => {
+      console.error(context, error);
+    });
   }
 
   private bindCustomStopRemoval(marker: StopMarker, stop: Stop): void {
@@ -249,7 +255,10 @@ class TransitMapController {
         removeBtn.textContent = 'Entferne...';
 
         if (removeCustomStop(stop.id)) {
-          this.invalidateStopWalkshedCache(stop.id);
+          this.runBackground(
+            this.invalidateStopWalkshedCache(stop.id),
+            `Failed to invalidate walkshed cache for ${stop.id}`,
+          );
           this.removeStop(stop.id);
           this.map.closePopup(event.popup);
           return;
@@ -302,24 +311,30 @@ class TransitMapController {
       radiusCircle?.setLatLng(marker.getLatLng());
     });
 
-    marker.on('dragend', () => {
-      const position = marker.getLatLng();
-      const hasMoved = !position.equals(dragStartPosition);
+    marker.on('dragend', async () => {
+      try {
+        const position = marker.getLatLng();
+        const hasMoved = !position.equals(dragStartPosition);
 
-      if (!hasMoved) {
-        this.syncWalkshedForStop(stop);
-        this.releaseMapClickSuppression();
-        return;
-      }
+        if (!hasMoved) {
+          this.syncWalkshedForStop(stop);
+          return;
+        }
 
-      const updatedStop = updateCustomStopPosition(stop.id, position.lat, position.lng);
+        const updatedStop = updateCustomStopPosition(stop.id, position.lat, position.lng);
 
-      if (!updatedStop) {
-        marker.setLatLng(dragStartPosition);
-        radiusCircle?.setLatLng(dragStartPosition);
-        this.syncWalkshedForStop(stop);
-      } else {
-        this.invalidateStopWalkshedCache(stop.id);
+        if (!updatedStop) {
+          marker.setLatLng(dragStartPosition);
+          radiusCircle?.setLatLng(dragStartPosition);
+          this.syncWalkshedForStop(stop);
+          return;
+        }
+
+        try {
+          await this.invalidateStopWalkshedCache(stop.id);
+        } catch (error) {
+          console.error(`Failed to invalidate walkshed cache for ${stop.id}`, error);
+        }
 
         this.addOrUpdateStop(updatedStop);
         if (
@@ -328,9 +343,9 @@ class TransitMapController {
         ) {
           this.walkshedOverlay.prioritizeStop(updatedStop);
         }
+      } finally {
+        this.releaseMapClickSuppression();
       }
-
-      this.releaseMapClickSuppression();
     });
   }
 

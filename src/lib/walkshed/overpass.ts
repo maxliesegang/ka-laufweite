@@ -12,6 +12,7 @@ const LATENCY_SMOOTHING = 0.25;
 const UNKNOWN_ENDPOINT_LATENCY_MS = 700;
 const FAILURE_PENALTY_MS = 1_500;
 const MAX_FAILURE_STREAK = 6;
+const PREFERRED_ENDPOINT_BONUS_MS = 120;
 
 interface EndpointStats {
   latencyMs: number;
@@ -42,11 +43,11 @@ function persistPreferredEndpoint(endpointUrl: string): void {
 
 function endpointScore(endpointUrl: string): number {
   const stats = endpointStatsByUrl.get(endpointUrl);
-  if (!stats) {
-    return UNKNOWN_ENDPOINT_LATENCY_MS;
-  }
+  const baseScore = stats
+    ? stats.latencyMs + stats.failureStreak * FAILURE_PENALTY_MS
+    : UNKNOWN_ENDPOINT_LATENCY_MS;
 
-  return stats.latencyMs + stats.failureStreak * FAILURE_PENALTY_MS;
+  return preferredEndpointUrl === endpointUrl ? baseScore - PREFERRED_ENDPOINT_BONUS_MS : baseScore;
 }
 
 function orderedEndpointUrls(): string[] {
@@ -54,9 +55,6 @@ function orderedEndpointUrls(): string[] {
   const defaultOrder = new Map(endpoints.map((endpoint, index) => [endpoint, index]));
 
   return [...endpoints].sort((a, b) => {
-    if (preferredEndpointUrl === a && preferredEndpointUrl !== b) return -1;
-    if (preferredEndpointUrl === b && preferredEndpointUrl !== a) return 1;
-
     const scoreDelta = endpointScore(a) - endpointScore(b);
     if (scoreDelta !== 0) return scoreDelta;
 
@@ -167,25 +165,31 @@ async function fetchFromEndpoint(endpoint: string, query: string): Promise<Overp
   return parsed;
 }
 
+export type FootwayFetchResult =
+  | { status: 'ok'; response: OverpassResponse }
+  | { status: 'all-endpoints-failed' };
+
 export async function fetchFootways(
   lat: number,
   lon: number,
   distanceMeters: number,
-): Promise<OverpassResponse | null> {
+): Promise<FootwayFetchResult> {
   loadPreferredEndpointFromStorage();
   const query = overpassFootwayQuery(lat, lon, distanceMeters);
+  const orderedEndpoints = orderedEndpointUrls();
 
-  for (const endpointUrl of orderedEndpointUrls()) {
+  for (const endpointUrl of orderedEndpoints) {
     const startedAt = Date.now();
     try {
       const result = await fetchFromEndpoint(endpointUrl, query);
-      markEndpointSuccess(endpointUrl, Date.now() - startedAt);
-      return result;
+      const durationMs = Date.now() - startedAt;
+      markEndpointSuccess(endpointUrl, durationMs);
+      return { status: 'ok', response: result };
     } catch {
       markEndpointFailure(endpointUrl);
       continue;
     }
   }
 
-  return null;
+  return { status: 'all-endpoints-failed' };
 }

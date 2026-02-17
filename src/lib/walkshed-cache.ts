@@ -1,140 +1,129 @@
-import type { LatLng } from './walkshed/types';
+import { getStorageItem, setStorageItem } from './storage';
 import {
-  getStorageItem,
-  removeStorageItem,
-  readStorageJson,
-  setStorageItem,
-  writeStorageJson,
-} from './storage';
-
-interface CacheEntry {
-  polygon: LatLng[];
-  updatedAt: number;
-}
-
-type CacheStore = Record<string, CacheEntry>;
+  createWalkshedCachePersistence,
+  type CacheEntry,
+  type CacheStore,
+  type PolygonCacheEntry,
+  type UnavailableCacheEntry,
+} from './walkshed-cache-persistence';
+import type { LatLng } from './walkshed/types';
 
 export const WALKSHED_CACHE_STORAGE_KEY = 'karlsruhe-opnv-walkshed-cache-v5';
 export const WALKSHED_CACHE_RESET_MARKER_KEY = 'karlsruhe-opnv-walkshed-cache-reset-marker';
-const MAX_ENTRIES = 400;
-const PERSIST_DEBOUNCE_MS = 2_000;
-const EMPTY_CACHE_STORE: CacheStore = {};
+
+const WALKSHED_CACHE_DB_NAME = 'karlsruhe-opnv-walkshed-cache-v1';
+const WALKSHED_CACHE_DB_VERSION = 1;
+const WALKSHED_CACHE_DB_STORE_NAME = 'entries';
+
+const MAX_ENTRIES = 4_000;
+const MAX_UNAVAILABLE_ENTRIES = 1_000;
+const MAX_ENTRY_AGE_MS = 30 * 24 * 60 * 60 * 1_000;
+
+const persistence = createWalkshedCachePersistence({
+  dbName: WALKSHED_CACHE_DB_NAME,
+  dbVersion: WALKSHED_CACHE_DB_VERSION,
+  dbStoreName: WALKSHED_CACHE_DB_STORE_NAME,
+  legacyStorageKey: WALKSHED_CACHE_STORAGE_KEY,
+});
 
 let cachedStore: CacheStore | null = null;
+let loadStorePromise: Promise<CacheStore> | null = null;
 let cachedResetMarker: string | null = null;
-let persistTimerId: number | null = null;
-let storeDirty = false;
-
-function isLatLng(value: unknown): value is LatLng {
-  return (
-    Array.isArray(value) &&
-    value.length === 2 &&
-    typeof value[0] === 'number' &&
-    Number.isFinite(value[0]) &&
-    typeof value[1] === 'number' &&
-    Number.isFinite(value[1])
-  );
-}
 
 function currentResetMarker(): string {
   return getStorageItem(WALKSHED_CACHE_RESET_MARKER_KEY) ?? '';
 }
 
-function readStoreFromStorage(): CacheStore {
-  const parsed = readStorageJson(WALKSHED_CACHE_STORAGE_KEY);
-  if (!parsed || typeof parsed !== 'object') return {};
-
-  const entriesRaw = (parsed as { entries?: unknown }).entries;
-  if (!entriesRaw || typeof entriesRaw !== 'object') return {};
-
-  const entries: CacheStore = {};
-  for (const [key, value] of Object.entries(entriesRaw)) {
-    const entry = value as Partial<CacheEntry>;
-    if (
-      Array.isArray(entry?.polygon) &&
-      entry.polygon.every(isLatLng) &&
-      typeof entry.updatedAt === 'number' &&
-      Number.isFinite(entry.updatedAt)
-    ) {
-      entries[key] = { polygon: entry.polygon, updatedAt: entry.updatedAt };
-    }
-  }
-
-  return entries;
-}
-
-function ensureStore(): CacheStore {
-  if (cachedStore) return cachedStore;
-
-  cachedStore = readStoreFromStorage();
-  cachedResetMarker = currentResetMarker();
-  return cachedStore;
-}
-
-function reloadStoreIfReset(): CacheStore {
-  const marker = currentResetMarker();
-  if (cachedStore && cachedResetMarker === marker) {
-    return cachedStore;
-  }
-
-  cancelPendingPersist();
-  storeDirty = false;
-  cachedStore = readStoreFromStorage();
-  cachedResetMarker = marker;
-  return cachedStore;
+function isEntryFresh(updatedAt: number, now = Date.now()): boolean {
+  return now - updatedAt <= MAX_ENTRY_AGE_MS;
 }
 
 function pruneEntries(entries: CacheStore): CacheStore {
-  const all = Object.entries(entries);
-  if (all.length <= MAX_ENTRIES) return entries;
+  const now = Date.now();
+  const polygons: [string, PolygonCacheEntry][] = [];
+  const unavailable: [string, UnavailableCacheEntry][] = [];
 
-  all.sort((a, b) => b[1].updatedAt - a[1].updatedAt);
-  return Object.fromEntries(all.slice(0, MAX_ENTRIES));
-}
+  for (const entry of Object.entries(entries)) {
+    if (!isEntryFresh(entry[1].updatedAt, now)) continue;
+    if (entry[1].kind === 'polygon') {
+      polygons.push(entry as [string, PolygonCacheEntry]);
+      continue;
+    }
 
-function cancelPendingPersist(): void {
-  if (persistTimerId !== null) {
-    clearTimeout(persistTimerId);
-    persistTimerId = null;
+    unavailable.push(entry as [string, UnavailableCacheEntry]);
   }
+
+  polygons.sort((a, b) => b[1].updatedAt - a[1].updatedAt);
+  const limitedPolygons = polygons.slice(0, MAX_ENTRIES);
+  if (limitedPolygons.length >= MAX_ENTRIES) {
+    return Object.fromEntries(limitedPolygons);
+  }
+
+  unavailable.sort((a, b) => b[1].updatedAt - a[1].updatedAt);
+  const remainingSlots = MAX_ENTRIES - limitedPolygons.length;
+  const unavailableSlots = Math.min(remainingSlots, MAX_UNAVAILABLE_ENTRIES);
+  return Object.fromEntries([...limitedPolygons, ...unavailable.slice(0, unavailableSlots)]);
 }
 
-function flushToStorage(): void {
-  cancelPendingPersist();
-  if (!storeDirty || !cachedStore) return;
-  storeDirty = false;
+function pruneEntriesWithRemovedKeys(entries: CacheStore): {
+  pruned: CacheStore;
+  removedKeys: string[];
+} {
+  const pruned = pruneEntries(entries);
+  const removedKeys = Object.keys(entries).filter((key) => !(key in pruned));
+  return { pruned, removedKeys };
+}
 
-  const normalized = pruneEntries(cachedStore);
-  cachedStore = normalized;
+async function loadStoreFromPersistence(): Promise<CacheStore> {
+  const dbEntries = await persistence.readIndexedDbStore();
+  if (dbEntries) {
+    // IndexedDB is the canonical backend; discard any legacy localStorage snapshot.
+    persistence.removeLegacyStore();
+    return pruneEntries(dbEntries);
+  }
 
-  if (Object.keys(normalized).length === 0) {
-    removeStorageItem(WALKSHED_CACHE_STORAGE_KEY);
+  return pruneEntries(persistence.readLegacyStore());
+}
+
+async function ensureStore(): Promise<CacheStore> {
+  const marker = currentResetMarker();
+  if (cachedStore && cachedResetMarker === marker) return cachedStore;
+  if (loadStorePromise && cachedResetMarker === marker) return loadStorePromise;
+
+  cachedResetMarker = marker;
+  loadStorePromise = loadStoreFromPersistence()
+    .then((entries) => {
+      cachedStore = entries;
+      return entries;
+    })
+    .finally(() => {
+      loadStorePromise = null;
+    });
+
+  return loadStorePromise;
+}
+
+async function persistUpsert(cacheKey: string, entries: CacheStore): Promise<void> {
+  const entry = entries[cacheKey];
+  if (!entry) return;
+
+  if (await persistence.upsertIndexedDbEntry(cacheKey, entry)) return;
+  persistence.writeLegacyStore(entries);
+}
+
+async function persistRemovals(removedKeys: string[], entries: CacheStore): Promise<void> {
+  if (removedKeys.length === 0) return;
+  if (await persistence.deleteIndexedDbEntries(removedKeys)) return;
+  persistence.writeLegacyStore(entries);
+}
+
+async function persistClear(entries: CacheStore): Promise<void> {
+  if (await persistence.clearIndexedDbStore()) {
+    persistence.removeLegacyStore();
     return;
   }
 
-  writeStorageJson(WALKSHED_CACHE_STORAGE_KEY, { entries: normalized });
-}
-
-function schedulePersist(): void {
-  if (persistTimerId !== null) return;
-  persistTimerId = window.setTimeout(() => {
-    persistTimerId = null;
-    flushToStorage();
-  }, PERSIST_DEBOUNCE_MS);
-}
-
-function persistStoreImmediately(entries: CacheStore): void {
-  const normalized = pruneEntries(entries);
-  cachedStore = normalized;
-  storeDirty = false;
-  cancelPendingPersist();
-
-  if (Object.keys(normalized).length === 0) {
-    removeStorageItem(WALKSHED_CACHE_STORAGE_KEY);
-    return;
-  }
-
-  writeStorageJson(WALKSHED_CACHE_STORAGE_KEY, { entries: normalized });
+  persistence.writeLegacyStore(entries);
 }
 
 function touchResetMarker(): void {
@@ -143,19 +132,73 @@ function touchResetMarker(): void {
   cachedResetMarker = marker;
 }
 
-export function getCachedWalkshedPolygon(cacheKey: string): LatLng[] | null {
-  return ensureStore()[cacheKey]?.polygon ?? null;
+async function getCacheEntry(cacheKey: string): Promise<CacheEntry | null> {
+  const entries = await ensureStore();
+  const entry = entries[cacheKey];
+  if (!entry) return null;
+
+  if (entry.kind === 'unavailable' && entry.retryAfter <= Date.now()) {
+    const nextEntries = { ...entries };
+    delete nextEntries[cacheKey];
+    cachedStore = nextEntries;
+    await persistRemovals([cacheKey], nextEntries);
+    return null;
+  }
+
+  return entry;
 }
 
-export function setCachedWalkshedPolygon(cacheKey: string, polygon: LatLng[]): void {
-  const entries = ensureStore();
-  entries[cacheKey] = { polygon, updatedAt: Date.now() };
-  storeDirty = true;
-  schedulePersist();
+async function upsertCacheEntry(cacheKey: string, entry: CacheEntry): Promise<void> {
+  const entries = await ensureStore();
+  const nextEntries = { ...entries, [cacheKey]: entry };
+  const { pruned, removedKeys } = pruneEntriesWithRemovedKeys(nextEntries);
+  cachedStore = pruned;
+
+  await persistUpsert(cacheKey, pruned);
+  await persistRemovals(
+    removedKeys.filter((key) => key !== cacheKey),
+    pruned,
+  );
 }
 
-export function getWalkshedCacheSize(): number {
-  return Object.keys(ensureStore()).length;
+export async function getCachedWalkshedPolygon(cacheKey: string): Promise<LatLng[] | null> {
+  const entry = await getCacheEntry(cacheKey);
+  if (!entry || entry.kind !== 'polygon') return null;
+  return entry.polygon;
+}
+
+export async function setCachedWalkshedPolygon(cacheKey: string, polygon: LatLng[]): Promise<void> {
+  await upsertCacheEntry(cacheKey, {
+    kind: 'polygon',
+    polygon,
+    updatedAt: Date.now(),
+  });
+}
+
+export async function isWalkshedTemporarilyUnavailable(cacheKey: string): Promise<boolean> {
+  const entry = await getCacheEntry(cacheKey);
+  return entry?.kind === 'unavailable';
+}
+
+export async function setCachedWalkshedUnavailable(
+  cacheKey: string,
+  retryAfterMs: number,
+): Promise<void> {
+  const boundedRetryAfterMs = Math.max(1_000, Math.round(retryAfterMs));
+  const now = Date.now();
+  await upsertCacheEntry(cacheKey, {
+    kind: 'unavailable',
+    retryAfter: now + boundedRetryAfterMs,
+    updatedAt: now,
+  });
+}
+
+export async function getWalkshedCacheSize(): Promise<number> {
+  const entries = await ensureStore();
+  return Object.values(entries).reduce(
+    (count, entry) => count + (entry.kind === 'polygon' ? 1 : 0),
+    0,
+  );
 }
 
 export function getWalkshedCacheResetMarker(): string {
@@ -163,14 +206,21 @@ export function getWalkshedCacheResetMarker(): string {
 }
 
 export function reloadCacheIfExternallyReset(): void {
-  reloadStoreIfReset();
+  const marker = currentResetMarker();
+  if (marker === cachedResetMarker) return;
+
+  cachedStore = null;
+  loadStorePromise = null;
+  cachedResetMarker = marker;
 }
 
-export function removeCachedWalkshedPolygonsForStop(stopId: string): number {
+export async function removeCachedWalkshedPolygonsForStop(stopId: string): Promise<number> {
   return removeCachedWalkshedPolygonsForStops([stopId]);
 }
 
-export function removeCachedWalkshedPolygonsForStops(stopIds: Iterable<string>): number {
+export async function removeCachedWalkshedPolygonsForStops(
+  stopIds: Iterable<string>,
+): Promise<number> {
   const prefixes = new Set(
     [...stopIds]
       .map((stopId) => stopId.trim())
@@ -178,30 +228,40 @@ export function removeCachedWalkshedPolygonsForStops(stopIds: Iterable<string>):
       .map((stopId) => `${stopId}:`),
   );
   if (prefixes.size === 0) return 0;
+  const prefixList = [...prefixes];
 
-  const entries = { ...ensureStore() };
-  let removed = 0;
+  const entries = await ensureStore();
+  const nextEntries: CacheStore = {};
+  const removedKeys: string[] = [];
 
-  for (const key of Object.keys(entries)) {
-    for (const prefix of prefixes) {
+  for (const [key, entry] of Object.entries(entries)) {
+    let shouldRemove = false;
+    for (const prefix of prefixList) {
       if (!key.startsWith(prefix)) continue;
-      delete entries[key];
-      removed += 1;
+      shouldRemove = true;
       break;
     }
+
+    if (shouldRemove) {
+      removedKeys.push(key);
+      continue;
+    }
+
+    nextEntries[key] = entry;
   }
 
-  if (removed === 0) return 0;
+  if (removedKeys.length === 0) return 0;
 
-  persistStoreImmediately(entries);
+  cachedStore = nextEntries;
+  await persistRemovals(removedKeys, nextEntries);
   touchResetMarker();
-  return removed;
+  return removedKeys.length;
 }
 
-export function clearWalkshedCache(): void {
-  cancelPendingPersist();
-  storeDirty = false;
-  cachedStore = EMPTY_CACHE_STORE;
-  removeStorageItem(WALKSHED_CACHE_STORAGE_KEY);
+export async function clearWalkshedCache(): Promise<void> {
+  const emptyStore: CacheStore = {};
+  cachedStore = emptyStore;
+  loadStorePromise = null;
+  await persistClear(emptyStore);
   touchResetMarker();
 }
