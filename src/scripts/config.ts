@@ -20,6 +20,7 @@ import {
 } from '../lib/stop-type-config';
 import { mapStopTypes, stopTypeRecordChanged, type StopType } from '../lib/types';
 import { clearCustomStops } from '../lib/custom-stops-client';
+import { clearWalkshedDisabledStops } from '../lib/walkshed-disabled-stops';
 import {
   clearWalkshedCache,
   getWalkshedCacheSize,
@@ -173,21 +174,35 @@ export function initConfigPage(): void {
     clearTimer();
 
     const removedStops = clearCustomStops();
-    if (removedStops.length === 0) {
-      saveStatus.textContent = 'Keine eigenen Haltestellen vorhanden.';
+    const resetWalkshedPolygons = clearWalkshedDisabledStops();
+
+    const removedPolygons =
+      removedStops.length === 0
+        ? 0
+        : removeCachedWalkshedPolygonsForStops(removedStops.map((stop) => stop.id));
+    updateCacheStatus();
+
+    if (removedStops.length === 0 && resetWalkshedPolygons === 0) {
+      saveStatus.textContent =
+        'Keine eigenen Haltestellen oder ausgeblendeten Fussweg-Polygone vorhanden.';
       return;
     }
 
-    const removedPolygons = removeCachedWalkshedPolygonsForStops(
-      removedStops.map((stop) => stop.id),
-    );
-    updateCacheStatus();
+    const statusParts: string[] = [];
+    if (removedStops.length > 0) {
+      statusParts.push(`Eigene Haltestellen geloescht: ${removedStops.length}.`);
+      if (removedPolygons > 0) {
+        statusParts.push(`Zugehoerige Polygon-Cache-Eintraege geloescht: ${removedPolygons}.`);
+      } else {
+        statusParts.push('Keine zugehoerigen Polygon-Cache-Eintraege vorhanden.');
+      }
+    }
 
-    const cacheHint =
-      removedPolygons > 0
-        ? ` Zugehörige Polygon-Cache-Einträge gelöscht: ${removedPolygons}.`
-        : ' Keine zugehörigen Polygon-Cache-Einträge vorhanden.';
-    saveStatus.textContent = `Eigene Haltestellen gelöscht: ${removedStops.length}.${cacheHint}`;
+    if (resetWalkshedPolygons > 0) {
+      statusParts.push(`Ausgeblendete Fussweg-Polygone zurueckgesetzt: ${resetWalkshedPolygons}.`);
+    }
+
+    saveStatus.textContent = statusParts.join(' ');
   });
 
   resetCacheBtn.addEventListener('click', () => {

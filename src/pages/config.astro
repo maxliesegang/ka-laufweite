@@ -53,13 +53,14 @@ const mapHref = import.meta.env.BASE_URL;
           <h2 id="actions-heading">Aktionen</h2>
           <p class="panel-note">
             Bei Radius- oder Darstellungs-Aenderungen wird der Polygon-Cache automatisch
-            zurueckgesetzt.
+            zurueckgesetzt. Die Aktion zum Loeschen eigener Haltestellen setzt auch ausgeblendete
+            Fussweg-Polygone pro Haltestelle zurueck.
           </p>
 
           <div class="actions">
             <button id="reset-radius" type="button" class="secondary">Standardwerte setzen</button>
             <button id="delete-custom-stops" type="button" class="secondary danger"
-              >Alle eigenen Haltestellen loeschen</button
+              >Eigene Haltestellen loeschen und Polygon-Filter zuruecksetzen</button
             >
             <button id="reset-walkshed-cache" type="button" class="secondary"
               >Nur Polygon-Cache loeschen</button

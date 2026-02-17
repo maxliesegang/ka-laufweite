@@ -10,8 +10,10 @@ import {
   ADD_STOP_NAME_SELECTOR,
   ADD_STOP_TYPE_SELECTOR,
   STOP_REMOVE_BUTTON_SELECTOR,
+  STOP_WALKSHED_TOGGLE_BUTTON_SELECTOR,
   createAddStopPopupHtml,
   createStopPopupHtml,
+  getStopWalkshedToggleLabel,
 } from '../lib/map-popups';
 import {
   COVERAGE_SHAPE_DISPLAY_LABELS,
@@ -26,6 +28,11 @@ import {
 } from '../lib/settings';
 import { formatStopRadiusSummary, STOP_TYPE_CONFIG } from '../lib/stop-type-config';
 import { loadAllStops } from '../lib/stops-repository';
+import {
+  WALKSHED_DISABLED_STOPS_STORAGE_KEY,
+  getWalkshedDisabledStopIds,
+  setWalkshedDisabledForStop,
+} from '../lib/walkshed-disabled-stops';
 import {
   WALKSHED_CACHE_RESET_MARKER_KEY,
   getWalkshedCacheResetMarker,
@@ -56,7 +63,11 @@ const WALKSHED_PANE_Z_INDEX = 450;
 const STOP_CIRCLE_FILL_OPACITY = 0.06;
 const STOP_CIRCLE_STROKE_OPACITY = 0.75;
 const STOP_TYPE_TOGGLE_SELECTOR = '[data-stop-type-toggle]';
-const SYNCED_STORAGE_KEYS = new Set([...SETTINGS_STORAGE_KEYS, WALKSHED_CACHE_RESET_MARKER_KEY]);
+const SYNCED_STORAGE_KEYS = new Set([
+  ...SETTINGS_STORAGE_KEYS,
+  WALKSHED_CACHE_RESET_MARKER_KEY,
+  WALKSHED_DISABLED_STOPS_STORAGE_KEY,
+]);
 
 interface StopLayer {
   layer: L.LayerGroup;
@@ -84,6 +95,7 @@ class TransitMapController {
   private radiusMetersByType: StopRadiusByType = getConfiguredStopRadii();
   private visibleStopTypes: StopTypeVisibilityByType = getConfiguredStopTypeVisibility();
   private coverageShape: CoverageShape = getConfiguredCoverageShape();
+  private walkshedDisabledStopIds = getWalkshedDisabledStopIds();
   private walkshedCacheResetMarker = getWalkshedCacheResetMarker();
   private stopLoadVersion = 0;
   private suppressNextMapClick = false;
@@ -125,6 +137,41 @@ class TransitMapController {
 
   private visibleStops(): Stop[] {
     return this.allStops().filter((stop) => this.visibleStopTypes[stop.type]);
+  }
+
+  private walkshedVisibleStops(): Stop[] {
+    return this.visibleStops().filter((stop) => !this.walkshedDisabledStopIds.has(stop.id));
+  }
+
+  private syncWalkshedForStop(stop: Stop): void {
+    if (!this.visibleStopTypes[stop.type] || this.walkshedDisabledStopIds.has(stop.id)) {
+      this.walkshedOverlay.removeStop(stop.id);
+      return;
+    }
+
+    this.walkshedOverlay.addOrUpdateStop(stop);
+  }
+
+  private setStopWalkshedDisabled(stop: Stop, disabled: boolean): void {
+    const wasDisabled = this.walkshedDisabledStopIds.has(stop.id);
+    const nextDisabled = setWalkshedDisabledForStop(stop.id, disabled);
+    if (wasDisabled === nextDisabled) return;
+
+    if (nextDisabled) {
+      this.walkshedDisabledStopIds.add(stop.id);
+    } else {
+      this.walkshedDisabledStopIds.delete(stop.id);
+    }
+
+    this.syncWalkshedForStop(stop);
+  }
+
+  private updateWalkshedToggleButton(button: HTMLButtonElement, stopId: string): void {
+    const isDisabled = this.walkshedDisabledStopIds.has(stopId);
+    const toggleLabel = getStopWalkshedToggleLabel(isDisabled);
+    button.setAttribute('aria-pressed', isDisabled ? 'true' : 'false');
+    button.setAttribute('aria-label', toggleLabel);
+    button.textContent = toggleLabel;
   }
 
   private updateLegend(): void {
@@ -214,6 +261,29 @@ class TransitMapController {
     });
   }
 
+  private bindWalkshedToggle(marker: StopMarker, stop: Stop): void {
+    if (stop.isCustom) return;
+
+    marker.on('popupopen', (event: L.PopupEvent) => {
+      const toggleBtn = event.popup
+        .getElement()
+        ?.querySelector<HTMLButtonElement>(STOP_WALKSHED_TOGGLE_BUTTON_SELECTOR);
+      if (!toggleBtn) return;
+
+      this.updateWalkshedToggleButton(toggleBtn, stop.id);
+      if (toggleBtn.dataset.bound === 'true') return;
+      toggleBtn.dataset.bound = 'true';
+
+      toggleBtn.addEventListener('click', (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+
+        this.setStopWalkshedDisabled(stop, !this.walkshedDisabledStopIds.has(stop.id));
+        this.updateWalkshedToggleButton(toggleBtn, stop.id);
+      });
+    });
+  }
+
   private bindCustomStopDragging(marker: StopMarker, stop: Stop, radiusCircle?: L.Circle): void {
     if (!stop.isCustom || !(marker instanceof L.Marker)) return;
 
@@ -237,7 +307,7 @@ class TransitMapController {
       const hasMoved = !position.equals(dragStartPosition);
 
       if (!hasMoved) {
-        this.walkshedOverlay.addOrUpdateStop(stop);
+        this.syncWalkshedForStop(stop);
         this.releaseMapClickSuppression();
         return;
       }
@@ -247,12 +317,15 @@ class TransitMapController {
       if (!updatedStop) {
         marker.setLatLng(dragStartPosition);
         radiusCircle?.setLatLng(dragStartPosition);
-        this.walkshedOverlay.addOrUpdateStop(stop);
+        this.syncWalkshedForStop(stop);
       } else {
         this.invalidateStopWalkshedCache(stop.id);
 
         this.addOrUpdateStop(updatedStop);
-        if (this.coverageShape === 'walkshed') {
+        if (
+          this.coverageShape === 'walkshed' &&
+          !this.walkshedDisabledStopIds.has(updatedStop.id)
+        ) {
           this.walkshedOverlay.prioritizeStop(updatedStop);
         }
       }
@@ -281,16 +354,21 @@ class TransitMapController {
       layers.push(radiusCircle);
     }
 
-    const marker = this.createStopMarker(stop, center, color).bindPopup(createStopPopupHtml(stop));
+    const marker = this.createStopMarker(stop, center, color).bindPopup(
+      createStopPopupHtml(stop, {
+        walkshedDisabled: this.walkshedDisabledStopIds.has(stop.id),
+      }),
+    );
 
     marker.on('click', () => {
-      if (this.coverageShape === 'walkshed') {
+      if (this.coverageShape === 'walkshed' && !this.walkshedDisabledStopIds.has(stop.id)) {
         this.walkshedOverlay.prioritizeStop(stop);
       }
     });
 
     layers.push(marker);
     this.bindCustomStopRemoval(marker, stop);
+    this.bindWalkshedToggle(marker, stop);
     this.bindCustomStopDragging(marker, stop, radiusCircle);
 
     return { layer: L.layerGroup(layers), radiusCircle };
@@ -320,7 +398,7 @@ class TransitMapController {
     }
 
     this.renderAllStopLayers();
-    this.walkshedOverlay.setStops(this.visibleStops());
+    this.walkshedOverlay.setStops(this.walkshedVisibleStops());
   }
 
   private addOrUpdateStop(stop: Stop): void {
@@ -329,7 +407,7 @@ class TransitMapController {
 
     if (this.visibleStopTypes[stop.type]) {
       this.addStopLayer(stop);
-      this.walkshedOverlay.addOrUpdateStop(stop);
+      this.syncWalkshedForStop(stop);
       return;
     }
 
@@ -374,6 +452,16 @@ class TransitMapController {
     this.renderAllStopLayers();
   }
 
+  private setWalkshedDisabledStopIds(nextStopIds: Set<string>): void {
+    const hasChanged =
+      nextStopIds.size !== this.walkshedDisabledStopIds.size ||
+      [...nextStopIds].some((stopId) => !this.walkshedDisabledStopIds.has(stopId));
+    if (!hasChanged) return;
+
+    this.walkshedDisabledStopIds = new Set(nextStopIds);
+    this.walkshedOverlay.setStops(this.walkshedVisibleStops());
+  }
+
   private syncSettingsFromStorage(): void {
     const marker = getWalkshedCacheResetMarker();
     if (marker !== this.walkshedCacheResetMarker) {
@@ -384,6 +472,7 @@ class TransitMapController {
     }
 
     this.setVisibleStopTypes(getConfiguredStopTypeVisibility());
+    this.setWalkshedDisabledStopIds(getWalkshedDisabledStopIds());
     this.setCoverageShape(getConfiguredCoverageShape());
     this.setRadii(getConfiguredStopRadii());
   }
@@ -421,7 +510,7 @@ class TransitMapController {
     if (!hasChanged) return;
 
     this.renderAllStopLayers();
-    this.walkshedOverlay.setStops(this.visibleStops());
+    this.walkshedOverlay.setStops(this.walkshedVisibleStops());
   }
 
   private bindStopTypeToggles(): void {

@@ -2,12 +2,23 @@ import { STOP_TYPE_CONFIG, STOP_TYPE_ENTRIES } from './stop-type-config';
 import type { Stop } from './types';
 
 export const STOP_REMOVE_BUTTON_SELECTOR = '[data-remove-stop-id]';
+export const STOP_WALKSHED_TOGGLE_BUTTON_SELECTOR = '[data-toggle-walkshed-stop-id]';
 export const ADD_STOP_FORM_SELECTOR = '[data-add-stop-form]';
 export const ADD_STOP_NAME_SELECTOR = '[data-stop-name-input]';
 export const ADD_STOP_TYPE_SELECTOR = '[data-stop-type-input]';
 const ADD_STOP_TYPE_OPTIONS = STOP_TYPE_ENTRIES.map(
   (stopType) => `<option value="${stopType.type}">${stopType.label}</option>`,
 ).join('');
+
+interface StopPopupOptions {
+  walkshedDisabled?: boolean;
+}
+
+export function getStopWalkshedToggleLabel(walkshedDisabled: boolean): string {
+  return walkshedDisabled
+    ? 'Fussweg-Polygon hier wieder anzeigen'
+    : 'Fussweg-Polygon hier ausblenden';
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -18,9 +29,10 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
-export function createStopPopupHtml(stop: Stop): string {
+export function createStopPopupHtml(stop: Stop, options: StopPopupOptions = {}): string {
   const typeLabel = STOP_TYPE_CONFIG[stop.type].label;
   const details = stop.isCustom ? `${typeLabel} (Eigene Haltestelle)` : typeLabel;
+  const escapedStopId = escapeHtml(stop.id);
   const base = `
     <div class="stop-popup">
       <strong>${escapeHtml(stop.name)}</strong>
@@ -29,12 +41,26 @@ export function createStopPopupHtml(stop: Stop): string {
   `;
 
   if (!stop.isCustom) {
-    return base;
+    const walkshedDisabled = options.walkshedDisabled === true;
+    const walkshedToggleLabel = getStopWalkshedToggleLabel(walkshedDisabled);
+
+    return `
+      ${base}
+      <button
+        type="button"
+        class="stop-popup__walkshed-toggle"
+        data-toggle-walkshed-stop-id="${escapedStopId}"
+        aria-pressed="${walkshedDisabled ? 'true' : 'false'}"
+        aria-label="${walkshedToggleLabel}"
+      >
+        ${walkshedToggleLabel}
+      </button>
+    `;
   }
 
   return `
     ${base}
-    <button type="button" class="stop-popup__remove" data-remove-stop-id="${stop.id}">
+    <button type="button" class="stop-popup__remove" data-remove-stop-id="${escapedStopId}">
       Haltestelle entfernen
     </button>
   `;
