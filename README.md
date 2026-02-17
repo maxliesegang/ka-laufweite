@@ -13,7 +13,8 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 - **Type filters in the legend** — show/hide train, tram, and bus markers with persisted state across reloads
 - **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
 - **Fully static** — no backend required, deploys to GitHub Pages
-- **Local cache for API protection** — walkshed polygons are cached in localStorage and can be reset from the config page
+- **Persistent client cache for API protection** — walkshed polygons are cached in IndexedDB (with localStorage fallback) and can be reset from the config page
+- **Temporary backoff on failures** — unavailable walksheds are cached briefly to avoid repeated API retries
 
 ## Getting Started
 
@@ -79,6 +80,14 @@ This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `hi
 4. Boundary points are collected where the walking budget runs out (including interpolated edge cutoffs)
 5. A concave hull wraps the boundary points into a polygon, with convex hull as fallback
 
+## Cache Behavior
+
+- Walkshed polygons and temporary "unavailable" results are persisted in browser storage
+- Primary storage is IndexedDB (`karlsruhe-opnv-walkshed-cache-v1`); localStorage is only used as fallback
+- Cache entries are pruned after 30 days and capped by size (4000 total entries, max 1000 unavailable entries)
+- Temporary unavailable results use retry windows (2 minutes for transient failures, 24 hours for no-data cases)
+- Cache can be cleared from the config page (`Cache zurücksetzen`)
+
 ## Project Structure
 
 ```
@@ -105,7 +114,8 @@ src/
     custom-stops-client.ts      # localStorage CRUD + migration for custom stops
     map-config.ts               # map constants, colors, marker sizes
     map-popups.ts               # popup HTML templates
-    walkshed-cache.ts           # localStorage polygon cache + reset marker
+    walkshed-cache.ts           # cache policy + invalidation + reset marker sync
+    walkshed-cache-persistence.ts # IndexedDB/localStorage persistence adapter
     walkshed/
       service.ts                # walkshed orchestration and caching
       overpass.ts               # Overpass API client
