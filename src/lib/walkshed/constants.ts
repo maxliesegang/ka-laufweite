@@ -1,13 +1,11 @@
 export const OVERPASS_ENDPOINT_URLS = [
   'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
 ];
 
 export const WALKABLE_HIGHWAY_EXCLUDE_REGEX =
   'motorway|motorway_link|trunk|trunk_link|construction|proposed|bus_guideway|raceway|bridleway|corridor|escape';
-export const REQUEST_TIMEOUT_MS = 18_000;
+export const REQUEST_TIMEOUT_MS = 35_000;
 export const SNAP_DISTANCE_METERS = 250;
 export const QUERY_PADDING_METERS = 80;
 export const GRAPH_CACHE_COORD_PRECISION = 4;

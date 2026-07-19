@@ -19,6 +19,7 @@ const NO_DATA_UNAVAILABLE_RETRY_MS = 24 * 60 * 60 * 1_000;
 interface GraphLoadResult {
   graph: WalkGraph | null;
   transientFailure: boolean;
+  aborted: boolean;
 }
 
 const graphCache = new Map<string, Promise<GraphLoadResult>>();
@@ -52,6 +53,7 @@ async function loadWalkGraph(
   stop: Stop,
   distanceMeters: number,
   allowReasonableStreetCrossings: boolean,
+  signal?: AbortSignal,
 ): Promise<GraphLoadResult> {
   const graphKey = graphCacheKey(stop, distanceMeters, allowReasonableStreetCrossings);
   const cached = graphCache.get(graphKey);
@@ -59,18 +61,23 @@ async function loadWalkGraph(
     return cached;
   }
 
-  const pending = fetchFootways(stop.lat, stop.lon, distanceMeters)
+  const pending = fetchFootways(stop.lat, stop.lon, distanceMeters, signal)
     .then((result): GraphLoadResult => {
       if (result.status !== 'ok') {
-        return { graph: null, transientFailure: true };
+        return { graph: null, transientFailure: true, aborted: false };
       }
 
       return {
         graph: buildWalkGraph(result.response, allowReasonableStreetCrossings),
         transientFailure: false,
+        aborted: false,
       };
     })
-    .catch((): GraphLoadResult => ({ graph: null, transientFailure: true }));
+    .catch((): GraphLoadResult => ({
+      graph: null,
+      transientFailure: !signal?.aborted,
+      aborted: signal?.aborted ?? false,
+    }));
 
   graphCache.set(graphKey, pending);
   const graphResult = await pending;
@@ -130,6 +137,7 @@ export async function buildWalkshedPolygon(
   stop: Stop,
   distanceMeters: number,
   allowReasonableStreetCrossings = true,
+  signal?: AbortSignal,
 ): Promise<WalkshedBuildResult> {
   const calculationEpoch = cacheEpoch;
   const persistentCacheMarker = getWalkshedCacheResetMarker();
@@ -153,7 +161,13 @@ export async function buildWalkshedPolygon(
     return { status: 'unavailable', retryAfter: cachedRetryAfter, reason: 'cached' };
   }
 
-  const graphResult = await loadWalkGraph(stop, distanceMeters, allowReasonableStreetCrossings);
+  const graphResult = await loadWalkGraph(
+    stop,
+    distanceMeters,
+    allowReasonableStreetCrossings,
+    signal,
+  );
+  if (graphResult.aborted) return { status: 'superseded' };
   if (!graphResult.graph) {
     const retryMs = graphResult.transientFailure
       ? TRANSIENT_UNAVAILABLE_RETRY_MS

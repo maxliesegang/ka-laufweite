@@ -9,7 +9,8 @@ import { circlePolygon, emptyPolygonCollection, type PolygonFeature } from './ma
 
 const FILL_OPACITY = 0.16;
 const STROKE_OPACITY = 0.9;
-const MAX_CONCURRENT_LOADS = 4;
+const MAX_CONCURRENT_LOADS = 1;
+const LOAD_COOLDOWN_MS = 1_000;
 const VIEWPORT_SYNC_DEBOUNCE_MS = 120;
 const BOUNDS_PADDING = 0.08;
 const PLACEHOLDER_FILL_OPACITY = 0.035;
@@ -48,10 +49,14 @@ export class WalkshedOverlayManager {
   private readonly queuedStopIds = new Set<string>();
   private readonly loadingStopIds = new Map<string, symbol>();
   private readonly priorityStopIds = new Set<string>();
+  private readonly explicitlyRequestedStopIds = new Set<string>();
+  private readonly abortControllersByStopId = new Map<string, AbortController>();
   private readonly unavailableWalkshedKeys = new Map<string, number>();
   private readonly visibleStopIds = new Set<string>();
   private loadGeneration = 0;
   private viewportSyncTimeoutId: number | null = null;
+  private loadCooldownTimeoutId: number | null = null;
+  private loadCooldownUntil = 0;
   private activeLoadCount = 0;
 
   constructor(options: OverlayManagerOptions) {
@@ -129,6 +134,7 @@ export class WalkshedOverlayManager {
     this.loadGeneration += 1;
     this.stopsById.set(stop.id, stop);
     this.queuedStopIds.delete(stop.id);
+    this.abortStopLoad(stop.id);
     this.removePolygon(stop.id);
     this.removePlaceholderCircle(stop.id);
     this.removeUnavailableWalkshedKeysForStop(stop.id);
@@ -140,6 +146,8 @@ export class WalkshedOverlayManager {
     this.visibleStopIds.delete(stopId);
     this.queuedStopIds.delete(stopId);
     this.priorityStopIds.delete(stopId);
+    this.explicitlyRequestedStopIds.delete(stopId);
+    this.abortStopLoad(stopId);
     this.removePolygon(stopId);
     this.removePlaceholderCircle(stopId);
     this.removeUnavailableWalkshedKeysForStop(stopId);
@@ -149,6 +157,11 @@ export class WalkshedOverlayManager {
   prioritizeStop(stop: Stop): void {
     if (!this.isEnabled()) return;
     this.stopsById.set(stop.id, stop);
+    this.explicitlyRequestedStopIds.add(stop.id);
+    this.visibleStopIds.add(stop.id);
+    for (const loadingStopId of this.loadingStopIds.keys()) {
+      if (!this.explicitlyRequestedStopIds.has(loadingStopId)) this.abortStopLoad(loadingStopId);
+    }
     if (this.queuedStopIds.has(stop.id)) {
       this.priorityStopIds.add(stop.id);
       return;
@@ -237,7 +250,10 @@ export class WalkshedOverlayManager {
     this.loadGeneration += 1;
     this.queuedStopIds.clear();
     this.priorityStopIds.clear();
+    this.explicitlyRequestedStopIds.clear();
+    this.abortAllStopLoads();
     this.cancelScheduledViewportSync();
+    this.cancelLoadCooldown();
     this.polygonsByStopId.clear();
     this.placeholdersByStopId.clear();
     this.unavailableWalkshedKeys.clear();
@@ -245,6 +261,31 @@ export class WalkshedOverlayManager {
     this.updatePolygonSource();
     this.updatePlaceholderSource();
     this.emitLoadProgress();
+  }
+
+  private abortStopLoad(stopId: string): void {
+    this.abortControllersByStopId.get(stopId)?.abort();
+    this.abortControllersByStopId.delete(stopId);
+  }
+
+  private abortAllStopLoads(): void {
+    for (const controller of this.abortControllersByStopId.values()) controller.abort();
+    this.abortControllersByStopId.clear();
+  }
+
+  private cancelLoadCooldown(): void {
+    if (this.loadCooldownTimeoutId === null) return;
+    clearTimeout(this.loadCooldownTimeoutId);
+    this.loadCooldownTimeoutId = null;
+  }
+
+  private scheduleLoadQueueAfterCooldown(): void {
+    this.cancelLoadCooldown();
+    const delay = Math.max(0, this.loadCooldownUntil - Date.now());
+    this.loadCooldownTimeoutId = window.setTimeout(() => {
+      this.loadCooldownTimeoutId = null;
+      this.processLoadQueue();
+    }, delay);
   }
 
   private removePolygon(stopId: string, updateSource = true): boolean {
@@ -345,12 +386,21 @@ export class WalkshedOverlayManager {
   private syncVisibleWalksheds(): void {
     if (!this.isEnabled()) return;
     const generation = this.loadGeneration;
+    const stopsWithinBounds = [...this.stopsById.values()].filter((stop) =>
+      this.isStopWithinBounds(stop),
+    );
+    const targetStopIds = new Set(stopsWithinBounds.map((stop) => stop.id));
+    for (const stopId of this.explicitlyRequestedStopIds) {
+      const stop = this.stopsById.get(stopId);
+      if (stop && this.isStopWithinBounds(stop)) targetStopIds.add(stopId);
+      else this.explicitlyRequestedStopIds.delete(stopId);
+    }
     const loadableStops: Stop[] = [];
     let polygonsChanged = false;
     let placeholdersChanged = false;
     this.visibleStopIds.clear();
-    for (const stop of this.stopsById.values()) {
-      if (!this.isStopWithinBounds(stop)) continue;
+    for (const stop of stopsWithinBounds) {
+      if (!targetStopIds.has(stop.id)) continue;
       this.visibleStopIds.add(stop.id);
       if (this.canEnqueueStop(stop)) {
         loadableStops.push(stop);
@@ -372,6 +422,9 @@ export class WalkshedOverlayManager {
         this.queuedStopIds.delete(stopId);
         this.priorityStopIds.delete(stopId);
       }
+    }
+    for (const stopId of [...this.loadingStopIds.keys()]) {
+      if (!this.visibleStopIds.has(stopId)) this.abortStopLoad(stopId);
     }
     if (polygonsChanged) this.updatePolygonSource();
     if (placeholdersChanged) this.updatePlaceholderSource();
@@ -397,11 +450,17 @@ export class WalkshedOverlayManager {
     else this.queuedStopIds.add(stop.id);
   }
 
-  private async loadWalkshedForStop(stop: Stop, generation: number, radiusMeters: number) {
+  private async loadWalkshedForStop(
+    stop: Stop,
+    generation: number,
+    radiusMeters: number,
+    signal: AbortSignal,
+  ) {
     const result = await buildWalkshedPolygon(
       stop,
       radiusMeters,
       this.getAllowReasonableStreetCrossings(),
+      signal,
     );
     if (!this.isLoadResultCurrent(stop, generation, radiusMeters)) return;
     if (result.status === 'superseded') return;
@@ -437,6 +496,10 @@ export class WalkshedOverlayManager {
 
   private processLoadQueue(): void {
     if (!this.isEnabled()) return;
+    if (Date.now() < this.loadCooldownUntil) {
+      this.scheduleLoadQueueAfterCooldown();
+      return;
+    }
     while (this.activeLoadCount < MAX_CONCURRENT_LOADS) {
       const stopId = this.dequeueNextStopId();
       if (!stopId) return;
@@ -445,15 +508,21 @@ export class WalkshedOverlayManager {
       const radiusMeters = this.radiusForStop(stop);
       const generation = this.loadGeneration;
       const loadToken = Symbol(stopId);
+      const abortController = new AbortController();
       this.activeLoadCount += 1;
       this.loadingStopIds.set(stopId, loadToken);
-      void this.loadWalkshedForStop(stop, generation, radiusMeters)
+      this.abortControllersByStopId.set(stopId, abortController);
+      void this.loadWalkshedForStop(stop, generation, radiusMeters, abortController.signal)
         .catch((error) => console.error(`Walkshed failed for ${stopId}:`, error))
         .finally(() => {
           this.activeLoadCount = Math.max(0, this.activeLoadCount - 1);
           if (this.loadingStopIds.get(stopId) === loadToken) this.loadingStopIds.delete(stopId);
+          if (this.abortControllersByStopId.get(stopId) === abortController) {
+            this.abortControllersByStopId.delete(stopId);
+          }
           if (this.isEnabled()) {
-            this.processLoadQueue();
+            this.loadCooldownUntil = Date.now() + LOAD_COOLDOWN_MS;
+            this.scheduleLoadQueueAfterCooldown();
             this.scheduleViewportSync();
           }
         });

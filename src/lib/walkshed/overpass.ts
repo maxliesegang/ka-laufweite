@@ -13,6 +13,10 @@ const UNKNOWN_ENDPOINT_LATENCY_MS = 700;
 const FAILURE_PENALTY_MS = 1_500;
 const MAX_FAILURE_STREAK = 6;
 const PREFERRED_ENDPOINT_BONUS_MS = 120;
+const MAX_REQUEST_ROUNDS = 2;
+const RETRY_BASE_DELAY_MS = 1_000;
+const RETRY_JITTER_MS = 500;
+const RETRYABLE_STATUS_CODES = new Set([429, 502, 503, 504]);
 
 interface EndpointStats {
   latencyMs: number;
@@ -148,16 +152,59 @@ export function parseOverpassResponse(payload: unknown): OverpassResponse | null
   return { elements };
 }
 
-async function fetchFromEndpoint(endpoint: string, query: string): Promise<OverpassResponse> {
+class OverpassRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly retryAfterMs: number | null,
+  ) {
+    super(message);
+  }
+}
+
+function retryAfterMs(response: Response): number | null {
+  const value = response.headers.get('Retry-After');
+  if (!value) return null;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1_000);
+  const date = Date.parse(value);
+  return Number.isFinite(date) ? Math.max(0, date - Date.now()) : null;
+}
+
+function abortableDelay(delayMs: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.reject(signal.reason);
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timeoutId);
+      reject(signal?.reason);
+    };
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, delayMs);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+async function fetchFromEndpoint(
+  endpoint: string,
+  query: string,
+  signal?: AbortSignal,
+): Promise<OverpassResponse> {
+  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `data=${encodeURIComponent(query)}`,
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
   });
 
   if (!response.ok) {
-    throw new Error(`Overpass status ${response.status}`);
+    throw new OverpassRequestError(
+      `Overpass status ${response.status}`,
+      response.status,
+      retryAfterMs(response),
+    );
   }
 
   const payload: unknown = await response.json();
@@ -176,22 +223,37 @@ export async function fetchFootways(
   lat: number,
   lon: number,
   distanceMeters: number,
+  signal?: AbortSignal,
 ): Promise<FootwayFetchResult> {
   loadPreferredEndpointFromStorage();
   const query = overpassFootwayQuery(lat, lon, distanceMeters);
   const orderedEndpoints = orderedEndpointUrls();
 
-  for (const endpointUrl of orderedEndpoints) {
-    const startedAt = Date.now();
-    try {
-      const result = await fetchFromEndpoint(endpointUrl, query);
-      const durationMs = Date.now() - startedAt;
-      markEndpointSuccess(endpointUrl, durationMs);
-      return { status: 'ok', response: result };
-    } catch {
-      markEndpointFailure(endpointUrl);
-      continue;
+  for (let round = 0; round < MAX_REQUEST_ROUNDS; round += 1) {
+    let retryDelayMs = RETRY_BASE_DELAY_MS * 2 ** round;
+    let retryableFailure = false;
+
+    for (const endpointUrl of orderedEndpoints) {
+      if (signal?.aborted) throw signal.reason;
+      const startedAt = Date.now();
+      try {
+        const result = await fetchFromEndpoint(endpointUrl, query, signal);
+        const durationMs = Date.now() - startedAt;
+        markEndpointSuccess(endpointUrl, durationMs);
+        return { status: 'ok', response: result };
+      } catch (error) {
+        if (signal?.aborted) throw signal.reason;
+        markEndpointFailure(endpointUrl);
+        if (error instanceof OverpassRequestError) {
+          if (!RETRYABLE_STATUS_CODES.has(error.status)) return { status: 'all-endpoints-failed' };
+          retryDelayMs = Math.max(retryDelayMs, error.retryAfterMs ?? 0);
+        }
+        retryableFailure = true;
+      }
     }
+
+    if (!retryableFailure || round === MAX_REQUEST_ROUNDS - 1) break;
+    await abortableDelay(retryDelayMs + Math.random() * RETRY_JITTER_MS, signal);
   }
 
   return { status: 'all-endpoints-failed' };

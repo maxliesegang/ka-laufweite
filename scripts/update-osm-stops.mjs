@@ -5,8 +5,7 @@ const outputPath = join(import.meta.dirname, '..', 'public', 'data', 'osm-stops.
 
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
 ];
 const REQUEST_TIMEOUT_MS = 45_000;
 const MAX_ROUNDS = 2;

@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { parseOverpassResponse } from './overpass';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fetchFootways, parseOverpassResponse } from './overpass';
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 describe('Overpass response validation', () => {
   it('accepts a valid empty response as valid no-data', () => {
@@ -15,5 +21,49 @@ describe('Overpass response validation', () => {
         ],
       }),
     ).toBeNull();
+  });
+});
+
+describe('Overpass request resilience', () => {
+  it('retries temporary failures after trying each endpoint', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('', { status: 429, headers: { 'Retry-After': '0' } }))
+      .mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ elements: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pending = fetchFootways(49, 8, 300);
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    await expect(pending).resolves.toEqual({ status: 'ok', response: { elements: [] } });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not retry a permanent query error', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 400 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchFootways(49, 8, 300)).resolves.toEqual({
+      status: 'all-endpoints-failed',
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it('does not start work with an aborted signal', async () => {
+    const fetchMock = vi.fn<typeof fetch>();
+    vi.stubGlobal('fetch', fetchMock);
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(fetchFootways(49, 8, 300, controller.signal)).rejects.toBeDefined();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
