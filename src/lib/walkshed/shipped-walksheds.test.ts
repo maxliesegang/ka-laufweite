@@ -66,11 +66,37 @@ describe('shipped walksheds', () => {
 
     await preloadShippedWalksheds(['tram']);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toContain('walksheds-tram.json');
+    expect(String(fetchMock.mock.calls[0][0])).toContain('walksheds-tram-300.json');
 
     // A bus lookup fetches only the bus dataset; tram is already cached.
     await loadShippedWalkshedPolygon({ ...stop, type: 'bus' }, 200, true);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[1][0])).toContain('walksheds-bus.json');
+    expect(String(fetchMock.mock.calls[1][0])).toContain('walksheds-bus-200.json');
+  });
+
+  it('loads each supported radius from its own dataset', async () => {
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      const radiusMeters = Number(url.match(/-(\d+)\.json$/)?.[1]);
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          version: WALKSHED_DATA_VERSION,
+          generatedAt: '2026-07-19T12:00:00.000Z',
+          precision: WALKSHED_DATA_PRECISION,
+          allowReasonableStreetCrossings: true,
+          radiusByType: { train: 400, tram: radiusMeters, bus: 200 },
+          polygons: { [walkshedDatasetPolygonKey(stop)]: encodeWalkshedPolygon(polygon) },
+        }),
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const { loadShippedWalkshedPolygon } = await import('./shipped-walksheds');
+
+    expect(await loadShippedWalkshedPolygon(stop, 350, true)).not.toBeNull();
+    expect(await loadShippedWalkshedPolygon(stop, 400, true)).not.toBeNull();
+    expect(await loadShippedWalkshedPolygon(stop, 330, true)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('walksheds-tram-350.json');
+    expect(String(fetchMock.mock.calls[1][0])).toContain('walksheds-tram-400.json');
   });
 });

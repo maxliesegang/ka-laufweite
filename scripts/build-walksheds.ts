@@ -1,7 +1,8 @@
 /**
- * Precompute default-configuration walkshed polygons for every OSM stop and
- * write them to public/data/walksheds-<type>.json (delta-encoded integers), one
- * file per stop type so the map only downloads the types it currently shows.
+ * Precompute supported walkshed polygons for every OSM stop and
+ * write them to public/data/walksheds-<type>-<radius>.json (delta-encoded
+ * integers), one file per stop type and radius so the map only downloads the
+ * exact dataset it currently needs.
  *
  * Reuses the exact runtime modules, so shipped polygons are identical to what
  * the browser would have computed from Overpass. Run periodically alongside
@@ -24,16 +25,17 @@ import { gzipSync } from 'node:zlib';
 import {
   DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
   DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
+  SHIPPED_STOP_RADII_METERS_BY_TYPE,
 } from '../src/lib/settings.ts';
 import { STOP_TYPES, isStop, isStopType, type Stop, type StopType } from '../src/lib/types.ts';
-import { fetchFootwayNetwork } from '../src/lib/walkshed/overpass.ts';
+import { fetchFootwayNetworkInBounds } from '../src/lib/walkshed/overpass.ts';
 import { buildWalkGraph, findNearestEdgeSeeds } from '../src/lib/walkshed/graph.ts';
 import { buildWalkshedPolygonFromSeeds } from '../src/lib/walkshed/polygon.ts';
+import { createWalkshedQueryArea } from '../src/lib/walkshed/query-area.ts';
 import {
   WALKSHED_DATA_PRECISION,
   WALKSHED_DATA_VERSION,
   encodeWalkshedPolygon,
-  partitionWalkshedDatasetByType,
   shippedWalkshedDataFilename,
   walkshedDatasetPolygonKey,
   type WalkshedDataset,
@@ -70,7 +72,10 @@ function createProgressReporter(progressFile: string | null, startedAt: number):
 const dataDir = join(import.meta.dirname, '..', 'public', 'data');
 const stopsPath = join(dataDir, 'osm-stops.json');
 const RETRY_PASSES = 2;
-const DEFAULT_CONCURRENCY = 6;
+const DEFAULT_CONCURRENCY = 2;
+const MAX_STOPS_PER_BATCH = 48;
+const BATCH_LATITUDE_DEGREES = 0.01;
+const BATCH_LONGITUDE_DEGREES = 0.015;
 
 function mib(bytes: number): string {
   return (bytes / 1_048_576).toFixed(2);
@@ -141,57 +146,134 @@ function parseOptions(args: string[]): BuildOptions {
 }
 
 interface StopResult {
-  encoded: number[] | null; // null = legitimately empty (no reachable footways)
-  transientFailure: boolean; // Overpass unreachable/throttled — worth retrying
+  encodedByRadius: Map<number, number[]>;
+  empty: number; // legitimately empty radius variants (no reachable footways)
 }
 
-async function computeStop(stop: Stop): Promise<StopResult> {
-  const radius = DEFAULT_STOP_RADIUS_METERS_BY_TYPE[stop.type];
-  const result = await fetchFootwayNetwork(stop.lat, stop.lon, radius);
-  if (result.status !== 'ok') return { encoded: null, transientFailure: true };
+interface BatchResult {
+  resultsByStopKey: Map<string, StopResult>;
+  transientFailure: boolean;
+}
+
+/** Group stops into small geographic cells. The shared query is padded by the
+ * radius bucket and safety margin, preserving the runtime no-truncation invariant. */
+function createStopBatches(stops: Stop[]): Stop[][] {
+  const stopsByCell = new Map<string, Stop[]>();
+  for (const stop of stops) {
+    const cellKey = `${Math.floor(stop.lat / BATCH_LATITUDE_DEGREES)}:${Math.floor(stop.lon / BATCH_LONGITUDE_DEGREES)}`;
+    const cellStops = stopsByCell.get(cellKey);
+    if (cellStops) cellStops.push(stop);
+    else stopsByCell.set(cellKey, [stop]);
+  }
+
+  const batches: Stop[][] = [];
+  for (const cellStops of stopsByCell.values()) {
+    for (let start = 0; start < cellStops.length; start += MAX_STOPS_PER_BATCH) {
+      batches.push(cellStops.slice(start, start + MAX_STOPS_PER_BATCH));
+    }
+  }
+  return batches;
+}
+
+async function computeBatch(stops: Stop[]): Promise<BatchResult> {
+  const queryArea = createWalkshedQueryArea(
+    stops.map((stop) => ({
+      lat: stop.lat,
+      lon: stop.lon,
+      radiusMeters: Math.max(...SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type]),
+    })),
+  );
+  if (!queryArea) return { resultsByStopKey: new Map(), transientFailure: false };
+
+  const result = await fetchFootwayNetworkInBounds(queryArea.bounds);
+  if (result.status !== 'ok') {
+    return { resultsByStopKey: new Map(), transientFailure: true };
+  }
 
   const graph = buildWalkGraph(result.networkData, DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS);
-  if (!graph) return { encoded: null, transientFailure: false };
+  const resultsByStopKey = new Map<string, StopResult>();
+  if (!graph) {
+    for (const stop of stops) {
+      resultsByStopKey.set(walkshedDatasetPolygonKey(stop), {
+        encodedByRadius: new Map(),
+        empty: SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type].length,
+      });
+    }
+    return { resultsByStopKey, transientFailure: false };
+  }
 
-  const seeds = findNearestEdgeSeeds(graph, stop.lat, stop.lon);
-  const polygon = buildWalkshedPolygonFromSeeds(graph, stop.lat, stop.lon, radius, seeds).polygon;
-  if (!polygon) return { encoded: null, transientFailure: false };
+  for (const stop of stops) {
+    const radii = SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type];
+    const seeds = findNearestEdgeSeeds(graph, stop.lat, stop.lon);
+    const encodedByRadius = new Map<number, number[]>();
+    for (const radiusMeters of radii) {
+      const polygon = buildWalkshedPolygonFromSeeds(
+        graph,
+        stop.lat,
+        stop.lon,
+        radiusMeters,
+        seeds,
+      ).polygon;
+      if (polygon) encodedByRadius.set(radiusMeters, encodeWalkshedPolygon(polygon));
+    }
+    resultsByStopKey.set(walkshedDatasetPolygonKey(stop), {
+      encodedByRadius,
+      empty: radii.length - encodedByRadius.size,
+    });
+  }
 
-  return { encoded: encodeWalkshedPolygon(polygon), transientFailure: false };
+  return { resultsByStopKey, transientFailure: false };
 }
 
 async function runPass(
   stops: Stop[],
-  polygons: Map<string, number[]>,
+  polygons: Map<string, Record<string, number[]>>,
   concurrency: number,
   report: ProgressReporter,
   passLabel: string,
 ): Promise<{ empty: number; failed: Stop[] }> {
+  const batches = createStopBatches(stops);
   let cursor = 0;
   let done = 0;
+  let nextReportAt = 50;
   let empty = 0;
   const failed: Stop[] = [];
 
   async function worker(): Promise<void> {
-    while (cursor < stops.length) {
-      const stop = stops[cursor];
+    while (cursor < batches.length) {
+      const batch = batches[cursor];
       cursor += 1;
       try {
-        const { encoded, transientFailure } = await computeStop(stop);
-        if (transientFailure) failed.push(stop);
-        else if (encoded && encoded.length >= 6) {
-          polygons.set(walkshedDatasetPolygonKey(stop), encoded);
-        } else empty += 1;
+        const { resultsByStopKey, transientFailure } = await computeBatch(batch);
+        if (transientFailure) failed.push(...batch);
+        else {
+          for (const stop of batch) {
+            const stopKey = walkshedDatasetPolygonKey(stop);
+            const stopResult = resultsByStopKey.get(stopKey);
+            if (!stopResult) continue;
+            const polygonsByRadius: Record<string, number[]> = {};
+            for (const [radiusMeters, encoded] of stopResult.encodedByRadius) {
+              if (encoded.length >= 6) polygonsByRadius[String(radiusMeters)] = encoded;
+            }
+            if (Object.keys(polygonsByRadius).length > 0) {
+              polygons.set(stopKey, polygonsByRadius);
+            }
+            empty += stopResult.empty;
+          }
+        }
       } catch (error) {
-        failed.push(stop);
-        if (failed.length <= 3) console.error(`\n  ${stop.id} error:`, String(error));
+        failed.push(...batch);
+        if (failed.length <= batch.length * 3) {
+          console.error(`\n  batch starting at ${batch[0]?.id} error:`, String(error));
+        }
       }
-      done += 1;
-      if (done % 50 === 0 || done === stops.length) {
+      done += batch.length;
+      if (done >= nextReportAt || done === stops.length) {
         report(
           `  ${passLabel}: ${done}/${stops.length}  ` +
-            `(built ${polygons.size}, empty ${empty}, failed ${failed.length})`,
+            `(built ${polygons.size} stops, empty ${empty} variants, failed ${failed.length})`,
         );
+        while (nextReportAt <= done) nextReportAt += 50;
       }
     }
   }
@@ -214,10 +296,10 @@ async function main(): Promise<void> {
   console.log(
     `Building walksheds for ${stops.length} ${types.join('/')} stops ` +
       `(concurrency ${concurrency}, crossings=${DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS}, ` +
-      `radii ${JSON.stringify(DEFAULT_STOP_RADIUS_METERS_BY_TYPE)})`,
+      `radii ${JSON.stringify(SHIPPED_STOP_RADII_METERS_BY_TYPE)})`,
   );
 
-  const polygons = new Map<string, number[]>();
+  const polygons = new Map<string, Record<string, number[]>>();
   const startedAt = Date.now();
   const report = createProgressReporter(progressFile, startedAt);
 
@@ -235,32 +317,41 @@ async function main(): Promise<void> {
   }
 
   // Sort stop keys for deterministic output and compression-friendly shared prefixes.
-  const sortedPolygons: Record<string, number[]> = {};
+  const sortedPolygons: Record<string, Record<string, number[]>> = {};
   for (const id of [...polygons.keys()].sort()) sortedPolygons[id] = polygons.get(id)!;
 
-  const dataset: WalkshedDataset = {
-    version: WALKSHED_DATA_VERSION,
-    generatedAt: new Date().toISOString(),
-    precision: WALKSHED_DATA_PRECISION,
-    allowReasonableStreetCrossings: DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
-    radiusByType: DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
-    polygons: sortedPolygons,
-  };
-
   await mkdir(outDir, { recursive: true });
-  const datasetByType = partitionWalkshedDatasetByType(dataset);
   let totalGzipBytes = 0;
   const perTypeSummaries: string[] = [];
   // Only touch the requested types; other types keep their existing files.
   for (const type of types) {
-    const outPath = join(outDir, shippedWalkshedDataFilename(type));
-    const json = await writeJsonAtomic(outPath, datasetByType[type]);
-    const gzip = gzipSync(Buffer.from(json, 'utf8'), { level: 9 }).length;
-    totalGzipBytes += gzip;
-    const count = Object.keys(datasetByType[type].polygons).length;
-    perTypeSummaries.push(
-      `    ${shippedWalkshedDataFilename(type)}: ${count} (${mib(gzip)} MB gz)`,
-    );
+    const polygonKeysOfType = stops
+      .filter((stop) => stop.type === type)
+      .map(walkshedDatasetPolygonKey)
+      .sort();
+    for (const radiusMeters of SHIPPED_STOP_RADII_METERS_BY_TYPE[type]) {
+      const polygonsForRadius: Record<string, number[]> = {};
+      for (const polygonKey of polygonKeysOfType) {
+        const encoded = sortedPolygons[polygonKey]?.[String(radiusMeters)];
+        if (encoded) polygonsForRadius[polygonKey] = encoded;
+      }
+      const dataset: WalkshedDataset = {
+        version: WALKSHED_DATA_VERSION,
+        generatedAt: new Date().toISOString(),
+        precision: WALKSHED_DATA_PRECISION,
+        allowReasonableStreetCrossings: DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
+        radiusByType: { ...DEFAULT_STOP_RADIUS_METERS_BY_TYPE, [type]: radiusMeters },
+        polygons: polygonsForRadius,
+      };
+      const filename = shippedWalkshedDataFilename(type, radiusMeters);
+      const outPath = join(outDir, filename);
+      const json = await writeJsonAtomic(outPath, dataset);
+      const gzip = gzipSync(Buffer.from(json, 'utf8'), { level: 9 }).length;
+      totalGzipBytes += gzip;
+      perTypeSummaries.push(
+        `    ${filename}: ${Object.keys(polygonsForRadius).length} polygons (${mib(gzip)} MB gz)`,
+      );
+    }
   }
 
   const elapsed = (Date.now() - startedAt) / 1000;
@@ -269,7 +360,7 @@ async function main(): Promise<void> {
       `unresolved ${pending.length}, ${mib(totalGzipBytes)} MB gz`,
   );
   console.log(
-    `\nWrote ${types.length} file(s) to ${outDir}\n` +
+    `\nWrote ${perTypeSummaries.length} file(s) to ${outDir}\n` +
       perTypeSummaries.join('\n') +
       `\n  built ${polygons.size}, empty ${totalEmpty}, unresolved ${pending.length}  |  ${elapsed.toFixed(0)}s\n` +
       `  total ${mib(totalGzipBytes)} MB gzip`,

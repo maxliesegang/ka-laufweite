@@ -76,8 +76,8 @@ describe('walkshed codec', () => {
   });
 
   it('derives the shipped data path per stop type', () => {
-    expect(shippedWalkshedDataPath('bus')).toBe('data/walksheds-bus.json');
-    expect(shippedWalkshedDataPath('train')).toBe('data/walksheds-train.json');
+    expect(shippedWalkshedDataPath('bus', 200)).toBe('data/walksheds-bus-200.json');
+    expect(shippedWalkshedDataPath('train', 450)).toBe('data/walksheds-train-450.json');
   });
 
   it('partitions a combined dataset into one dataset per stop type', () => {

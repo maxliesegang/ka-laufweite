@@ -195,9 +195,19 @@ async function fetchFromEndpoint(
   signal?: AbortSignal,
 ): Promise<OverpassResponse> {
   const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
+  // Public Overpass instances require identifiable non-browser clients. Browsers
+  // supply their own User-Agent and Referer headers, which scripts cannot replace.
+  if (typeof window === 'undefined') {
+    headers['User-Agent'] =
+      'ka-laufweite walkshed builder (https://github.com/maxliesegang/ka-laufweite)';
+    headers.Referer = 'https://maxliesegang.github.io/ka-laufweite/';
+  }
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers,
     body: `data=${encodeURIComponent(query)}`,
     signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
   });

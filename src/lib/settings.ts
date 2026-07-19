@@ -1,6 +1,6 @@
 import { getStorageItem, readStorageJson, setStorageItem, writeStorageJson } from './storage';
 import { STOP_TYPE_CONFIG } from './stop-type-config';
-import { mapStopTypes, stopTypeRecordChanged, type StopType } from './types';
+import { STOP_TYPES, mapStopTypes, type StopType } from './types';
 
 export const LEGACY_STOP_RADIUS_STORAGE_KEY = 'karlsruhe-opnv-stop-radius-meters';
 export const STOP_RADIUS_STORAGE_KEYS: Record<StopType, string> = mapStopTypes(
@@ -15,6 +15,14 @@ export const DEFAULT_STOP_RADIUS_METERS_BY_TYPE: Record<StopType, number> = {
   train: 400,
   tram: 300,
   bus: 200,
+};
+
+/** Radii covered by the optional precomputed walkshed datasets. Train and tram
+ *  get two useful increments without taking on the much larger bus dataset. */
+export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number[]> = {
+  train: [400, 450, 500],
+  tram: [300, 350, 400],
+  bus: [200],
 };
 
 export const MIN_STOP_RADIUS_METERS = 50;
@@ -124,14 +132,14 @@ export const SETTINGS_STORAGE_KEYS: readonly string[] = [
 ];
 
 /**
- * Whether the given configuration matches the one the shipped default polygons
- * were baked with. Only such configurations can be served from the precomputed
+ * Whether the given configuration is covered by the shipped polygons. Only
+ * such configurations can be served entirely from the precomputed
  * dataset (see {@link loadShippedWalkshedPolygon}); anything else must be
  * computed live from Overpass. Kept here — beside the DEFAULT_* constants it
  * compares against — so the map preload, the config status message, and the
  * shipped-walkshed lookup share one source of truth.
  */
-export function matchesShippedWalkshedDefaults(
+export function matchesShippedWalkshedConfiguration(
   radiusByType: StopRadiusByType,
   coverageShape: CoverageShape,
   allowReasonableStreetCrossings: boolean,
@@ -139,7 +147,9 @@ export function matchesShippedWalkshedDefaults(
   return (
     coverageShape === DEFAULT_COVERAGE_SHAPE &&
     allowReasonableStreetCrossings === DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS &&
-    !stopTypeRecordChanged(radiusByType, DEFAULT_STOP_RADIUS_METERS_BY_TYPE)
+    STOP_TYPES.every((stopType) =>
+      SHIPPED_STOP_RADII_METERS_BY_TYPE[stopType].includes(radiusByType[stopType]),
+    )
   );
 }
 

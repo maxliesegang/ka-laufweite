@@ -38,15 +38,15 @@ export function walkshedDatasetPolygonKey(stop: Pick<Stop, 'id' | 'lat' | 'lon' 
   return `${stop.id}:${stop.type}:${stop.lat}:${stop.lon}`;
 }
 
-/** Basename of the shipped dataset for one stop type. Split per type so the map
- *  only downloads the polygons for the stop types it currently shows. */
-export function shippedWalkshedDataFilename(type: StopType): string {
-  return `walksheds-${type}.json`;
+/** Basename of the shipped dataset for one stop type and radius, so the map
+ *  only downloads the exact polygon set it currently needs. */
+export function shippedWalkshedDataFilename(type: StopType, radiusMeters: number): string {
+  return `walksheds-${type}-${radiusMeters}.json`;
 }
 
-/** Public path (relative to BASE_URL) of the shipped dataset for one stop type. */
-export function shippedWalkshedDataPath(type: StopType): string {
-  return `data/${shippedWalkshedDataFilename(type)}`;
+/** Public path (relative to BASE_URL) of one shipped type/radius dataset. */
+export function shippedWalkshedDataPath(type: StopType, radiusMeters: number): string {
+  return `data/${shippedWalkshedDataFilename(type, radiusMeters)}`;
 }
 
 /**

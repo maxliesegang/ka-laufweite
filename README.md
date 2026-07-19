@@ -8,7 +8,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 
 - **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation in a Web Worker when available
 - **Batched network loading** — nearby stops share bounded Overpass queries and cached walk graphs instead of fetching the same footway network repeatedly
-- **Fast defaults** — precomputed polygons can ship with the app for the default stop radii, with automatic fallback to live calculation
+- **Fast common radii** — precomputed polygons can ship with the app for common stop radii, with automatic fallback to live calculation
 - **Circle mode** — simple air-line radius as a faster alternative
 - **Custom stops** — click anywhere on the map to add your own stops and choose their type
 - **Per-stop walkshed toggle** — hide or show the walkshed polygon for an individual stop from its popup, persisted across reloads
@@ -25,7 +25,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 ```sh
 npm install
 npm run update:stops   # fetch stop data from Overpass API
-npm run build:walksheds # optionally refresh the shipped default polygons
+npm run build:walksheds # optionally refresh the shipped common-radius polygons
 npm run dev            # start dev server
 ```
 
@@ -93,13 +93,15 @@ npm run update:stops
 
 This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `highway=bus_stop`, and `amenity=bus_station` in the KVV bounding box.
 
-To rebuild the optional shipped polygon snapshot for the current stops and default settings, run
-`npm run build:walksheds`. It writes one file per stop type — `public/data/walksheds-{train,tram,bus}.json` —
-so the map only downloads the polygons for the types it currently shows (bus is hidden by default and
-loads lazily). The generator accepts `--types`, `--limit`, `--concurrency`, and `--out-dir` options
-after `--`. Use `--types` to build a subset — e.g. `--types train,tram` — leaving the other types'
-files untouched (handy because bus has by far the most stops). Its output is versioned, validated at
-runtime, and keyed by stop type and coordinates so stale polygons are ignored after a stop changes.
+To rebuild the optional shipped polygon snapshot for the current stops and supported radii, run
+`npm run build:walksheds`. It writes one file per stop type and radius — for example,
+`public/data/walksheds-train-450.json` — so the map only downloads the exact dataset selected by the
+user (bus is hidden by default and loads lazily). Train and tram ship their default radius plus 50 m
+and 100 m; bus retains only its default. The generator accepts `--types`, `--limit`, `--concurrency`,
+and `--out-dir` options after `--`. Use `--types` to build a subset — e.g. `--types train,tram` —
+leaving the other types' files untouched (handy because bus has by far the most stops). Its output is
+versioned, validated at runtime, and keyed by stop type and coordinates so stale polygons are ignored
+after a stop changes.
 
 The stop snapshot is refreshed automatically on the first day of every month. The workflow commits verified data changes to the default branch and can also be started manually from GitHub Actions.
 
@@ -174,7 +176,7 @@ src/
     walkshed/
       service.ts                # requests, results, batching orchestration, and runtime caches
       cache-key.ts              # shared cache-key format (stop id + radius)
-      shipped-walksheds.ts      # validated loader for precomputed default polygons
+      shipped-walksheds.ts      # validated loader for precomputed common-radius polygons
       walkshed-codec.ts         # compact shipped-polygon format and validation
       overpass.ts               # footway-network client with endpoint scoring
       query-area.ts             # radius buckets, padded bounds, and shared area keys
@@ -193,7 +195,7 @@ scripts/
   update-osm-stops.mjs          # CLI script to refresh stop data
 public/
   data/osm-stops.json           # static stop snapshot
-  data/walksheds-*.json         # optional shipped polygons by stop type
+  data/walksheds-*.json         # optional shipped polygons by stop type and radius
 ```
 
 ## License

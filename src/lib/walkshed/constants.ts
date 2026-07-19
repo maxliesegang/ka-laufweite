@@ -4,6 +4,7 @@
 // request as a generic "CORS failed". A broad pool spreads load and keeps a
 // fallback alive when one instance is rate-limiting.
 export const OVERPASS_ENDPOINT_URLS = [
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
   'https://overpass-api.de/api/interpreter',
   'https://lz4.overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',

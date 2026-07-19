@@ -9,7 +9,7 @@ import {
   type CoverageShape,
   type StopRadiusByType,
   COVERAGE_SHAPE_COMPACT_LABELS,
-  matchesShippedWalkshedDefaults,
+  matchesShippedWalkshedConfiguration,
   getConfiguredCoverageShape,
   getConfiguredStopRadii,
   getAllowReasonableStreetCrossings,
@@ -239,12 +239,12 @@ export function initConfigPage(): void {
       clearTimer();
       await clearWalkshedCache();
       await updateCacheStatus();
-      saveStatus.textContent = matchesShippedWalkshedDefaults(
+      saveStatus.textContent = matchesShippedWalkshedConfiguration(
         currentRadiusByType,
         currentShape,
         currentAllowCrossings,
       )
-        ? 'Polygon-Cache wurde gelöscht. Standardpolygone werden auf der Karte aus den mitgelieferten Daten wiederhergestellt.'
+        ? 'Polygon-Cache wurde gelöscht. Mitgelieferte Polygone werden auf der Karte wiederhergestellt.'
         : 'Polygon-Cache wurde gelöscht. Einstellungen bleiben unverändert.';
     });
   });
