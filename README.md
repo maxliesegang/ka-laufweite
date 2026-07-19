@@ -6,7 +6,8 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 
 ## Features
 
-- **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation
+- **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation in a Web Worker when available
+- **Batched network loading** — nearby stops share bounded Overpass queries and cached walk graphs instead of fetching the same footway network repeatedly
 - **Fast defaults** — precomputed polygons can ship with the app for the default stop radii, with automatic fallback to live calculation
 - **Circle mode** — simple air-line radius as a faster alternative
 - **Custom stops** — click anywhere on the map to add your own stops and choose their type
@@ -59,6 +60,12 @@ Type-check the Astro and TypeScript sources with:
 npm run check
 ```
 
+Run the unit tests with:
+
+```sh
+npm test
+```
+
 ### GitHub Pages
 
 ```sh
@@ -106,11 +113,15 @@ The stop snapshot is refreshed automatically on the first day of every month. Th
 
 ## How Walksheds Work
 
-1. When a stop becomes visible on the map, a matching shipped or browser-cached polygon is used when available; otherwise footpath data is fetched from the Overpass API (endpoints are scored by latency/failures and the fastest is preferred)
-2. A walk graph is built from OSM ways and nodes
-3. Dijkstra's shortest path algorithm computes reachable distances, seeded from the nearest walkable node(s) near the stop
-4. Boundary points are collected where the walking budget runs out (including interpolated edge cutoffs)
-5. A concave hull wraps the boundary points into a polygon, with convex hull as fallback
+1. When stops become visible, matching shipped or browser-cached polygons are loaded first.
+2. Remaining nearby stops are grouped into bounded batches. Each batch shares one padded Overpass query area and one footway network response; endpoints are scored by latency and failures.
+3. A spatially indexed walk graph is built from the OSM ways and nodes and cached in memory with LRU limits.
+4. Each stop is projected onto its nearest walkable edge and receives its own graph seeds and walking radius.
+5. Dijkstra's shortest-path algorithm computes reachable nodes for every stop independently. Polygon calculation runs in a Web Worker when supported, with a synchronous compatibility fallback.
+6. Boundary points are collected from the settled subgraph where the walking budget runs out, including interpolated edge cutoffs.
+7. A concave hull wraps the boundary points into a polygon, with a convex hull as fallback.
+
+Batching does not change walkshed correctness: query bounds contain every stop and are padded by a radius bucket plus a safety margin, so routes reachable within each requested radius are not truncated at the query boundary.
 
 ## Map Rendering
 
@@ -126,6 +137,7 @@ The stop snapshot is refreshed automatically on the first day of every month. Th
 - Primary storage is IndexedDB (`karlsruhe-opnv-walkshed-cache-v1`); localStorage is only used as fallback
 - Cache entries are pruned after 30 days and capped by size (4000 total entries, max 1000 unavailable entries)
 - Temporary unavailable results use retry windows (2 minutes for transient failures, 24 hours for no-data cases)
+- Raw Overpass responses and walk graphs are runtime-only, weighted-LRU cached, and never persisted
 - Cache can be cleared from the config page (`Cache zurücksetzen`)
 
 ## Project Structure
@@ -160,21 +172,28 @@ src/
     walkshed-cache.ts           # cache policy + invalidation + reset marker sync
     walkshed-cache-persistence.ts # IndexedDB/localStorage persistence adapter
     walkshed/
-      service.ts                # walkshed orchestration and caching
-      cache-key.ts              # shared cache-key format (stop id + distance)
+      service.ts                # requests, results, batching orchestration, and runtime caches
+      cache-key.ts              # shared cache-key format (stop id + radius)
       shipped-walksheds.ts      # validated loader for precomputed default polygons
       walkshed-codec.ts         # compact shipped-polygon format and validation
-      overpass.ts               # Overpass API client with endpoint scoring
-      graph.ts                  # graph construction, nearest node, Dijkstra
+      overpass.ts               # footway-network client with endpoint scoring
+      query-area.ts             # radius buckets, padded bounds, and shared area keys
+      graph.ts                  # graph construction, spatial edge index, and Dijkstra
       polygon.ts                # boundary collection and hull generation
-      geo.ts                    # haversine, bbox, coordinate math
-      priority-queue.ts         # min-heap for Dijkstra
+      polygon-calculation.ts    # per-stop graph routing and polygon calculation
+      polygon-calculation-worker.ts # worker-side graph cache and calculations
+      polygon-calculation-worker-client.ts # worker lifecycle and requests
+      polygon-calculation-worker-protocol.ts # typed worker messages
+      geo.ts                    # haversine, bounding-box, and coordinate math
+      priority-queue.ts         # minimum-distance heap for Dijkstra
+      weighted-lru-cache.ts     # bounded runtime cache utility
       constants.ts              # algorithm parameters
       types.ts                  # walkshed-specific types
 scripts/
   update-osm-stops.mjs          # CLI script to refresh stop data
 public/
   data/osm-stops.json           # static stop snapshot
+  data/walksheds-*.json         # optional shipped polygons by stop type
 ```
 
 ## License

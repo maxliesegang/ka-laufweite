@@ -7,8 +7,8 @@ import {
   POINT_KEY_DECIMALS,
 } from './constants';
 import { METERS_PER_LAT_DEGREE, metersPerLonDegree } from './geo';
-import { shortestPathDistancesFromSeeds } from './graph';
-import type { LatLng, LocalPoint, NearestNodeMatch, WalkGraph, WalkshedAttempt } from './types';
+import { calculateShortestPaths } from './graph';
+import type { GraphSeed, LatLng, LocalPoint, WalkGraph, WalkshedPolygonAttempt } from './types';
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -32,22 +32,26 @@ function addUniquePoint(points: LatLng[], seen: Set<string>, point: LatLng): voi
 
 function collectReachableBoundaryPoints(
   graph: WalkGraph,
-  distances: Float64Array,
-  maxDistance: number,
+  distanceByNodeIndex: Float64Array,
+  maxDistanceMeters: number,
+  settledNodeIndexes: number[],
 ): LatLng[] {
   const points: LatLng[] = [];
   const seen = new Set<string>();
+  const visitedEdges = new Set<string>();
 
-  for (let from = 0; from < graph.adjacency.length; from += 1) {
-    const fromDistance = distances[from];
-    const fromReachable = Number.isFinite(fromDistance) && fromDistance <= maxDistance;
+  for (const from of settledNodeIndexes) {
+    const fromDistance = distanceByNodeIndex[from];
+    const fromReachable = Number.isFinite(fromDistance) && fromDistance <= maxDistanceMeters;
 
     for (const edge of graph.adjacency[from]) {
-      const to = edge.to;
-      if (from > to) continue;
+      const to = edge.toNodeIndex;
+      const edgeKey = from < to ? `${from}:${to}` : `${to}:${from}`;
+      if (visitedEdges.has(edgeKey)) continue;
+      visitedEdges.add(edgeKey);
 
-      const toDistance = distances[to];
-      const toReachable = Number.isFinite(toDistance) && toDistance <= maxDistance;
+      const toDistance = distanceByNodeIndex[to];
+      const toReachable = Number.isFinite(toDistance) && toDistance <= maxDistanceMeters;
       if (!fromReachable && !toReachable) continue;
 
       const fromPoint = graph.nodes[from];
@@ -56,9 +60,9 @@ function collectReachableBoundaryPoints(
       if (fromReachable) {
         addUniquePoint(points, seen, fromPoint);
 
-        const fromRemaining = maxDistance - fromDistance;
-        if (fromRemaining > 0 && fromRemaining < edge.distance) {
-          const t = fromRemaining / edge.distance;
+        const fromRemaining = maxDistanceMeters - fromDistance;
+        if (fromRemaining > 0 && fromRemaining < edge.distanceMeters) {
+          const t = fromRemaining / edge.distanceMeters;
           addUniquePoint(points, seen, interpolate(fromPoint, toPoint, t));
         }
       }
@@ -66,9 +70,9 @@ function collectReachableBoundaryPoints(
       if (toReachable) {
         addUniquePoint(points, seen, toPoint);
 
-        const toRemaining = maxDistance - toDistance;
-        if (toRemaining > 0 && toRemaining < edge.distance) {
-          const t = toRemaining / edge.distance;
+        const toRemaining = maxDistanceMeters - toDistance;
+        if (toRemaining > 0 && toRemaining < edge.distanceMeters) {
+          const t = toRemaining / edge.distanceMeters;
           addUniquePoint(points, seen, interpolate(toPoint, fromPoint, t));
         }
       }
@@ -194,22 +198,31 @@ function polygonFromBoundaryPoints(
   return fallbackHull.map((point) => fromLocalMeters(point, centerLat, centerLon));
 }
 
-export function buildPolygonFromSeedNodes(
+export function buildWalkshedPolygonFromSeeds(
   graph: WalkGraph,
   centerLat: number,
   centerLon: number,
-  distanceMeters: number,
-  seeds: NearestNodeMatch[],
-): WalkshedAttempt {
+  radiusMeters: number,
+  seeds: GraphSeed[],
+): WalkshedPolygonAttempt {
   const effectiveSeeds = seeds.filter(
-    (seed) => distanceMeters - seed.distanceMeters >= MIN_EFFECTIVE_WALK_DISTANCE_METERS,
+    (seed) => radiusMeters - seed.initialDistanceMeters >= MIN_EFFECTIVE_WALK_DISTANCE_METERS,
   );
   if (effectiveSeeds.length === 0) {
     return { polygon: null, boundaryPointCount: 0 };
   }
 
-  const distances = shortestPathDistancesFromSeeds(graph, effectiveSeeds, distanceMeters);
-  const boundaryPoints = collectReachableBoundaryPoints(graph, distances, distanceMeters);
+  const { distanceByNodeIndex, settledNodeIndexes } = calculateShortestPaths(
+    graph,
+    effectiveSeeds,
+    radiusMeters,
+  );
+  const boundaryPoints = collectReachableBoundaryPoints(
+    graph,
+    distanceByNodeIndex,
+    radiusMeters,
+    settledNodeIndexes,
+  );
   // This remains a visual hull approximation of the reachable network. Do not
   // force the stop into it: the straight snap connector may cross a real barrier.
 

@@ -40,11 +40,11 @@ describe('shipped walksheds', () => {
 
   it('loads polygons only for the matching stop snapshot', async () => {
     stubDatasetFetch(walkshedDatasetPolygonKey(stop));
-    const { getShippedWalkshedPolygon } = await import('./shipped-walksheds');
+    const { loadShippedWalkshedPolygon } = await import('./shipped-walksheds');
 
-    expect(await getShippedWalkshedPolygon(stop, 300, true)).not.toBeNull();
+    expect(await loadShippedWalkshedPolygon(stop, 300, true)).not.toBeNull();
     expect(
-      await getShippedWalkshedPolygon({ ...stop, lat: stop.lat + 0.001 }, 300, true),
+      await loadShippedWalkshedPolygon({ ...stop, lat: stop.lat + 0.001 }, 300, true),
     ).toBeNull();
   });
 
@@ -61,7 +61,7 @@ describe('shipped walksheds', () => {
       }),
     });
     vi.stubGlobal('fetch', fetchMock);
-    const { preloadShippedWalksheds, getShippedWalkshedPolygon } =
+    const { preloadShippedWalksheds, loadShippedWalkshedPolygon } =
       await import('./shipped-walksheds');
 
     await preloadShippedWalksheds(['tram']);
@@ -69,7 +69,7 @@ describe('shipped walksheds', () => {
     expect(String(fetchMock.mock.calls[0][0])).toContain('walksheds-tram.json');
 
     // A bus lookup fetches only the bus dataset; tram is already cached.
-    await getShippedWalkshedPolygon({ ...stop, type: 'bus' }, 200, true);
+    await loadShippedWalkshedPolygon({ ...stop, type: 'bus' }, 200, true);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(String(fetchMock.mock.calls[1][0])).toContain('walksheds-bus.json');
   });

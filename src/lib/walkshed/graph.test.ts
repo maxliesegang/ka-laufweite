@@ -1,23 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { buildWalkGraph, nearestEdgeSeeds, shortestPathDistancesFromSeeds } from './graph';
+import { buildWalkGraph, calculateShortestPathDistances, findNearestEdgeSeeds } from './graph';
 import type { OverpassResponse } from './types';
 
 function lineGraph(): NonNullable<ReturnType<typeof buildWalkGraph>> {
-  const response: OverpassResponse = {
+  const networkData: OverpassResponse = {
     elements: [
       { type: 'node', id: 1, lat: 49, lon: 8 },
       { type: 'node', id: 2, lat: 49, lon: 8.002 },
       { type: 'way', id: 10, nodes: [1, 2] },
     ],
   };
-  const graph = buildWalkGraph(response);
+  const graph = buildWalkGraph(networkData);
   if (!graph) throw new Error('expected graph');
   return graph;
 }
 
 describe('walk graph', () => {
   it('adds short perpendicular crossings throughout the graph when enabled', () => {
-    const response: OverpassResponse = {
+    const networkData: OverpassResponse = {
       elements: [
         { type: 'node', id: 1, lat: 49.00008, lon: 8 },
         { type: 'node', id: 2, lat: 49.00008, lon: 8.001 },
@@ -30,18 +30,18 @@ describe('walk graph', () => {
         { type: 'way', id: 12, nodes: [5, 6], tags: { highway: 'residential' } },
       ],
     };
-    const mappedOnly = buildWalkGraph(response, false);
-    const withCrossings = buildWalkGraph(response, true);
+    const mappedOnly = buildWalkGraph(networkData, false);
+    const withCrossings = buildWalkGraph(networkData, true);
     if (!mappedOnly || !withCrossings) throw new Error('expected graphs');
 
-    const mappedDistances = shortestPathDistancesFromSeeds(
+    const mappedDistances = calculateShortestPathDistances(
       mappedOnly,
-      [{ index: 0, distanceMeters: 0 }],
+      [{ nodeIndex: 0, initialDistanceMeters: 0 }],
       100,
     );
-    const crossingDistances = shortestPathDistancesFromSeeds(
+    const crossingDistances = calculateShortestPathDistances(
       withCrossings,
-      [{ index: 0, distanceMeters: 0 }],
+      [{ nodeIndex: 0, initialDistanceMeters: 0 }],
       100,
     );
     expect(mappedDistances[2]).toBe(Number.POSITIVE_INFINITY);
@@ -50,30 +50,34 @@ describe('walk graph', () => {
 
   it('projects a stop onto one edge and charges along-edge access costs', () => {
     const graph = lineGraph();
-    const seeds = nearestEdgeSeeds(graph, 49, 8.001);
+    expect(graph.edgeIndex).toBeDefined();
+    const seeds = findNearestEdgeSeeds(graph, 49, 8.001);
     expect(seeds).toHaveLength(2);
-    expect(seeds[0].distanceMeters).toBeGreaterThan(70);
-    expect(seeds[0].distanceMeters).toBeLessThan(80);
-    expect(seeds[1].distanceMeters).toBeGreaterThan(70);
-    expect(seeds[1].distanceMeters).toBeLessThan(80);
+    expect(seeds[0].initialDistanceMeters).toBeGreaterThan(70);
+    expect(seeds[0].initialDistanceMeters).toBeLessThan(80);
+    expect(seeds[1].initialDistanceMeters).toBeGreaterThan(70);
+    expect(seeds[1].initialDistanceMeters).toBeLessThan(80);
   });
 
   it('does not seed a disconnected nearby edge as an additional source', () => {
     const graph = lineGraph();
     graph.nodes.push([49.0001, 8], [49.0001, 8.002]);
-    graph.adjacency.push([{ to: 3, distance: 146 }], [{ to: 2, distance: 146 }]);
-    const seeds = nearestEdgeSeeds(graph, 49.00001, 8.001);
-    expect(new Set(seeds.map((seed) => seed.index))).toEqual(new Set([0, 1]));
+    graph.adjacency.push(
+      [{ toNodeIndex: 3, distanceMeters: 146 }],
+      [{ toNodeIndex: 2, distanceMeters: 146 }],
+    );
+    const seeds = findNearestEdgeSeeds(graph, 49.00001, 8.001);
+    expect(new Set(seeds.map((seed) => seed.nodeIndex))).toEqual(new Set([0, 1]));
   });
 
   it('respects the distance budget in Dijkstra traversal', () => {
     const graph = lineGraph();
-    const distances = shortestPathDistancesFromSeeds(
+    const distanceByNodeIndex = calculateShortestPathDistances(
       graph,
-      [{ index: 0, distanceMeters: 10 }],
+      [{ nodeIndex: 0, initialDistanceMeters: 10 }],
       100,
     );
-    expect(distances[0]).toBe(10);
-    expect(distances[1]).toBe(Number.POSITIVE_INFINITY);
+    expect(distanceByNodeIndex[0]).toBe(10);
+    expect(distanceByNodeIndex[1]).toBe(Number.POSITIVE_INFINITY);
   });
 });

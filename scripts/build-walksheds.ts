@@ -26,9 +26,9 @@ import {
   DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
 } from '../src/lib/settings.ts';
 import { STOP_TYPES, isStop, isStopType, type Stop, type StopType } from '../src/lib/types.ts';
-import { fetchFootways } from '../src/lib/walkshed/overpass.ts';
-import { buildWalkGraph, nearestEdgeSeeds } from '../src/lib/walkshed/graph.ts';
-import { buildPolygonFromSeedNodes } from '../src/lib/walkshed/polygon.ts';
+import { fetchFootwayNetwork } from '../src/lib/walkshed/overpass.ts';
+import { buildWalkGraph, findNearestEdgeSeeds } from '../src/lib/walkshed/graph.ts';
+import { buildWalkshedPolygonFromSeeds } from '../src/lib/walkshed/polygon.ts';
 import {
   WALKSHED_DATA_PRECISION,
   WALKSHED_DATA_VERSION,
@@ -147,14 +147,14 @@ interface StopResult {
 
 async function computeStop(stop: Stop): Promise<StopResult> {
   const radius = DEFAULT_STOP_RADIUS_METERS_BY_TYPE[stop.type];
-  const result = await fetchFootways(stop.lat, stop.lon, radius);
+  const result = await fetchFootwayNetwork(stop.lat, stop.lon, radius);
   if (result.status !== 'ok') return { encoded: null, transientFailure: true };
 
-  const graph = buildWalkGraph(result.response, DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS);
+  const graph = buildWalkGraph(result.networkData, DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS);
   if (!graph) return { encoded: null, transientFailure: false };
 
-  const seeds = nearestEdgeSeeds(graph, stop.lat, stop.lon);
-  const polygon = buildPolygonFromSeedNodes(graph, stop.lat, stop.lon, radius, seeds).polygon;
+  const seeds = findNearestEdgeSeeds(graph, stop.lat, stop.lon);
+  const polygon = buildWalkshedPolygonFromSeeds(graph, stop.lat, stop.lon, radius, seeds).polygon;
   if (!polygon) return { encoded: null, transientFailure: false };
 
   return { encoded: encodeWalkshedPolygon(polygon), transientFailure: false };

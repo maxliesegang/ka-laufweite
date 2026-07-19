@@ -126,7 +126,7 @@ export const SETTINGS_STORAGE_KEYS: readonly string[] = [
 /**
  * Whether the given configuration matches the one the shipped default polygons
  * were baked with. Only such configurations can be served from the precomputed
- * dataset (see {@link getShippedWalkshedPolygon}); anything else must be
+ * dataset (see {@link loadShippedWalkshedPolygon}); anything else must be
  * computed live from Overpass. Kept here — beside the DEFAULT_* constants it
  * compares against — so the map preload, the config status message, and the
  * shipped-walkshed lookup share one source of truth.

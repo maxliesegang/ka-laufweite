@@ -1,5 +1,5 @@
 import { QUERY_PADDING_METERS } from './constants';
-import type { LatLng } from './types';
+import type { BoundingBox, LatLng } from './types';
 
 export const METERS_PER_LAT_DEGREE = 111_320;
 
@@ -22,15 +22,47 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
   return 2 * earthRadius * Math.asin(Math.sqrt(x));
 }
 
-export function bboxForStop(lat: number, lon: number, radiusMeters: number) {
-  const radius = radiusMeters + QUERY_PADDING_METERS;
-  const latDelta = radius / METERS_PER_LAT_DEGREE;
-  const lonDelta = radius / metersPerLonDegree(lat);
+/**
+ * Grow a bounding box outward by at least `paddingMeters` on every side.
+ * Longitude uses the poleward padded edge, where a degree is shortest, so the
+ * requested margin is preserved throughout the box.
+ */
+export function padBoundingBox(bounds: BoundingBox, paddingMeters: number): BoundingBox {
+  const latDelta = paddingMeters / METERS_PER_LAT_DEGREE;
+  const south = bounds.south - latDelta;
+  const north = bounds.north + latDelta;
+  const polewardLatitude = Math.max(Math.abs(south), Math.abs(north));
+  const lonDelta = paddingMeters / metersPerLonDegree(polewardLatitude);
 
   return {
-    south: lat - latDelta,
-    west: lon - lonDelta,
-    north: lat + latDelta,
-    east: lon + lonDelta,
+    south,
+    west: bounds.west - lonDelta,
+    north,
+    east: bounds.east + lonDelta,
   };
+}
+
+/** Smallest bounding box containing every point, or null when given none. */
+export function boundsContaining(points: LatLng[]): BoundingBox | null {
+  if (points.length === 0) return null;
+
+  let south = Number.POSITIVE_INFINITY;
+  let west = Number.POSITIVE_INFINITY;
+  let north = Number.NEGATIVE_INFINITY;
+  let east = Number.NEGATIVE_INFINITY;
+  for (const [lat, lon] of points) {
+    south = Math.min(south, lat);
+    north = Math.max(north, lat);
+    west = Math.min(west, lon);
+    east = Math.max(east, lon);
+  }
+
+  return { south, west, north, east };
+}
+
+export function boundingBoxForStop(lat: number, lon: number, radiusMeters: number): BoundingBox {
+  return padBoundingBox(
+    { south: lat, west: lon, north: lat, east: lon },
+    radiusMeters + QUERY_PADDING_METERS,
+  );
 }

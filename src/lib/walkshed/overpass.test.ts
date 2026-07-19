@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OVERPASS_ENDPOINT_URLS } from './constants';
-import { fetchFootways, parseOverpassResponse } from './overpass';
+import { fetchFootwayNetwork, parseOverpassResponse } from './overpass';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -41,10 +41,10 @@ describe('Overpass request resilience', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
 
-    const pending = fetchFootways(49, 8, 300);
+    const pending = fetchFootwayNetwork(49, 8, 300);
     await vi.advanceTimersByTimeAsync(1_000);
 
-    await expect(pending).resolves.toEqual({ status: 'ok', response: { elements: [] } });
+    await expect(pending).resolves.toEqual({ status: 'ok', networkData: { elements: [] } });
     expect(fetchMock).toHaveBeenCalledTimes(OVERPASS_ENDPOINT_URLS.length + 1);
   });
 
@@ -52,7 +52,7 @@ describe('Overpass request resilience', () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 400 }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchFootways(49, 8, 300)).resolves.toEqual({
+    await expect(fetchFootwayNetwork(49, 8, 300)).resolves.toEqual({
       status: 'all-endpoints-failed',
     });
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -64,7 +64,7 @@ describe('Overpass request resilience', () => {
     const controller = new AbortController();
     controller.abort();
 
-    await expect(fetchFootways(49, 8, 300, controller.signal)).rejects.toBeDefined();
+    await expect(fetchFootwayNetwork(49, 8, 300, controller.signal)).rejects.toBeDefined();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

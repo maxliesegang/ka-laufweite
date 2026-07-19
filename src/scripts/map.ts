@@ -51,7 +51,7 @@ import {
 } from '../lib/walkshed-cache';
 import {
   clearWalkshedRuntimeCache,
-  removeWalkshedRuntimeCacheForStop,
+  invalidateWalkshedRuntimeCacheForStop,
 } from '../lib/walkshed/service';
 import { preloadShippedWalksheds } from '../lib/walkshed/shipped-walksheds';
 import {
@@ -412,7 +412,7 @@ class TransitMapController {
   }
 
   private async invalidateStopWalkshedCache(stopId: string): Promise<void> {
-    removeWalkshedRuntimeCacheForStop(stopId);
+    invalidateWalkshedRuntimeCacheForStop(stopId);
     await removeCachedWalkshedPolygonsForStop(stopId);
     this.walkshedCacheResetMarker = getWalkshedCacheResetMarker();
   }

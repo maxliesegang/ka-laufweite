@@ -6,7 +6,7 @@ const cacheMocks = vi.hoisted(() => ({
   getPolygon: vi.fn(),
   setPolygon: vi.fn(),
 }));
-const fetchMocks = vi.hoisted(() => ({ fetchFootways: vi.fn() }));
+const fetchMocks = vi.hoisted(() => ({ fetchFootwayNetworkInBounds: vi.fn() }));
 const shippedMocks = vi.hoisted(() => ({ getPolygon: vi.fn() }));
 
 vi.mock('../walkshed-cache', () => ({
@@ -16,15 +16,17 @@ vi.mock('../walkshed-cache', () => ({
   setCachedWalkshedPolygon: cacheMocks.setPolygon,
   setCachedWalkshedUnavailable: vi.fn(),
 }));
-vi.mock('./overpass', () => ({ fetchFootways: fetchMocks.fetchFootways }));
+vi.mock('./overpass', () => ({
+  fetchFootwayNetworkInBounds: fetchMocks.fetchFootwayNetworkInBounds,
+}));
 vi.mock('./shipped-walksheds', () => ({
-  getShippedWalkshedPolygon: shippedMocks.getPolygon,
+  loadShippedWalkshedPolygon: shippedMocks.getPolygon,
 }));
 
 import {
   buildWalkshedPolygon,
   clearWalkshedRuntimeCache,
-  peekCachedWalkshedPolygon,
+  loadCachedWalkshedPolygon,
 } from './service';
 
 const stop: Stop = { id: 'custom-1', name: 'Test', lat: 49, lon: 8.001, type: 'bus' };
@@ -35,7 +37,7 @@ describe('walkshed service revisions', () => {
     cacheMocks.marker = '';
     cacheMocks.getPolygon.mockReset().mockResolvedValue(null);
     cacheMocks.setPolygon.mockReset();
-    fetchMocks.fetchFootways.mockReset();
+    fetchMocks.fetchFootwayNetworkInBounds.mockReset();
     shippedMocks.getPolygon.mockReset().mockResolvedValue(null);
   });
 
@@ -43,7 +45,7 @@ describe('walkshed service revisions', () => {
     const persistedPolygon = [[49, 8]] as const;
     cacheMocks.getPolygon.mockResolvedValue(persistedPolygon);
 
-    expect(await peekCachedWalkshedPolygon(stop, 500)).toBe(persistedPolygon);
+    expect(await loadCachedWalkshedPolygon(stop, 500)).toBe(persistedPolygon);
     expect(shippedMocks.getPolygon).not.toHaveBeenCalled();
   });
 
@@ -51,7 +53,7 @@ describe('walkshed service revisions', () => {
     const shippedPolygon = [[49, 8]] as const;
     shippedMocks.getPolygon.mockResolvedValue(shippedPolygon);
 
-    expect(await peekCachedWalkshedPolygon(stop, 500)).toBe(shippedPolygon);
+    expect(await loadCachedWalkshedPolygon(stop, 500)).toBe(shippedPolygon);
   });
 
   it('restores a shipped default after the persistent and runtime caches are cleared', async () => {
@@ -60,7 +62,7 @@ describe('walkshed service revisions', () => {
     cacheMocks.getPolygon.mockResolvedValue(persistedPolygon);
     shippedMocks.getPolygon.mockResolvedValue(shippedPolygon);
 
-    expect(await peekCachedWalkshedPolygon(stop, 500)).toBe(persistedPolygon);
+    expect(await loadCachedWalkshedPolygon(stop, 500)).toBe(persistedPolygon);
 
     clearWalkshedRuntimeCache();
     cacheMocks.getPolygon.mockResolvedValue(null);
@@ -69,22 +71,22 @@ describe('walkshed service revisions', () => {
       status: 'polygon',
       polygon: shippedPolygon,
     });
-    expect(fetchMocks.fetchFootways).not.toHaveBeenCalled();
+    expect(fetchMocks.fetchFootwayNetworkInBounds).not.toHaveBeenCalled();
   });
 
   it('does not commit a calculation superseded by cache invalidation', async () => {
     let resolveFetch: ((value: unknown) => void) | undefined;
-    fetchMocks.fetchFootways.mockReturnValue(
+    fetchMocks.fetchFootwayNetworkInBounds.mockReturnValue(
       new Promise((resolve) => {
         resolveFetch = resolve;
       }),
     );
     const pending = buildWalkshedPolygon(stop, 500);
-    await vi.waitFor(() => expect(fetchMocks.fetchFootways).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(fetchMocks.fetchFootwayNetworkInBounds).toHaveBeenCalledOnce());
     clearWalkshedRuntimeCache();
     resolveFetch?.({
       status: 'ok',
-      response: {
+      networkData: {
         elements: [
           { type: 'node', id: 1, lat: 49, lon: 8 },
           { type: 'node', id: 2, lat: 49, lon: 8.002 },

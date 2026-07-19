@@ -1,12 +1,12 @@
-export class MinPriorityQueue {
-  private heap: Array<{ node: number; distance: number }> = [];
+export class MinDistanceQueue {
+  private heap: Array<{ nodeIndex: number; distanceMeters: number }> = [];
 
-  push(value: { node: number; distance: number }): void {
+  push(value: { nodeIndex: number; distanceMeters: number }): void {
     this.heap.push(value);
     this.bubbleUp(this.heap.length - 1);
   }
 
-  pop(): { node: number; distance: number } | null {
+  pop(): { nodeIndex: number; distanceMeters: number } | null {
     if (this.heap.length === 0) return null;
     const first = this.heap[0];
     const last = this.heap.pop();
@@ -27,7 +27,7 @@ export class MinPriorityQueue {
     let i = index;
     while (i > 0) {
       const parent = Math.floor((i - 1) / 2);
-      if (this.heap[parent].distance <= this.heap[i].distance) break;
+      if (this.heap[parent].distanceMeters <= this.heap[i].distanceMeters) break;
       [this.heap[parent], this.heap[i]] = [this.heap[i], this.heap[parent]];
       i = parent;
     }
@@ -40,11 +40,17 @@ export class MinPriorityQueue {
       const right = left + 1;
       let smallest = i;
 
-      if (left < this.heap.length && this.heap[left].distance < this.heap[smallest].distance) {
+      if (
+        left < this.heap.length &&
+        this.heap[left].distanceMeters < this.heap[smallest].distanceMeters
+      ) {
         smallest = left;
       }
 
-      if (right < this.heap.length && this.heap[right].distance < this.heap[smallest].distance) {
+      if (
+        right < this.heap.length &&
+        this.heap[right].distanceMeters < this.heap[smallest].distanceMeters
+      ) {
         smallest = right;
       }
 

@@ -35,7 +35,7 @@ function loadDataset(type: StopType): Promise<WalkshedDataset | null> {
 /**
  * Warm the shipped datasets for the given stop types — the ones visible on load —
  * so the first polygon lookup doesn't wait on a cold fetch. Hidden types (e.g. bus
- * by default) are fetched lazily on their first {@link getShippedWalkshedPolygon}.
+ * by default) are fetched lazily on their first {@link loadShippedWalkshedPolygon}.
  * Returns true only if every requested type loaded successfully.
  */
 export async function preloadShippedWalksheds(types: Iterable<StopType>): Promise<boolean> {
@@ -52,9 +52,9 @@ export async function preloadShippedWalksheds(types: Iterable<StopType>): Promis
  * one-time fetch. The service checks it after browser persistence and before
  * scheduling an Overpass calculation.
  */
-export async function getShippedWalkshedPolygon(
+export async function loadShippedWalkshedPolygon(
   stop: Stop,
-  distanceMeters: number,
+  radiusMeters: number,
   allowReasonableStreetCrossings: boolean,
 ): Promise<LatLng[] | null> {
   if (stop.isCustom) return null;
@@ -62,7 +62,7 @@ export async function getShippedWalkshedPolygon(
   const dataset = await loadDataset(stop.type);
   if (!dataset) return null;
   if (dataset.allowReasonableStreetCrossings !== allowReasonableStreetCrossings) return null;
-  if (dataset.radiusByType[stop.type] !== distanceMeters) return null;
+  if (dataset.radiusByType[stop.type] !== radiusMeters) return null;
 
   const polygonKey = walkshedDatasetPolygonKey(stop);
   const encoded = dataset.polygons[polygonKey];

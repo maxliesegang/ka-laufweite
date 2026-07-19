@@ -3,8 +3,13 @@ import {
   REQUEST_TIMEOUT_MS,
   WALKABLE_HIGHWAY_EXCLUDE_REGEX,
 } from './constants';
-import { bboxForStop } from './geo';
-import type { OverpassNodeElement, OverpassResponse, OverpassWayElement } from './types';
+import { boundingBoxForStop } from './geo';
+import type {
+  BoundingBox,
+  OverpassNodeElement,
+  OverpassResponse,
+  OverpassWayElement,
+} from './types';
 import { getStorageItem, setStorageItem } from '../storage';
 
 const OVERPASS_PREFERRED_ENDPOINT_STORAGE_KEY = 'karlsruhe-opnv-overpass-endpoint-v1';
@@ -89,9 +94,7 @@ function markEndpointFailure(endpointUrl: string): void {
   });
 }
 
-function overpassFootwayQuery(lat: number, lon: number, radiusMeters: number): string {
-  const bbox = bboxForStop(lat, lon, radiusMeters);
-
+function overpassFootwayQuery(bounds: BoundingBox): string {
   return `
 [out:json][timeout:25];
 (
@@ -101,7 +104,7 @@ function overpassFootwayQuery(lat: number, lon: number, radiusMeters: number): s
     ["indoor"!="yes"]
     ["access"!~"private|no"]
     ["foot"!~"no"]
-    (${bbox.south},${bbox.west},${bbox.north},${bbox.east});
+    (${bounds.south},${bounds.west},${bounds.north},${bounds.east});
 );
 (._;>;);
 out body;
@@ -216,17 +219,20 @@ async function fetchFromEndpoint(
   return parsed;
 }
 
-export type FootwayFetchResult =
-  { status: 'ok'; response: OverpassResponse } | { status: 'all-endpoints-failed' };
+export type FootwayNetworkFetchResult =
+  { status: 'ok'; networkData: OverpassResponse } | { status: 'all-endpoints-failed' };
 
-export async function fetchFootways(
-  lat: number,
-  lon: number,
-  distanceMeters: number,
+/**
+ * Fetch every walkable OSM way (and its nodes) inside `bounds` in one request.
+ * Endpoint scoring, retries, CORS handling, timeouts, and abort support are all
+ * shared by bounded and single-stop requests; only the query geometry differs.
+ */
+export async function fetchFootwayNetworkInBounds(
+  bounds: BoundingBox,
   signal?: AbortSignal,
-): Promise<FootwayFetchResult> {
+): Promise<FootwayNetworkFetchResult> {
   loadPreferredEndpointFromStorage();
-  const query = overpassFootwayQuery(lat, lon, distanceMeters);
+  const query = overpassFootwayQuery(bounds);
   const orderedEndpoints = orderedEndpointUrls();
 
   for (let round = 0; round < MAX_REQUEST_ROUNDS; round += 1) {
@@ -237,10 +243,10 @@ export async function fetchFootways(
       if (signal?.aborted) throw signal.reason;
       const startedAt = Date.now();
       try {
-        const result = await fetchFromEndpoint(endpointUrl, query, signal);
+        const networkData = await fetchFromEndpoint(endpointUrl, query, signal);
         const durationMs = Date.now() - startedAt;
         markEndpointSuccess(endpointUrl, durationMs);
-        return { status: 'ok', response: result };
+        return { status: 'ok', networkData };
       } catch (error) {
         if (signal?.aborted) throw signal.reason;
         markEndpointFailure(endpointUrl);
@@ -257,4 +263,13 @@ export async function fetchFootways(
   }
 
   return { status: 'all-endpoints-failed' };
+}
+
+export async function fetchFootwayNetwork(
+  lat: number,
+  lon: number,
+  radiusMeters: number,
+  signal?: AbortSignal,
+): Promise<FootwayNetworkFetchResult> {
+  return fetchFootwayNetworkInBounds(boundingBoxForStop(lat, lon, radiusMeters), signal);
 }
