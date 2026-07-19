@@ -66,6 +66,8 @@ npm run update:stops
 
 This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `highway=bus_stop`, and `amenity=bus_station` in the KVV bounding box.
 
+The stop snapshot is refreshed automatically on the first day of every month. The workflow opens a pull request when the generated data changes and can also be started manually from GitHub Actions.
+
 ## Tech Stack
 
 - [Astro](https://astro.build) — static site generator
