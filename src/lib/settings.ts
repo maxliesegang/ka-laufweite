@@ -1,6 +1,6 @@
 import { getStorageItem, readStorageJson, setStorageItem, writeStorageJson } from './storage';
 import { STOP_TYPE_CONFIG } from './stop-type-config';
-import { mapStopTypes, type StopType } from './types';
+import { mapStopTypes, stopTypeRecordChanged, type StopType } from './types';
 
 export const LEGACY_STOP_RADIUS_STORAGE_KEY = 'karlsruhe-opnv-stop-radius-meters';
 export const STOP_RADIUS_STORAGE_KEYS: Record<StopType, string> = mapStopTypes(
@@ -122,6 +122,26 @@ export const SETTINGS_STORAGE_KEYS: readonly string[] = [
   STOP_TYPE_VISIBILITY_STORAGE_KEY,
   REASONABLE_STREET_CROSSINGS_STORAGE_KEY,
 ];
+
+/**
+ * Whether the given configuration matches the one the shipped default polygons
+ * were baked with. Only such configurations can be served from the precomputed
+ * dataset (see {@link getShippedWalkshedPolygon}); anything else must be
+ * computed live from Overpass. Kept here — beside the DEFAULT_* constants it
+ * compares against — so the map preload, the config status message, and the
+ * shipped-walkshed lookup share one source of truth.
+ */
+export function matchesShippedWalkshedDefaults(
+  radiusByType: StopRadiusByType,
+  coverageShape: CoverageShape,
+  allowReasonableStreetCrossings: boolean,
+): boolean {
+  return (
+    coverageShape === DEFAULT_COVERAGE_SHAPE &&
+    allowReasonableStreetCrossings === DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS &&
+    !stopTypeRecordChanged(radiusByType, DEFAULT_STOP_RADIUS_METERS_BY_TYPE)
+  );
+}
 
 export const COVERAGE_SHAPE_DISPLAY_LABELS: Record<CoverageShape, string> = {
   circle: 'Kreis (Luftlinie)',

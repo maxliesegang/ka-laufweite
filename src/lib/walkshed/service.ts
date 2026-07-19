@@ -11,6 +11,7 @@ import { walkshedCacheKey, walkshedCacheKeyPrefixForStop } from './cache-key';
 import { buildWalkGraph, nearestEdgeSeeds } from './graph';
 import { fetchFootways } from './overpass';
 import { buildPolygonFromSeedNodes } from './polygon';
+import { getShippedWalkshedPolygon } from './shipped-walksheds';
 import type { LatLng, WalkGraph } from './types';
 
 const TRANSIENT_UNAVAILABLE_RETRY_MS = 2 * 60 * 1_000;
@@ -128,6 +129,17 @@ export async function peekCachedWalkshedPolygon(
   if (persistedPolygon) {
     polygonCache.set(cacheKey, persistedPolygon);
     return persistedPolygon;
+  }
+
+  // Shipped defaults avoid an Overpass request on a persistent-cache miss.
+  const shippedPolygon = await getShippedWalkshedPolygon(
+    stop,
+    distanceMeters,
+    allowReasonableStreetCrossings,
+  );
+  if (shippedPolygon) {
+    polygonCache.set(cacheKey, shippedPolygon);
+    return shippedPolygon;
   }
 
   return null;

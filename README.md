@@ -7,6 +7,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 ## Features
 
 - **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation
+- **Fast defaults** — precomputed polygons can ship with the app for the default stop radii, with automatic fallback to live calculation
 - **Circle mode** — simple air-line radius as a faster alternative
 - **Custom stops** — click anywhere on the map to add your own stops and choose their type
 - **Per-stop walkshed toggle** — hide or show the walkshed polygon for an individual stop from its popup, persisted across reloads
@@ -23,6 +24,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 ```sh
 npm install
 npm run update:stops   # fetch stop data from Overpass API
+npm run build:walksheds # optionally refresh the shipped default polygons
 npm run dev            # start dev server
 ```
 
@@ -84,6 +86,14 @@ npm run update:stops
 
 This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `highway=bus_stop`, and `amenity=bus_station` in the KVV bounding box.
 
+To rebuild the optional shipped polygon snapshot for the current stops and default settings, run
+`npm run build:walksheds`. It writes one file per stop type — `public/data/walksheds-{train,tram,bus}.json` —
+so the map only downloads the polygons for the types it currently shows (bus is hidden by default and
+loads lazily). The generator accepts `--types`, `--limit`, `--concurrency`, and `--out-dir` options
+after `--`. Use `--types` to build a subset — e.g. `--types train,tram` — leaving the other types'
+files untouched (handy because bus has by far the most stops). Its output is versioned, validated at
+runtime, and keyed by stop type and coordinates so stale polygons are ignored after a stop changes.
+
 The stop snapshot is refreshed automatically on the first day of every month. The workflow commits verified data changes to the default branch and can also be started manually from GitHub Actions.
 
 ## Tech Stack
@@ -96,7 +106,7 @@ The stop snapshot is refreshed automatically on the first day of every month. Th
 
 ## How Walksheds Work
 
-1. When a stop becomes visible on the map, footpath data is fetched from the Overpass API (endpoints are scored by latency/failures and the fastest is preferred)
+1. When a stop becomes visible on the map, a matching shipped or browser-cached polygon is used when available; otherwise footpath data is fetched from the Overpass API (endpoints are scored by latency/failures and the fastest is preferred)
 2. A walk graph is built from OSM ways and nodes
 3. Dijkstra's shortest path algorithm computes reachable distances, seeded from the nearest walkable node(s) near the stop
 4. Boundary points are collected where the walking budget runs out (including interpolated edge cutoffs)
@@ -152,6 +162,8 @@ src/
     walkshed/
       service.ts                # walkshed orchestration and caching
       cache-key.ts              # shared cache-key format (stop id + distance)
+      shipped-walksheds.ts      # validated loader for precomputed default polygons
+      walkshed-codec.ts         # compact shipped-polygon format and validation
       overpass.ts               # Overpass API client with endpoint scoring
       graph.ts                  # graph construction, nearest node, Dijkstra
       polygon.ts                # boundary collection and hull generation

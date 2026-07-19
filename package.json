@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "check": "astro check",
     "update:stops": "node scripts/update-osm-stops.mjs",
+    "build:walksheds": "tsx scripts/build-walksheds.ts",
     "astro": "astro"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "@types/node": "^26.1.1",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   }

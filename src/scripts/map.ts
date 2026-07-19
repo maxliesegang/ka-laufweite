@@ -29,6 +29,7 @@ import {
   type CoverageShape,
   type StopRadiusByType,
   type StopTypeVisibilityByType,
+  matchesShippedWalkshedDefaults,
   getConfiguredCoverageShape,
   getAllowReasonableStreetCrossings,
   getConfiguredStopRadii,
@@ -52,6 +53,7 @@ import {
   clearWalkshedRuntimeCache,
   removeWalkshedRuntimeCacheForStop,
 } from '../lib/walkshed/service';
+import { preloadShippedWalksheds } from '../lib/walkshed/shipped-walksheds';
 import {
   STOP_TYPES,
   isStopType,
@@ -418,6 +420,16 @@ class TransitMapController {
   private async loadStops(): Promise<void> {
     const generation = ++this.stopLoadGeneration;
     try {
+      if (
+        matchesShippedWalkshedDefaults(
+          this.radiusMetersByType,
+          this.coverageShape,
+          this.allowReasonableStreetCrossings,
+        )
+      ) {
+        // Warm only the visible types; hidden ones (bus by default) load lazily.
+        void preloadShippedWalksheds(STOP_TYPES.filter((type) => this.visibleStopTypes[type]));
+      }
       const stops = await loadAllStops();
       if (generation === this.stopLoadGeneration) this.setStops(stops);
     } catch (error) {

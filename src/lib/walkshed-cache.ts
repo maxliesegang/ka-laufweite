@@ -141,7 +141,10 @@ async function persistClear(entries: CacheStore): Promise<void> {
 }
 
 function touchResetMarker(): void {
-  const marker = String(Date.now());
+  const previousMarker = Number(currentResetMarker());
+  const marker = String(
+    Number.isSafeInteger(previousMarker) ? Math.max(Date.now(), previousMarker + 1) : Date.now(),
+  );
   setStorageItem(WALKSHED_CACHE_RESET_MARKER_KEY, marker);
   cachedResetMarker = marker;
 }
