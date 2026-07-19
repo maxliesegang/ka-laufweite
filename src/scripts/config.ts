@@ -5,7 +5,6 @@ import {
   MAX_STOP_RADIUS_METERS,
   MIN_STOP_RADIUS_METERS,
   STOP_RADIUS_INPUT_IDS,
-  STOP_RADIUS_STEP_METERS,
   type CoverageShape,
   type StopRadiusByType,
   COVERAGE_SHAPE_COMPACT_LABELS,
@@ -47,6 +46,17 @@ function invalidRadiusHint(invalidTypes: StopType[]): string {
   if (invalidTypes.length === 0) return '';
   const labels = invalidTypes.map((stopType) => STOP_TYPE_CONFIG[stopType].compactLabel).join(', ');
   return ` Ungültig und unverändert: ${labels}.`;
+}
+
+/** The input step controls the spinner increment but does not restrict manually
+ * entered radii, which can still be calculated live when no shipped dataset exists. */
+function hasSavableRadius(input: HTMLInputElement): boolean {
+  return (
+    !input.validity.valueMissing &&
+    !input.validity.badInput &&
+    !input.validity.rangeUnderflow &&
+    !input.validity.rangeOverflow
+  );
 }
 
 export function initConfigPage(): void {
@@ -113,7 +123,7 @@ export function initConfigPage(): void {
 
     for (const stopType of STOP_TYPES_CONFIG_ORDER) {
       const input = radiusInputs[stopType];
-      const canSaveRadius = normalizeRadius || input.validity.valid;
+      const canSaveRadius = normalizeRadius || hasSavableRadius(input);
 
       if (canSaveRadius) {
         nextRadiusByType[stopType] = setConfiguredStopRadius(stopType, input.value);
@@ -143,7 +153,7 @@ export function initConfigPage(): void {
     if (allInvalid && !changed) {
       saveStatus.textContent =
         `Jeder Radius muss zwischen ${MIN_STOP_RADIUS_METERS} m und ${MAX_STOP_RADIUS_METERS} m ` +
-        `in ${STOP_RADIUS_STEP_METERS} m Schritten liegen.`;
+        'liegen.';
       return;
     }
 

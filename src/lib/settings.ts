@@ -26,7 +26,7 @@ export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number
 
 export const MIN_STOP_RADIUS_METERS = 50;
 export const MAX_STOP_RADIUS_METERS = 5000;
-export const STOP_RADIUS_STEP_METERS = 10;
+export const STOP_RADIUS_STEP_METERS = 50;
 export const COVERAGE_SHAPE_STORAGE_KEY = 'karlsruhe-opnv-coverage-shape';
 export const STOP_TYPE_VISIBILITY_STORAGE_KEY = 'karlsruhe-opnv-stop-type-visibility-v1';
 export const REASONABLE_STREET_CROSSINGS_STORAGE_KEY =
