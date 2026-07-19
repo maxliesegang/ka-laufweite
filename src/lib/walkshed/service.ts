@@ -87,7 +87,15 @@ export function removeWalkshedRuntimeCacheForStop(stopId: string): void {
   }
 }
 
-export async function buildWalkshedPolygon(
+/**
+ * Fast path: return an already-computed polygon from the in-memory or persistent
+ * cache without ever touching the network. Returns null on a cache miss so the
+ * caller can decide whether to schedule the (slow) network compute separately.
+ *
+ * Keeping this network-free lets the overlay render cached stops immediately
+ * instead of queueing them behind uncached neighbours that need Overpass fetches.
+ */
+export async function peekCachedWalkshedPolygon(
   stop: Stop,
   distanceMeters: number,
 ): Promise<LatLng[] | null> {
@@ -103,6 +111,19 @@ export async function buildWalkshedPolygon(
     return persistedPolygon;
   }
 
+  return null;
+}
+
+export async function buildWalkshedPolygon(
+  stop: Stop,
+  distanceMeters: number,
+): Promise<LatLng[] | null> {
+  const cachedPolygon = await peekCachedWalkshedPolygon(stop, distanceMeters);
+  if (cachedPolygon) {
+    return cachedPolygon;
+  }
+
+  const cacheKey = polygonCacheKey(stop, distanceMeters);
   if (await isWalkshedTemporarilyUnavailable(cacheKey)) {
     return null;
   }

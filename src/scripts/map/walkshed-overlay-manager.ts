@@ -2,7 +2,7 @@ import L from 'leaflet';
 import { STOP_TYPE_CONFIG } from '../../lib/stop-type-config';
 import type { Stop, StopType } from '../../lib/types';
 import { walkshedCacheKey, walkshedCacheKeyPrefixForStop } from '../../lib/walkshed/cache-key';
-import { buildWalkshedPolygon } from '../../lib/walkshed/service';
+import { buildWalkshedPolygon, peekCachedWalkshedPolygon } from '../../lib/walkshed/service';
 
 const FILL_OPACITY = 0.16;
 const STROKE_OPACITY = 0.9;
@@ -69,8 +69,7 @@ export class WalkshedOverlayManager {
     if (!this.isEnabled()) return;
 
     this.stopsById.set(stop.id, stop);
-    this.enqueueStop(stop);
-    this.drainQueue();
+    void this.renderCachedThenQueueMisses([stop], this.pipelineVersion);
   }
 
   onViewportChanged(): void {
@@ -161,9 +160,19 @@ export class WalkshedOverlayManager {
     );
   }
 
-  private enqueueStop(stop: Stop): void {
-    if (!this.canProcessStop(stop)) return;
-    this.pendingStopIds.add(stop.id);
+  /**
+   * After an await, a resolved polygon is only worth rendering if the pipeline,
+   * settings, radius, stop set, and viewport still match what was captured when
+   * the work started. Shared by both the cached pre-pass and the network worker.
+   */
+  private isRenderStillValid(stop: Stop, version: number, radiusMeters: number): boolean {
+    return (
+      version === this.pipelineVersion &&
+      this.isEnabled() &&
+      radiusMeters === this.radiusForStop(stop) &&
+      this.stopsById.has(stop.id) &&
+      this.isStopInBounds(stop)
+    );
   }
 
   private dequeueStopId(): string | null {
@@ -185,13 +194,15 @@ export class WalkshedOverlayManager {
   private syncVisibleCoverage(): void {
     if (!this.isEnabled()) return;
 
+    const version = this.pipelineVersion;
     const bounds = this.currentBounds();
     const visibleStopIds = new Set<string>();
+    const processableStops: Stop[] = [];
 
     for (const stop of this.stopsById.values()) {
       if (!this.isStopInBounds(stop, bounds)) continue;
       visibleStopIds.add(stop.id);
-      this.enqueueStop(stop);
+      if (this.canProcessStop(stop)) processableStops.push(stop);
     }
 
     for (const stopId of [...this.layersByStopId.keys()]) {
@@ -206,7 +217,35 @@ export class WalkshedOverlayManager {
       }
     }
 
+    void this.renderCachedThenQueueMisses(processableStops, version);
+  }
+
+  /**
+   * Fast pre-pass: render every stop that already has a cached polygon without
+   * consuming a network worker slot, then enqueue only the genuine misses for the
+   * bounded-concurrency Overpass compute. This prevents cached stops from being
+   * blocked behind uncached neighbours that are still fetching from the network.
+   */
+  private async renderCachedThenQueueMisses(stops: Stop[], version: number): Promise<void> {
+    await Promise.all(stops.map((stop) => this.renderCachedOrEnqueue(stop, version)));
+
+    if (version !== this.pipelineVersion) return;
     this.drainQueue();
+  }
+
+  private async renderCachedOrEnqueue(stop: Stop, version: number): Promise<void> {
+    const radiusMeters = this.radiusForStop(stop);
+    const polygon = await peekCachedWalkshedPolygon(stop, radiusMeters);
+
+    if (!this.isRenderStillValid(stop, version, radiusMeters)) return;
+    if (!this.canProcessStop(stop)) return;
+
+    if (polygon) {
+      this.renderPolygon(stop, polygon, radiusMeters);
+      return;
+    }
+
+    this.pendingStopIds.add(stop.id);
   }
 
   private async loadWalkshedForStop(
@@ -214,21 +253,20 @@ export class WalkshedOverlayManager {
     version: number,
     radiusMeters: number,
   ): Promise<void> {
-    const unavailableKey = this.unavailableKey(stop.id, radiusMeters);
     const polygon = await buildWalkshedPolygon(stop, radiusMeters);
 
-    if (version !== this.pipelineVersion) return;
-    if (!this.isEnabled()) return;
-    if (radiusMeters !== this.radiusForStop(stop)) return;
-    if (!this.stopsById.has(stop.id)) return;
-    if (!this.isStopInBounds(stop)) return;
+    if (!this.isRenderStillValid(stop, version, radiusMeters)) return;
 
     if (!polygon) {
-      this.unavailableKeys.add(unavailableKey);
+      this.unavailableKeys.add(this.unavailableKey(stop.id, radiusMeters));
       return;
     }
 
-    this.unavailableKeys.delete(unavailableKey);
+    this.renderPolygon(stop, polygon, radiusMeters);
+  }
+
+  private renderPolygon(stop: Stop, polygon: L.LatLngExpression[], radiusMeters: number): void {
+    this.unavailableKeys.delete(this.unavailableKey(stop.id, radiusMeters));
     this.removeLayer(stop.id);
 
     const color = STOP_TYPE_CONFIG[stop.type].color;
