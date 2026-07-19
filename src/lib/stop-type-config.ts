@@ -36,16 +36,14 @@ export const STOP_TYPE_CONFIG: Record<StopType, StopTypeConfig> = {
   },
 };
 
-export const STOP_TYPE_ENTRIES = STOP_TYPES.map((type) => ({
-  type,
-  ...STOP_TYPE_CONFIG[type],
-}));
+function buildStopTypeEntries(order: readonly StopType[]) {
+  return order.map((type) => ({ type, ...STOP_TYPE_CONFIG[type] }));
+}
+
+export const STOP_TYPE_ENTRIES = buildStopTypeEntries(STOP_TYPES);
 
 export const STOP_TYPES_CONFIG_ORDER: readonly StopType[] = ['train', 'tram', 'bus'];
-export const STOP_TYPE_CONFIG_ENTRIES = STOP_TYPES_CONFIG_ORDER.map((type) => ({
-  type,
-  ...STOP_TYPE_CONFIG[type],
-}));
+export const STOP_TYPE_ENTRIES_CONFIG_ORDER = buildStopTypeEntries(STOP_TYPES_CONFIG_ORDER);
 
 export function formatStopRadiusSummary(
   radiusByType: Record<StopType, number>,

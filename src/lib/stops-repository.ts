@@ -17,9 +17,9 @@ async function fetchOsmStops(): Promise<Stop[]> {
   if (inFlightRequest) return inFlightRequest;
 
   inFlightRequest = fetch(OSM_STOPS_URL, { cache: OSM_FETCH_CACHE_MODE })
-    .then(async (res) => {
-      if (!res.ok) throw new Error(`HTTP ${res.status} for ${OSM_STOPS_URL}`);
-      return sanitizeOsmStops((await res.json()) as unknown);
+    .then(async (response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${OSM_STOPS_URL}`);
+      return sanitizeOsmStops((await response.json()) as unknown);
     })
     .then((stops) => {
       cachedOsmStops = stops;

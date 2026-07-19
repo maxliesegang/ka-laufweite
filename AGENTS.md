@@ -11,10 +11,13 @@ Guidance for coding agents and contributors working in this repository.
 
 - Runtime stop data source: `public/data/osm-stops.json`
 - Runtime custom stops: browser `localStorage` (see `src/lib/custom-stops-client.ts`)
+- Browser storage access: `src/lib/storage.ts` (safe `localStorage` + JSON wrappers used by all persistence modules)
 - Stop access and validation: `src/lib/stops-repository.ts`
+- Per-stop walkshed visibility: `src/lib/walkshed-disabled-stops.ts` (stops whose walkshed polygon the user hid via the popup)
 - Map popup templates: `src/lib/map-popups.ts`
 - Stop-type metadata and UI building blocks: `src/lib/stop-type-config.ts`, `src/components/StopLegendItems.astro`, `src/components/StopRadiusInputs.astro`, `src/components/PopupStyles.astro`
 - Walkshed polygon generation: `src/lib/walkshed/service.ts` with helpers in `src/lib/walkshed/*` (Overpass + footpath graph)
+- Walkshed cache-key format: `src/lib/walkshed/cache-key.ts` (single source of truth for `stopId:distance` keys, shared by runtime cache, persistent cache, and overlay manager)
 - Walkshed response cache policy: `src/lib/walkshed-cache.ts` (entry lifecycle, per-stop invalidation, reset marker sync)
 - Walkshed cache persistence: `src/lib/walkshed-cache-persistence.ts` (IndexedDB primary, localStorage fallback)
 - Map orchestration: `src/scripts/map.ts`

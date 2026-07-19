@@ -4,22 +4,22 @@ import {
   MIN_STOP_RADIUS_METERS,
   STOP_RADIUS_STEP_METERS,
 } from '../lib/settings';
-import { STOP_TYPE_CONFIG_ENTRIES } from '../lib/stop-type-config';
+import { STOP_TYPE_ENTRIES_CONFIG_ORDER } from '../lib/stop-type-config';
 ---
 
 <div class="radius-grid">
   {
-    STOP_TYPE_CONFIG_ENTRIES.map((stopType) => (
-      <label class="radius-row" for={stopType.radiusInputId}>
+    STOP_TYPE_ENTRIES_CONFIG_ORDER.map((entry) => (
+      <label class="radius-row" for={entry.radiusInputId}>
         <span class="radius-row__meta">
-          <span class="radius-row__dot" aria-hidden="true" style={`background:${stopType.color}`} />
-          <span class="radius-row__label">{stopType.label}</span>
+          <span class="radius-row__dot" aria-hidden="true" style={`background:${entry.color}`} />
+          <span class="radius-row__label">{entry.label}</span>
         </span>
 
         <span class="radius-row__control">
           <input
-            id={stopType.radiusInputId}
-            name={stopType.radiusInputName}
+            id={entry.radiusInputId}
+            name={entry.radiusInputName}
             type="number"
             inputmode="numeric"
             enterkeyhint="done"

@@ -237,20 +237,40 @@ class TransitMapController {
     });
   }
 
+  /**
+   * Wires a button inside a marker's popup. `onOpen` runs every time the popup
+   * opens (e.g. to refresh button state); `onClick` is bound once and always
+   * suppresses the default action and event bubbling to the map.
+   */
+  private bindPopupButton(
+    marker: StopMarker,
+    selector: string,
+    handlers: {
+      onOpen?: (button: HTMLButtonElement) => void;
+      onClick: (button: HTMLButtonElement, popup: L.Popup) => void;
+    },
+  ): void {
+    marker.on('popupopen', (event: L.PopupEvent) => {
+      const button = event.popup.getElement()?.querySelector<HTMLButtonElement>(selector);
+      if (!button) return;
+
+      handlers.onOpen?.(button);
+      if (button.dataset.bound === 'true') return;
+      button.dataset.bound = 'true';
+
+      button.addEventListener('click', (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        handlers.onClick(button, event.popup);
+      });
+    });
+  }
+
   private bindCustomStopRemoval(marker: StopMarker, stop: Stop): void {
     if (!stop.isCustom) return;
 
-    marker.on('popupopen', (event: L.PopupEvent) => {
-      const removeBtn = event.popup
-        .getElement()
-        ?.querySelector<HTMLButtonElement>(STOP_REMOVE_BUTTON_SELECTOR);
-      if (!removeBtn || removeBtn.dataset.bound === 'true') return;
-
-      removeBtn.dataset.bound = 'true';
-      removeBtn.addEventListener('click', (clickEvent) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-
+    this.bindPopupButton(marker, STOP_REMOVE_BUTTON_SELECTOR, {
+      onClick: (removeBtn, popup) => {
         removeBtn.disabled = true;
         removeBtn.textContent = 'Entferne...';
 
@@ -260,36 +280,25 @@ class TransitMapController {
             `Failed to invalidate walkshed cache for ${stop.id}`,
           );
           this.removeStop(stop.id);
-          this.map.closePopup(event.popup);
+          this.map.closePopup(popup);
           return;
         }
 
         removeBtn.disabled = false;
         removeBtn.textContent = 'Haltestelle entfernen';
-      });
+      },
     });
   }
 
   private bindWalkshedToggle(marker: StopMarker, stop: Stop): void {
     if (stop.isCustom) return;
 
-    marker.on('popupopen', (event: L.PopupEvent) => {
-      const toggleBtn = event.popup
-        .getElement()
-        ?.querySelector<HTMLButtonElement>(STOP_WALKSHED_TOGGLE_BUTTON_SELECTOR);
-      if (!toggleBtn) return;
-
-      this.updateWalkshedToggleButton(toggleBtn, stop.id);
-      if (toggleBtn.dataset.bound === 'true') return;
-      toggleBtn.dataset.bound = 'true';
-
-      toggleBtn.addEventListener('click', (clickEvent) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-
+    this.bindPopupButton(marker, STOP_WALKSHED_TOGGLE_BUTTON_SELECTOR, {
+      onOpen: (toggleBtn) => this.updateWalkshedToggleButton(toggleBtn, stop.id),
+      onClick: (toggleBtn) => {
         this.setStopWalkshedDisabled(stop, !this.walkshedDisabledStopIds.has(stop.id));
         this.updateWalkshedToggleButton(toggleBtn, stop.id);
-      });
+      },
     });
   }
 

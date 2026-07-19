@@ -93,7 +93,7 @@ export function addCustomStop(input: NewCustomStop): CustomStop {
 
 export function removeCustomStop(stopId: string): boolean {
   const stops = getCustomStops();
-  const filtered = stops.filter((s) => s.id !== stopId);
+  const filtered = stops.filter((stop) => stop.id !== stopId);
 
   if (filtered.length === stops.length) return false;
 

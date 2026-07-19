@@ -1,12 +1,14 @@
 import { QUERY_PADDING_METERS } from './constants';
 import type { LatLng } from './types';
 
+export const METERS_PER_LAT_DEGREE = 111_320;
+
 export function toRadians(value: number): number {
   return (value * Math.PI) / 180;
 }
 
 export function metersPerLonDegree(latitude: number): number {
-  return 111_320 * Math.max(0.2, Math.cos(toRadians(latitude)));
+  return METERS_PER_LAT_DEGREE * Math.max(0.2, Math.cos(toRadians(latitude)));
 }
 
 export function haversineMeters(a: LatLng, b: LatLng): number {
@@ -22,7 +24,7 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
 
 export function bboxForStop(lat: number, lon: number, radiusMeters: number) {
   const radius = radiusMeters + QUERY_PADDING_METERS;
-  const latDelta = radius / 111_320;
+  const latDelta = radius / METERS_PER_LAT_DEGREE;
   const lonDelta = radius / metersPerLonDegree(lat);
 
   return {

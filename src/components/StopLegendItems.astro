@@ -3,16 +3,16 @@ import { STOP_TYPE_ENTRIES } from '../lib/stop-type-config';
 ---
 
 {
-  STOP_TYPE_ENTRIES.map((stopType) => (
+  STOP_TYPE_ENTRIES.map((entry) => (
     <button
       type="button"
       class="legend-toggle"
-      data-stop-type-toggle={stopType.type}
+      data-stop-type-toggle={entry.type}
       aria-pressed="true"
       title="Typ ein-/ausblenden"
     >
-      <span class="dot" style={`background:${stopType.color}`} />
-      <span>{stopType.label}</span>
+      <span class="dot" style={`background:${entry.color}`} />
+      <span>{entry.label}</span>
     </button>
   ))
 }

@@ -81,14 +81,6 @@ export function nearestNodeCandidates(
   return matches.slice(0, limit);
 }
 
-export function shortestPathDistances(
-  graph: WalkGraph,
-  start: number,
-  maxDistance: number,
-): Float64Array {
-  return shortestPathDistancesFromSeeds(graph, [{ index: start, distanceMeters: 0 }], maxDistance);
-}
-
 export function shortestPathDistancesFromSeeds(
   graph: WalkGraph,
   seeds: NearestNodeMatch[],

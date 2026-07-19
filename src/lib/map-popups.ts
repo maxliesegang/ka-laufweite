@@ -7,7 +7,7 @@ export const ADD_STOP_FORM_SELECTOR = '[data-add-stop-form]';
 export const ADD_STOP_NAME_SELECTOR = '[data-stop-name-input]';
 export const ADD_STOP_TYPE_SELECTOR = '[data-stop-type-input]';
 const ADD_STOP_TYPE_OPTIONS = STOP_TYPE_ENTRIES.map(
-  (stopType) => `<option value="${stopType.type}">${stopType.label}</option>`,
+  (entry) => `<option value="${entry.type}">${entry.label}</option>`,
 ).join('');
 
 interface StopPopupOptions {

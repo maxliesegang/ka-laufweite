@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import { STOP_TYPE_CONFIG } from '../../lib/stop-type-config';
 import type { Stop, StopType } from '../../lib/types';
+import { walkshedCacheKey, walkshedCacheKeyPrefixForStop } from '../../lib/walkshed/cache-key';
 import { buildWalkshedPolygon } from '../../lib/walkshed/service';
 
 const FILL_OPACITY = 0.16;
@@ -91,7 +92,7 @@ export class WalkshedOverlayManager {
   }
 
   private unavailableKey(stopId: string, radiusMeters: number): string {
-    return `${stopId}:${radiusMeters}`;
+    return walkshedCacheKey(stopId, radiusMeters);
   }
 
   private isUnavailable(stopId: string, radiusMeters: number): boolean {
@@ -99,8 +100,9 @@ export class WalkshedOverlayManager {
   }
 
   private removeUnavailableKeysForStop(stopId: string): void {
+    const prefix = walkshedCacheKeyPrefixForStop(stopId);
     for (const key of [...this.unavailableKeys]) {
-      if (key.startsWith(`${stopId}:`)) {
+      if (key.startsWith(prefix)) {
         this.unavailableKeys.delete(key);
       }
     }
@@ -147,12 +149,20 @@ export class WalkshedOverlayManager {
     return this.getRadiusMetersForType(stop.type);
   }
 
-  private enqueueStop(stop: Stop): void {
-    const radius = this.radiusForStop(stop);
-    if (this.layersByStopId.has(stop.id)) return;
-    if (this.inFlightStopIds.has(stop.id)) return;
-    if (this.isUnavailable(stop.id, radius)) return;
+  /**
+   * A stop is eligible for (re)queuing only if it has no rendered layer yet,
+   * is not already being loaded, and is not currently marked unavailable.
+   */
+  private canProcessStop(stop: Stop): boolean {
+    return (
+      !this.layersByStopId.has(stop.id) &&
+      !this.inFlightStopIds.has(stop.id) &&
+      !this.isUnavailable(stop.id, this.radiusForStop(stop))
+    );
+  }
 
+  private enqueueStop(stop: Stop): void {
+    if (!this.canProcessStop(stop)) return;
     this.pendingStopIds.add(stop.id);
   }
 
@@ -244,12 +254,9 @@ export class WalkshedOverlayManager {
       if (!stopId) return;
 
       const stop = this.stopsById.get(stopId);
-      if (!stop) continue;
-      const radius = this.radiusForStop(stop);
-      if (this.layersByStopId.has(stopId)) continue;
-      if (this.inFlightStopIds.has(stopId)) continue;
-      if (this.isUnavailable(stopId, radius)) continue;
+      if (!stop || !this.canProcessStop(stop)) continue;
 
+      const radius = this.radiusForStop(stop);
       const version = this.pipelineVersion;
       this.activeWorkers += 1;
       this.inFlightStopIds.add(stopId);

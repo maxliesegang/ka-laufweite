@@ -9,6 +9,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 - **Walkshed polygons** — coverage areas based on real walkable paths from OSM, computed via Dijkstra's algorithm and concave hull generation
 - **Circle mode** — simple air-line radius as a faster alternative
 - **Custom stops** — click anywhere on the map to add your own stops and choose their type
+- **Per-stop walkshed toggle** — hide or show the walkshed polygon for an individual stop from its popup, persisted across reloads
 - **Configurable walking distance per type** — set separate values for tram, train, and bus (50 m to 5000 m)
 - **Type filters in the legend** — show/hide train, tram, and bus markers with persisted state across reloads
 - **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
@@ -74,9 +75,9 @@ This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `hi
 
 ## How Walksheds Work
 
-1. When a stop becomes visible on the map, footpath data is fetched from the Overpass API
+1. When a stop becomes visible on the map, footpath data is fetched from the Overpass API (endpoints are scored by latency/failures and the fastest is preferred)
 2. A walk graph is built from OSM ways and nodes
-3. Dijkstra's shortest path algorithm computes reachable distances from the nearest graph node
+3. Dijkstra's shortest path algorithm computes reachable distances, seeded from the nearest walkable node(s) near the stop
 4. Boundary points are collected where the walking budget runs out (including interpolated edge cutoffs)
 5. A concave hull wraps the boundary points into a polygon, with convex hull as fallback
 
@@ -95,6 +96,7 @@ src/
   components/
     StopLegendItems.astro       # legend rows generated from shared stop-type config
     StopRadiusInputs.astro      # reusable radius input fields per stop type
+    PopupStyles.astro           # shared popup styling injected into the map page
   pages/
     index.astro                 # map page
     config.astro                # settings page
@@ -108,17 +110,19 @@ src/
       walkshed-overlay-manager.ts  # async polygon loading and rendering
   lib/
     types.ts                    # shared types and type guards
+    storage.ts                  # safe localStorage + JSON read/write wrappers
     settings.ts                 # user preferences (radius, coverage mode, type visibility)
     stop-type-config.ts         # single source of truth for stop-type labels/colors/inputs
     stops-repository.ts         # stop loading (OSM + custom)
     custom-stops-client.ts      # localStorage CRUD + migration for custom stops
-    map-config.ts               # map constants, colors, marker sizes
+    walkshed-disabled-stops.ts  # per-stop walkshed visibility persistence
     map-popups.ts               # popup HTML templates
     walkshed-cache.ts           # cache policy + invalidation + reset marker sync
     walkshed-cache-persistence.ts # IndexedDB/localStorage persistence adapter
     walkshed/
       service.ts                # walkshed orchestration and caching
-      overpass.ts               # Overpass API client
+      cache-key.ts              # shared cache-key format (stop id + distance)
+      overpass.ts               # Overpass API client with endpoint scoring
       graph.ts                  # graph construction, nearest node, Dijkstra
       polygon.ts                # boundary collection and hull generation
       geo.ts                    # haversine, bbox, coordinate math

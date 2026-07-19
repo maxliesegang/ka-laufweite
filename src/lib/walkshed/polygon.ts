@@ -6,7 +6,7 @@ import {
   MIN_EFFECTIVE_WALK_DISTANCE_METERS,
   POINT_KEY_DECIMALS,
 } from './constants';
-import { metersPerLonDegree } from './geo';
+import { METERS_PER_LAT_DEGREE, metersPerLonDegree } from './geo';
 import { shortestPathDistancesFromSeeds } from './graph';
 import type { LatLng, LocalPoint, NearestNodeMatch, WalkGraph, WalkshedAttempt } from './types';
 
@@ -79,11 +79,17 @@ function collectReachableBoundaryPoints(
 }
 
 function toLocalMeters(point: LatLng, centerLat: number, centerLon: number): LocalPoint {
-  return [(point[1] - centerLon) * metersPerLonDegree(centerLat), (point[0] - centerLat) * 111_320];
+  return [
+    (point[1] - centerLon) * metersPerLonDegree(centerLat),
+    (point[0] - centerLat) * METERS_PER_LAT_DEGREE,
+  ];
 }
 
 function fromLocalMeters(point: LocalPoint, centerLat: number, centerLon: number): LatLng {
-  return [centerLat + point[1] / 111_320, centerLon + point[0] / metersPerLonDegree(centerLat)];
+  return [
+    centerLat + point[1] / METERS_PER_LAT_DEGREE,
+    centerLon + point[0] / metersPerLonDegree(centerLat),
+  ];
 }
 
 function localPointKey(point: LocalPoint): string {

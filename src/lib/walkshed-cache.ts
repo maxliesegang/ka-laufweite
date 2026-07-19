@@ -6,9 +6,10 @@ import {
   type PolygonCacheEntry,
   type UnavailableCacheEntry,
 } from './walkshed-cache-persistence';
+import { walkshedCacheKeyPrefixForStop } from './walkshed/cache-key';
 import type { LatLng } from './walkshed/types';
 
-export const WALKSHED_CACHE_STORAGE_KEY = 'karlsruhe-opnv-walkshed-cache-v5';
+export const WALKSHED_CACHE_LEGACY_STORAGE_KEY = 'karlsruhe-opnv-walkshed-cache-v5';
 export const WALKSHED_CACHE_RESET_MARKER_KEY = 'karlsruhe-opnv-walkshed-cache-reset-marker';
 
 const WALKSHED_CACHE_DB_NAME = 'karlsruhe-opnv-walkshed-cache-v1';
@@ -23,7 +24,7 @@ const persistence = createWalkshedCachePersistence({
   dbName: WALKSHED_CACHE_DB_NAME,
   dbVersion: WALKSHED_CACHE_DB_VERSION,
   dbStoreName: WALKSHED_CACHE_DB_STORE_NAME,
-  legacyStorageKey: WALKSHED_CACHE_STORAGE_KEY,
+  legacyStorageKey: WALKSHED_CACHE_LEGACY_STORAGE_KEY,
 });
 
 let cachedStore: CacheStore | null = null;
@@ -225,7 +226,7 @@ export async function removeCachedWalkshedPolygonsForStops(
     [...stopIds]
       .map((stopId) => stopId.trim())
       .filter((stopId) => stopId.length > 0)
-      .map((stopId) => `${stopId}:`),
+      .map((stopId) => walkshedCacheKeyPrefixForStop(stopId)),
   );
   if (prefixes.size === 0) return 0;
   const prefixList = [...prefixes];
@@ -235,14 +236,7 @@ export async function removeCachedWalkshedPolygonsForStops(
   const removedKeys: string[] = [];
 
   for (const [key, entry] of Object.entries(entries)) {
-    let shouldRemove = false;
-    for (const prefix of prefixList) {
-      if (!key.startsWith(prefix)) continue;
-      shouldRemove = true;
-      break;
-    }
-
-    if (shouldRemove) {
+    if (prefixList.some((prefix) => key.startsWith(prefix))) {
       removedKeys.push(key);
       continue;
     }
