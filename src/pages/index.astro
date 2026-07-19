@@ -7,26 +7,47 @@ import PopupStyles from '../components/PopupStyles.astro';
 <Layout title="KA Laufweite">
   <div id="map-shell">
     <div id="map"></div>
-    <div id="legend">
-      <h3>Legende</h3>
-      <StopLegendItems />
-      <p class="coverage" data-coverage-info></p>
-      <p class="radius" data-radius-info></p>
-      <p
-        class="walkshed-load-progress"
-        data-walkshed-load-progress
-        role="status"
-        aria-live="polite"
-        hidden
-      >
-      </p>
-      <p class="hint">
-        Klicke auf die Karte, um eine eigene Haltestelle hinzuzufügen und ihren Typ zu wählen.
-        Eigene Haltestellen sind verschiebbar und lassen sich per Popup entfernen. Darstellung und
-        Distanzen stellst du unter Konfiguration ein. Bei vorhandenen Haltestellen kannst du im
-        Popup das Fussweg-Polygon pro Haltestelle ein- oder ausblenden.
-      </p>
-    </div>
+    <details id="legend" open>
+      <summary>
+        <span>Kartenlegende</span>
+        <span class="summary-action" aria-hidden="true">Ein-/ausklappen</span>
+      </summary>
+      <div class="legend-content">
+        <div class="legend-section">
+          <p class="section-label">Haltestellen anzeigen</p>
+          <div class="stop-type-list">
+            <StopLegendItems />
+          </div>
+          <p class="filter-hint">Antippen, um einen Typ ein- oder auszublenden.</p>
+        </div>
+
+        <div class="legend-section settings-summary" aria-label="Aktuelle Darstellung">
+          <p class="coverage" data-coverage-info></p>
+          <p class="radius" data-radius-info></p>
+        </div>
+
+        <div
+          class="walkshed-status"
+          data-walkshed-load-progress
+          role="status"
+          aria-live="polite"
+          hidden
+        >
+          <span class="spinner" data-walkshed-spinner aria-hidden="true"></span>
+          <span class="status-icon" data-walkshed-status-icon aria-hidden="true">✓</span>
+          <span data-walkshed-progress-text></span>
+        </div>
+
+        <details class="map-help">
+          <summary>Tipps zur Bedienung</summary>
+          <ul>
+            <li>In die Karte klicken: eigene Haltestelle hinzufügen.</li>
+            <li>Eigene Haltestellen ziehen: Position ändern.</li>
+            <li>Haltestelle öffnen: Laufweite ein-/ausblenden.</li>
+          </ul>
+        </details>
+      </div>
+    </details>
   </div>
   <PopupStyles />
 </Layout>
@@ -55,30 +76,92 @@ import PopupStyles from '../components/PopupStyles.astro';
     left: 12px;
     z-index: 1000;
     background: white;
-    padding: 12px 16px;
-    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     font-size: 14px;
     max-width: min(320px, calc(100% - 24px));
-    max-height: min(330px, 52%);
+    max-height: min(460px, 70%);
     overflow: auto;
   }
 
-  #legend h3 {
-    margin-bottom: 8px;
+  #legend > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 14px;
     font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  #legend > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #legend > summary::before {
+    content: '›';
+    order: 3;
+    color: #52606d;
+    font-size: 20px;
+    line-height: 1;
+    transform: rotate(0deg);
+    transition: transform 150ms ease;
+  }
+
+  #legend[open] > summary::before {
+    transform: rotate(90deg);
+  }
+
+  #legend > summary:focus-visible {
+    outline: 2px solid #457b9d;
+    outline-offset: -3px;
+    border-radius: 10px;
+  }
+
+  .summary-action {
+    margin-left: auto;
+    color: #697684;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .legend-content {
+    padding: 0 14px 14px;
+  }
+
+  .legend-section {
+    border-top: 1px solid #e5e9ee;
+    padding-top: 10px;
+  }
+
+  .section-label {
+    margin-bottom: 6px;
+    color: #52606d;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stop-type-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
   }
 
   #legend :global(.legend-toggle) {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 4px;
     width: 100%;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    background: transparent;
-    padding: 2px 4px;
+    min-height: 34px;
+    border: 1px solid #dce2e8;
+    border-radius: 8px;
+    background: #fff;
+    padding: 5px 7px;
     text-align: left;
     font: inherit;
     color: inherit;
@@ -90,7 +173,9 @@ import PopupStyles from '../components/PopupStyles.astro';
   }
 
   #legend :global(.legend-toggle[aria-pressed='false']) {
-    opacity: 0.45;
+    background: #f4f6f8;
+    color: #697684;
+    text-decoration: line-through;
   }
 
   #legend :global(.legend-toggle:focus-visible) {
@@ -103,33 +188,104 @@ import PopupStyles from '../components/PopupStyles.astro';
     height: 12px;
     border-radius: 50%;
     display: inline-block;
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
   }
 
-  .hint {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #666;
-    max-width: 200px;
+  .filter-hint {
+    margin: 6px 2px 10px;
+    color: #697684;
+    font-size: 11px;
   }
 
-  .radius {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1f2933;
+  .settings-summary {
+    display: grid;
+    gap: 3px;
+    padding-bottom: 10px;
   }
 
+  .radius,
   .coverage {
-    margin-top: 8px;
     font-size: 12px;
-    font-weight: 600;
     color: #1f2933;
   }
 
-  .walkshed-load-progress {
-    margin-top: 6px;
+  .walkshed-status {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #edf6fb;
+    padding: 9px 10px;
+    color: #28566f;
     font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .walkshed-status[hidden] {
+    display: none;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    border: 2px solid #b6d5e5;
+    border-top-color: #28779d;
+    border-radius: 50%;
+    animation: spin 800ms linear infinite;
+  }
+
+  .status-icon {
+    display: none;
+    color: #247552;
+    font-weight: 800;
+  }
+
+  .walkshed-status[data-complete='true'] {
+    background: #edf8f2;
+    color: #285f49;
+  }
+
+  .walkshed-status[data-complete='true'] .spinner {
+    display: none;
+  }
+
+  .walkshed-status[data-complete='true'] .status-icon {
+    display: inline;
+  }
+
+  .map-help {
+    border-top: 1px solid #e5e9ee;
+    padding-top: 9px;
+    color: #52606d;
+    font-size: 12px;
+  }
+
+  .map-help > summary {
+    width: fit-content;
+    cursor: pointer;
     font-weight: 600;
-    color: #457b9d;
+  }
+
+  .map-help ul {
+    display: grid;
+    gap: 4px;
+    margin: 7px 0 0 18px;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 1600ms;
+    }
   }
 
   @media (max-width: 720px) {
@@ -138,20 +294,9 @@ import PopupStyles from '../components/PopupStyles.astro';
       right: 8px;
       bottom: 8px;
       border-radius: 10px;
-      padding: 10px 12px;
       font-size: 13px;
       max-width: none;
-      max-height: 42%;
-    }
-
-    #legend h3 {
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-
-    .hint {
-      max-width: none;
-      font-size: 11px;
+      max-height: 60%;
     }
   }
 

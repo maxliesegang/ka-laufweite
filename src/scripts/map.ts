@@ -94,6 +94,9 @@ class TransitMapController {
   private readonly walkshedLoadProgressEl = document.querySelector<HTMLElement>(
     '[data-walkshed-load-progress]',
   );
+  private readonly walkshedProgressTextEl = document.querySelector<HTMLElement>(
+    '[data-walkshed-progress-text]',
+  );
   private readonly walkshedOverlay: WalkshedOverlayManager;
   private readonly stopTypeToggleButtons = new Map<StopType, HTMLButtonElement>();
   private readonly customMarkersById = new Map<string, Marker>();
@@ -188,11 +191,18 @@ class TransitMapController {
   private updateWalkshedLoadProgress(progress: WalkshedLoadProgress): void {
     if (!this.walkshedLoadProgressEl) return;
     const visible = this.coverageShape === 'walkshed' && progress.total > 0;
+    const complete = progress.pending === 0;
     this.walkshedLoadProgressEl.hidden = !visible;
-    this.walkshedLoadProgressEl.ariaBusy = String(visible && progress.pending > 0);
+    this.walkshedLoadProgressEl.ariaBusy = String(visible && !complete);
+    this.walkshedLoadProgressEl.dataset.complete = String(complete);
     if (!visible) return;
-    const suffix = progress.unavailable ? ` · ${progress.unavailable} nicht verfügbar` : '';
-    this.walkshedLoadProgressEl.textContent = `Fußweg-Polygone: ${progress.loaded}/${progress.total} geladen${suffix}`;
+    const unavailableText = progress.unavailable
+      ? ` ${progress.unavailable} ${progress.unavailable === 1 ? 'Laufweite ist' : 'Laufweiten sind'} derzeit nicht verfügbar.`
+      : '';
+    if (!this.walkshedProgressTextEl) return;
+    this.walkshedProgressTextEl.textContent = complete
+      ? `${progress.loaded} von ${progress.total} Laufweiten geladen.${unavailableText}`
+      : `Laufweiten werden berechnet (${progress.loaded} von ${progress.total}). Das kann etwas dauern.${unavailableText}`;
   }
 
   private allStops(): Stop[] {
