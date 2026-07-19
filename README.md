@@ -96,8 +96,8 @@ This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `hi
 To rebuild the optional shipped polygon snapshot for the current stops and supported radii, run
 `npm run build:walksheds`. It writes one file per stop type and radius — for example,
 `public/data/walksheds-train-450.json` — so the map only downloads the exact dataset selected by the
-user (bus is hidden by default and loads lazily). Train and tram ship their default radius plus 50 m
-and 100 m; bus retains only its default. The generator accepts `--types`, `--radius`, `--limit`,
+user (bus is hidden by default and loads lazily). Train ships radii from 400 m through 600 m, tram
+from 300 m through 500 m, and bus from 200 m through 300 m, all in 50 m increments. The generator accepts `--types`, `--radius`, `--limit`,
 `--concurrency`, and `--out-dir` options after `--`. Use `--types` to build a subset — e.g.
 `--types train,tram` —
 leaving the other types' files untouched (handy because bus has by far the most stops). `--radius`

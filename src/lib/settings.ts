@@ -17,8 +17,7 @@ export const DEFAULT_STOP_RADIUS_METERS_BY_TYPE: Record<StopType, number> = {
   bus: 200,
 };
 
-/** Radii covered by the optional precomputed walkshed datasets. Train and tram
- *  get two useful increments without taking on the much larger bus dataset. */
+/** Radii covered by the optional precomputed walkshed datasets. */
 export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number[]> = {
   train: [400, 450, 500, 550, 600],
   tram: [300, 350, 400, 450, 500],
