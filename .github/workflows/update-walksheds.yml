@@ -1,0 +1,122 @@
+name: Update walkshed data
+
+on:
+  schedule:
+    # Run after the monthly stop snapshot refresh on the first day.
+    - cron: '17 4 2 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monthly-osm-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      builds: ${{ steps.builds.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Read configured type and radius combinations
+        id: builds
+        run: echo "matrix=$(npx tsx scripts/list-walkshed-builds.ts)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.matrix.outputs.builds) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ${{ matrix.type }} walksheds at ${{ matrix.radius }} m
+        run: >-
+          npm run build:walksheds --
+          --types "${{ matrix.type }}"
+          --radius "${{ matrix.radius }}"
+          --out-dir walkshed-output
+
+      - name: Upload generated dataset
+        uses: actions/upload-artifact@v7
+        with:
+          name: walkshed-${{ matrix.type }}-${{ matrix.radius }}
+          path: walkshed-output/walksheds-${{ matrix.type }}-${{ matrix.radius }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  commit:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest default branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Download generated datasets
+        uses: actions/download-artifact@v8
+        with:
+          pattern: walkshed-*
+          path: public/data
+          merge-multiple: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify generated data
+        run: |
+          npm run format:check
+          npm run check
+          npm test
+          npm run build
+
+      - name: Commit updated walkshed data
+        run: |
+          git add public/data/walksheds-*.json
+          if git diff --cached --quiet; then
+            echo "Walkshed data is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update precomputed walkshed data"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"

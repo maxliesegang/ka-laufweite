@@ -8,11 +8,13 @@
  * the browser would have computed from Overpass. Run periodically alongside
  * `npm run update:stops`.
  *
- *   npm run build:walksheds -- [--types train,tram] [--limit N] [--concurrency N]
- *                              [--out-dir path] [--progress-file path]
+ *   npm run build:walksheds -- [--types train,tram] [--radius N] [--limit N]
+ *                              [--concurrency N] [--out-dir path] [--progress-file path]
  *
  * `--types` builds a subset (e.g. train,tram now, bus later); the omitted types
  * keep their existing files. Defaults to all stop types.
+ * `--radius` builds one configured radius for exactly one requested stop type.
+ * This is primarily useful for parallel CI matrix jobs.
  *
  * `--progress-file` overwrites the given file with the latest progress line as the
  * build runs — readable even when stdout is buffered by a pipe (e.g. CI logs).
@@ -47,6 +49,9 @@ interface BuildOptions {
   outDir: string;
   /** Stop types to build; other types keep their existing files untouched. */
   types: StopType[];
+  /** Effective radii to build per type. `--radius` narrows the single requested
+   *  type to one value; every other type keeps its full shipped set. */
+  radiiByType: Record<StopType, readonly number[]>;
   /** File to overwrite with the latest progress line; readable while the build
    *  runs even when stdout is buffered by a pipe. */
   progressFile: string | null;
@@ -110,13 +115,12 @@ function parseTypes(value: string): StopType[] {
 }
 
 function parseOptions(args: string[]): BuildOptions {
-  const options: BuildOptions = {
-    concurrency: DEFAULT_CONCURRENCY,
-    limit: Number.POSITIVE_INFINITY,
-    outDir: dataDir,
-    types: [...STOP_TYPES],
-    progressFile: null,
-  };
+  let concurrency = DEFAULT_CONCURRENCY;
+  let limit = Number.POSITIVE_INFINITY;
+  let outDir = dataDir;
+  let types: StopType[] = [...STOP_TYPES];
+  let radius: number | null = null;
+  let progressFile: string | null = null;
 
   for (let index = 0; index < args.length; index += 2) {
     const option = args[index];
@@ -126,23 +130,57 @@ function parseOptions(args: string[]): BuildOptions {
     }
 
     if (option === '--concurrency') {
-      options.concurrency = parseNonNegativeInteger(value, option);
-      if (options.concurrency === 0) throw new Error('--concurrency must be greater than zero');
+      concurrency = parseNonNegativeInteger(value, option);
+      if (concurrency === 0) throw new Error('--concurrency must be greater than zero');
     } else if (option === '--limit') {
-      options.limit = parseNonNegativeInteger(value, option);
+      limit = parseNonNegativeInteger(value, option);
     } else if (option === '--out-dir') {
-      options.outDir = value;
+      outDir = value;
     } else if (option === '--types') {
-      options.types = parseTypes(value);
-      if (options.types.length === 0) throw new Error('--types must name at least one stop type');
+      types = parseTypes(value);
+      if (types.length === 0) throw new Error('--types must name at least one stop type');
+    } else if (option === '--radius') {
+      radius = parseNonNegativeInteger(value, option);
+      if (radius === 0) throw new Error('--radius must be greater than zero');
     } else if (option === '--progress-file') {
-      options.progressFile = value;
+      progressFile = value;
     } else {
       throw new Error(`Unknown option ${option}`);
     }
   }
 
-  return options;
+  return {
+    concurrency,
+    limit,
+    outDir,
+    types,
+    radiiByType: resolveRadii(types, radius),
+    progressFile,
+  };
+}
+
+/** Derive the per-type radii to build. Without `--radius` every requested type
+ *  builds its full shipped set; with it, the single requested type is narrowed
+ *  to that one value (other types are irrelevant — `main` only writes `types`). */
+function resolveRadii(
+  types: StopType[],
+  radius: number | null,
+): Record<StopType, readonly number[]> {
+  const radiiByType: Record<StopType, readonly number[]> = { ...SHIPPED_STOP_RADII_METERS_BY_TYPE };
+  if (radius === null) return radiiByType;
+
+  if (types.length !== 1) {
+    throw new Error('--radius requires exactly one stop type via --types');
+  }
+  const [type] = types;
+  if (!SHIPPED_STOP_RADII_METERS_BY_TYPE[type].includes(radius)) {
+    throw new Error(
+      `--radius ${radius} is not configured for ${type}; expected one of ` +
+        SHIPPED_STOP_RADII_METERS_BY_TYPE[type].join(', '),
+    );
+  }
+  radiiByType[type] = [radius];
+  return radiiByType;
 }
 
 interface StopResult {
@@ -175,12 +213,15 @@ function createStopBatches(stops: Stop[]): Stop[][] {
   return batches;
 }
 
-async function computeBatch(stops: Stop[]): Promise<BatchResult> {
+async function computeBatch(
+  stops: Stop[],
+  radiiByType: Record<StopType, readonly number[]>,
+): Promise<BatchResult> {
   const queryArea = createWalkshedQueryArea(
     stops.map((stop) => ({
       lat: stop.lat,
       lon: stop.lon,
-      radiusMeters: Math.max(...SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type]),
+      radiusMeters: Math.max(...radiiByType[stop.type]),
     })),
   );
   if (!queryArea) return { resultsByStopKey: new Map(), transientFailure: false };
@@ -196,14 +237,14 @@ async function computeBatch(stops: Stop[]): Promise<BatchResult> {
     for (const stop of stops) {
       resultsByStopKey.set(walkshedDatasetPolygonKey(stop), {
         encodedByRadius: new Map(),
-        empty: SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type].length,
+        empty: radiiByType[stop.type].length,
       });
     }
     return { resultsByStopKey, transientFailure: false };
   }
 
   for (const stop of stops) {
-    const radii = SHIPPED_STOP_RADII_METERS_BY_TYPE[stop.type];
+    const radii = radiiByType[stop.type];
     const seeds = findNearestEdgeSeeds(graph, stop.lat, stop.lon);
     const encodedByRadius = new Map<number, number[]>();
     for (const radiusMeters of radii) {
@@ -228,6 +269,7 @@ async function computeBatch(stops: Stop[]): Promise<BatchResult> {
 async function runPass(
   stops: Stop[],
   polygons: Map<string, Record<string, number[]>>,
+  radiiByType: Record<StopType, readonly number[]>,
   concurrency: number,
   report: ProgressReporter,
   passLabel: string,
@@ -244,7 +286,7 @@ async function runPass(
       const batch = batches[cursor];
       cursor += 1;
       try {
-        const { resultsByStopKey, transientFailure } = await computeBatch(batch);
+        const { resultsByStopKey, transientFailure } = await computeBatch(batch, radiiByType);
         if (transientFailure) failed.push(...batch);
         else {
           for (const stop of batch) {
@@ -284,7 +326,9 @@ async function runPass(
 }
 
 async function main(): Promise<void> {
-  const { concurrency, limit, outDir, types, progressFile } = parseOptions(process.argv.slice(2));
+  const { concurrency, limit, outDir, types, radiiByType, progressFile } = parseOptions(
+    process.argv.slice(2),
+  );
   const payload: unknown = JSON.parse(await readFile(stopsPath, 'utf8'));
   if (!Array.isArray(payload) || !payload.every(isStop)) {
     throw new Error(`${stopsPath} does not contain a valid stop array`);
@@ -292,11 +336,12 @@ async function main(): Promise<void> {
   const buildTypes = new Set(types);
   const allStops = payload.filter((stop) => stop.isCustom !== true && buildTypes.has(stop.type));
   const stops = Number.isFinite(limit) ? allStops.slice(0, limit) : allStops;
+  const builtRadiiByType = Object.fromEntries(types.map((type) => [type, radiiByType[type]]));
 
   console.log(
     `Building walksheds for ${stops.length} ${types.join('/')} stops ` +
       `(concurrency ${concurrency}, crossings=${DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS}, ` +
-      `radii ${JSON.stringify(SHIPPED_STOP_RADII_METERS_BY_TYPE)})`,
+      `radii ${JSON.stringify(builtRadiiByType)})`,
   );
 
   const polygons = new Map<string, Record<string, number[]>>();
@@ -308,7 +353,14 @@ async function main(): Promise<void> {
   for (let pass = 0; pass <= RETRY_PASSES && pending.length > 0; pass += 1) {
     if (pass > 0) console.log(`  retry pass ${pass}: ${pending.length} stop(s)`);
     const passLabel = pass === 0 ? 'pass 1' : `retry ${pass}`;
-    const { empty, failed } = await runPass(pending, polygons, concurrency, report, passLabel);
+    const { empty, failed } = await runPass(
+      pending,
+      polygons,
+      radiiByType,
+      concurrency,
+      report,
+      passLabel,
+    );
     totalEmpty += empty;
     pending = failed;
     if (failed.length > 0 && pass < RETRY_PASSES) {
@@ -329,7 +381,7 @@ async function main(): Promise<void> {
       .filter((stop) => stop.type === type)
       .map(walkshedDatasetPolygonKey)
       .sort();
-    for (const radiusMeters of SHIPPED_STOP_RADII_METERS_BY_TYPE[type]) {
+    for (const radiusMeters of radiiByType[type]) {
       const polygonsForRadius: Record<string, number[]> = {};
       for (const polygonKey of polygonKeysOfType) {
         const encoded = sortedPolygons[polygonKey]?.[String(radiusMeters)];

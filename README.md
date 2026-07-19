@@ -97,13 +97,17 @@ To rebuild the optional shipped polygon snapshot for the current stops and suppo
 `npm run build:walksheds`. It writes one file per stop type and radius — for example,
 `public/data/walksheds-train-450.json` — so the map only downloads the exact dataset selected by the
 user (bus is hidden by default and loads lazily). Train and tram ship their default radius plus 50 m
-and 100 m; bus retains only its default. The generator accepts `--types`, `--limit`, `--concurrency`,
-and `--out-dir` options after `--`. Use `--types` to build a subset — e.g. `--types train,tram` —
-leaving the other types' files untouched (handy because bus has by far the most stops). Its output is
-versioned, validated at runtime, and keyed by stop type and coordinates so stale polygons are ignored
-after a stop changes.
+and 100 m; bus retains only its default. The generator accepts `--types`, `--radius`, `--limit`,
+`--concurrency`, and `--out-dir` options after `--`. Use `--types` to build a subset — e.g.
+`--types train,tram` —
+leaving the other types' files untouched (handy because bus has by far the most stops). `--radius`
+can select one configured radius when exactly one type is selected. Its output is versioned,
+validated at runtime, and keyed by stop type and coordinates so stale polygons are ignored after a
+stop changes.
 
-The stop snapshot is refreshed automatically on the first day of every month. The workflow commits verified data changes to the default branch and can also be started manually from GitHub Actions.
+The stop snapshot is refreshed automatically on the first day of every month. On the second day, a
+separate workflow rebuilds each shipped type/radius combination in parallel and makes one verified
+commit after all jobs succeed. Both workflows can also be started manually from GitHub Actions.
 
 ## Tech Stack
 
