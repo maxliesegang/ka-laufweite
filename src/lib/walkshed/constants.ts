@@ -1,5 +1,6 @@
 export const OVERPASS_ENDPOINT_URLS = [
   'https://overpass-api.de/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
 ];
 

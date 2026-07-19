@@ -30,7 +30,11 @@ export type CoverageShape = 'circle' | 'walkshed';
 export type StopRadiusByType = Record<StopType, number>;
 export type StopTypeVisibilityByType = Record<StopType, boolean>;
 export const DEFAULT_COVERAGE_SHAPE: CoverageShape = 'walkshed';
-const DEFAULT_STOP_TYPE_VISIBILITY_BY_TYPE: StopTypeVisibilityByType = mapStopTypes(() => true);
+const DEFAULT_STOP_TYPE_VISIBILITY_BY_TYPE: StopTypeVisibilityByType = {
+  train: true,
+  tram: true,
+  bus: false,
+};
 
 export function clampStopRadius(value: unknown, fallback = DEFAULT_STOP_RADIUS_METERS): number {
   if (value === null || value === undefined) return fallback;
