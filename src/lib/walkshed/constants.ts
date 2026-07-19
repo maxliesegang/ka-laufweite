@@ -1,7 +1,14 @@
+// Only instances that send `Access-Control-Allow-Origin` belong here — a static
+// site calls these directly from the browser. Note: on error responses (429/504)
+// even CORS-capable instances drop that header, so the browser surfaces a throttled
+// request as a generic "CORS failed". A broad pool spreads load and keeps a
+// fallback alive when one instance is rate-limiting.
 export const OVERPASS_ENDPOINT_URLS = [
   'https://overpass-api.de/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 
 export const WALKABLE_HIGHWAY_EXCLUDE_REGEX =

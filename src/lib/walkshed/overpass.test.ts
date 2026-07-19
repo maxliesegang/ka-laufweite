@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { OVERPASS_ENDPOINT_URLS } from './constants';
 import { fetchFootways, parseOverpassResponse } from './overpass';
 
 afterEach(() => {
@@ -28,23 +29,23 @@ describe('Overpass request resilience', () => {
   it('retries temporary failures after trying each endpoint', async () => {
     vi.useFakeTimers();
     vi.spyOn(Math, 'random').mockReturnValue(0);
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(new Response('', { status: 429, headers: { 'Retry-After': '0' } }))
-      .mockResolvedValueOnce(new Response('', { status: 503 }))
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ elements: [] }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      );
+    const fetchMock = vi.fn<typeof fetch>();
+    for (const _endpoint of OVERPASS_ENDPOINT_URLS) {
+      fetchMock.mockResolvedValueOnce(new Response('', { status: 503 }));
+    }
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ elements: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
     vi.stubGlobal('fetch', fetchMock);
 
     const pending = fetchFootways(49, 8, 300);
     await vi.advanceTimersByTimeAsync(1_000);
 
     await expect(pending).resolves.toEqual({ status: 'ok', response: { elements: [] } });
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(OVERPASS_ENDPOINT_URLS.length + 1);
   });
 
   it('does not retry a permanent query error', async () => {
