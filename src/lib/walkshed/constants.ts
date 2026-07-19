@@ -7,7 +7,6 @@ export const OVERPASS_ENDPOINT_URLS = [
   'https://overpass-api.de/api/interpreter',
   'https://lz4.overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 
 export const WALKABLE_HIGHWAY_EXCLUDE_REGEX =
