@@ -7,11 +7,16 @@
  * the browser would have computed from Overpass. Run periodically alongside
  * `npm run update:stops`.
  *
- *   npm run build:walksheds -- [--types train,tram] [--limit N] [--concurrency N] [--out-dir path]
+ *   npm run build:walksheds -- [--types train,tram] [--limit N] [--concurrency N]
+ *                              [--out-dir path] [--progress-file path]
  *
  * `--types` builds a subset (e.g. train,tram now, bus later); the omitted types
  * keep their existing files. Defaults to all stop types.
+ *
+ * `--progress-file` overwrites the given file with the latest progress line as the
+ * build runs — readable even when stdout is buffered by a pipe (e.g. CI logs).
  */
+import { writeFileSync } from 'node:fs';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -40,6 +45,26 @@ interface BuildOptions {
   outDir: string;
   /** Stop types to build; other types keep their existing files untouched. */
   types: StopType[];
+  /** File to overwrite with the latest progress line; readable while the build
+   *  runs even when stdout is buffered by a pipe. */
+  progressFile: string | null;
+}
+
+/** Emits a progress line to stdout and, if configured, to a file synchronously. */
+type ProgressReporter = (line: string) => void;
+
+function createProgressReporter(progressFile: string | null, startedAt: number): ProgressReporter {
+  return (line: string) => {
+    process.stdout.write(`${line}\r`);
+    if (!progressFile) return;
+    const elapsed = ((Date.now() - startedAt) / 1000).toFixed(0);
+    // Best-effort: never fail the build because progress couldn't be written.
+    try {
+      writeFileSync(progressFile, `${line}  |  ${elapsed}s elapsed\n`);
+    } catch {
+      /* ignore */
+    }
+  };
 }
 
 const dataDir = join(import.meta.dirname, '..', 'public', 'data');
@@ -85,6 +110,7 @@ function parseOptions(args: string[]): BuildOptions {
     limit: Number.POSITIVE_INFINITY,
     outDir: dataDir,
     types: [...STOP_TYPES],
+    progressFile: null,
   };
 
   for (let index = 0; index < args.length; index += 2) {
@@ -104,6 +130,8 @@ function parseOptions(args: string[]): BuildOptions {
     } else if (option === '--types') {
       options.types = parseTypes(value);
       if (options.types.length === 0) throw new Error('--types must name at least one stop type');
+    } else if (option === '--progress-file') {
+      options.progressFile = value;
     } else {
       throw new Error(`Unknown option ${option}`);
     }
@@ -136,6 +164,8 @@ async function runPass(
   stops: Stop[],
   polygons: Map<string, number[]>,
   concurrency: number,
+  report: ProgressReporter,
+  passLabel: string,
 ): Promise<{ empty: number; failed: Stop[] }> {
   let cursor = 0;
   let done = 0;
@@ -158,8 +188,9 @@ async function runPass(
       }
       done += 1;
       if (done % 50 === 0 || done === stops.length) {
-        process.stdout.write(
-          `  ${done}/${stops.length}  (built ${polygons.size}, empty ${empty}, failed ${failed.length})\r`,
+        report(
+          `  ${passLabel}: ${done}/${stops.length}  ` +
+            `(built ${polygons.size}, empty ${empty}, failed ${failed.length})`,
         );
       }
     }
@@ -171,7 +202,7 @@ async function runPass(
 }
 
 async function main(): Promise<void> {
-  const { concurrency, limit, outDir, types } = parseOptions(process.argv.slice(2));
+  const { concurrency, limit, outDir, types, progressFile } = parseOptions(process.argv.slice(2));
   const payload: unknown = JSON.parse(await readFile(stopsPath, 'utf8'));
   if (!Array.isArray(payload) || !payload.every(isStop)) {
     throw new Error(`${stopsPath} does not contain a valid stop array`);
@@ -188,12 +219,14 @@ async function main(): Promise<void> {
 
   const polygons = new Map<string, number[]>();
   const startedAt = Date.now();
+  const report = createProgressReporter(progressFile, startedAt);
 
   let pending = stops;
   let totalEmpty = 0;
   for (let pass = 0; pass <= RETRY_PASSES && pending.length > 0; pass += 1) {
     if (pass > 0) console.log(`  retry pass ${pass}: ${pending.length} stop(s)`);
-    const { empty, failed } = await runPass(pending, polygons, concurrency);
+    const passLabel = pass === 0 ? 'pass 1' : `retry ${pass}`;
+    const { empty, failed } = await runPass(pending, polygons, concurrency, report, passLabel);
     totalEmpty += empty;
     pending = failed;
     if (failed.length > 0 && pass < RETRY_PASSES) {
@@ -231,6 +264,10 @@ async function main(): Promise<void> {
   }
 
   const elapsed = (Date.now() - startedAt) / 1000;
+  report(
+    `  DONE ${types.join('/')}: built ${polygons.size}, empty ${totalEmpty}, ` +
+      `unresolved ${pending.length}, ${mib(totalGzipBytes)} MB gz`,
+  );
   console.log(
     `\nWrote ${types.length} file(s) to ${outDir}\n` +
       perTypeSummaries.join('\n') +
