@@ -51,7 +51,7 @@ import {
   type StopType,
 } from '../lib/types';
 import { createCustomStopMarkerIcon } from './map/custom-stop-marker-icon';
-import { WalkshedOverlayManager } from './map/walkshed-overlay-manager';
+import { WalkshedOverlayManager, type WalkshedLoadProgress } from './map/walkshed-overlay-manager';
 
 const MAP_CONTAINER_ID = 'map';
 const MAP_INITIAL_CENTER: [number, number] = [49.0069, 8.4037];
@@ -85,6 +85,7 @@ class TransitMapController {
   private readonly map: L.Map;
   private readonly coverageInfoEl: HTMLElement | null;
   private readonly radiusInfoEl: HTMLElement | null;
+  private readonly walkshedLoadProgressEl: HTMLElement | null;
   private readonly stopRootLayer: L.LayerGroup;
   private readonly walkshedOverlay: WalkshedOverlayManager;
   private readonly stopTypeToggleButtons = new Map<StopType, HTMLButtonElement>();
@@ -97,20 +98,35 @@ class TransitMapController {
   private coverageShape: CoverageShape = getConfiguredCoverageShape();
   private walkshedDisabledStopIds = getWalkshedDisabledStopIds();
   private walkshedCacheResetMarker = getWalkshedCacheResetMarker();
-  private stopLoadVersion = 0;
+  private stopLoadGeneration = 0;
   private suppressNextMapClick = false;
 
   constructor(map: L.Map) {
     this.map = map;
     this.coverageInfoEl = document.querySelector('[data-coverage-info]');
     this.radiusInfoEl = document.querySelector('[data-radius-info]');
+    this.walkshedLoadProgressEl = document.querySelector('[data-walkshed-load-progress]');
     this.stopRootLayer = L.layerGroup().addTo(map);
     this.walkshedOverlay = new WalkshedOverlayManager({
       map,
       getRadiusMetersForType: (stopType) => this.radiusMetersByType[stopType],
       isEnabled: () => this.coverageShape === 'walkshed',
       paneName: WALKSHED_PANE_NAME,
+      onLoadProgressChange: (progress) => this.updateWalkshedLoadProgress(progress),
     });
+  }
+
+  private updateWalkshedLoadProgress(progress: WalkshedLoadProgress): void {
+    if (!this.walkshedLoadProgressEl) return;
+
+    const isVisible = this.coverageShape === 'walkshed' && progress.total > 0;
+    this.walkshedLoadProgressEl.hidden = !isVisible;
+    this.walkshedLoadProgressEl.ariaBusy = String(isVisible && progress.pending > 0);
+    if (!isVisible) return;
+
+    const unavailableSuffix =
+      progress.unavailable > 0 ? ` · ${progress.unavailable} nicht verfügbar` : '';
+    this.walkshedLoadProgressEl.textContent = `Fußweg-Polygone: ${progress.loaded}/${progress.total} geladen${unavailableSuffix}`;
   }
 
   init(): void {
@@ -439,14 +455,14 @@ class TransitMapController {
   }
 
   private async loadStops(): Promise<void> {
-    const version = ++this.stopLoadVersion;
+    const generation = ++this.stopLoadGeneration;
 
     try {
       const stops = await loadAllStops();
-      if (version !== this.stopLoadVersion) return;
+      if (generation !== this.stopLoadGeneration) return;
       this.setStops(stops);
     } catch (error) {
-      if (version !== this.stopLoadVersion) return;
+      if (generation !== this.stopLoadGeneration) return;
       console.error('Failed to load stops:', error);
     }
   }

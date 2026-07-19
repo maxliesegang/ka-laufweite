@@ -12,6 +12,14 @@ import PopupStyles from '../components/PopupStyles.astro';
       <StopLegendItems />
       <p class="coverage" data-coverage-info></p>
       <p class="radius" data-radius-info></p>
+      <p
+        class="walkshed-load-progress"
+        data-walkshed-load-progress
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+      </p>
       <p class="hint">
         Klicke auf die Karte, um eine eigene Haltestelle hinzuzufügen und ihren Typ zu wählen.
         Eigene Haltestellen sind verschiebbar und lassen sich per Popup entfernen. Darstellung und
@@ -115,6 +123,13 @@ import PopupStyles from '../components/PopupStyles.astro';
     font-size: 12px;
     font-weight: 600;
     color: #1f2933;
+  }
+
+  .walkshed-load-progress {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #457b9d;
   }
 
   @media (max-width: 720px) {
