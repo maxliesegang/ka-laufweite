@@ -20,11 +20,22 @@ Guidance for coding agents and contributors working in this repository.
 - Walkshed cache-key format: `src/lib/walkshed/cache-key.ts` (single source of truth for `stopId:distance` keys, shared by runtime cache, persistent cache, and overlay manager)
 - Walkshed response cache policy: `src/lib/walkshed-cache.ts` (entry lifecycle, per-stop invalidation, reset marker sync)
 - Walkshed cache persistence: `src/lib/walkshed-cache-persistence.ts` (IndexedDB primary, localStorage fallback)
-- Map orchestration: `src/scripts/map.ts`
-- Map UI helpers: `src/scripts/map/custom-stop-marker-icon.ts`
-- Walkshed overlay orchestration: `src/scripts/map/walkshed-overlay-manager.ts`
+- Map renderer: MapLibre GL JS with the OpenFreeMap Liberty vector style by default
+- Map orchestration and stop/radius GeoJSON sources: `src/scripts/map.ts`
+- Map geometry helpers: `src/scripts/map/map-geometry.ts` (GeoJSON types and geodesic radius polygons)
+- Draggable custom-stop marker elements: `src/scripts/map/custom-stop-marker-icon.ts`
+- Walkshed GeoJSON source, rendering, and load queue: `src/scripts/map/walkshed-overlay-manager.ts`
 - Config page logic: `src/scripts/config.ts`
 - Shared settings/types: `src/lib/settings.ts` (radius, coverage shape, stop-type visibility), `src/lib/types.ts`
+
+### Map rendering specifics
+
+- Default style URL: `https://tiles.openfreemap.org/styles/liberty`
+- Build-time style override: `PUBLIC_MAP_STYLE_URL`
+- Built-in stops use a shared MapLibre GeoJSON source and circle layer; custom stops use draggable DOM markers
+- Radius circles and walksheds are geodesic/derived polygons rendered through shared GeoJSON sources
+- Layer order is intentional: walksheds, placeholders, radius coverage, then stop markers
+- Internal walkshed coordinates use `[latitude, longitude]`; GeoJSON and MapLibre coordinates use `[longitude, latitude]`
 
 ### Walkshed cache specifics
 
@@ -40,6 +51,11 @@ Guidance for coding agents and contributors working in this repository.
 - Keep map behavior deterministic and resilient to missing data.
 - Preserve static-site compatibility (no server-only routes/dependencies).
 - Use `import.meta.env.BASE_URL` for in-app links and static asset paths.
+- Keep map styles provider-independent and MapLibre-compatible; do not embed provider secrets in client code.
+- Preserve layer ordering when adding MapLibre sources or layers.
+- Batch GeoJSON mutations and call `GeoJSONSource.setData` once per logical update where practical.
+- Avoid recreating draggable DOM markers for changes that only affect polygon sources or paint properties.
+- Convert coordinates explicitly at the boundary between walkshed `LatLng` tuples and GeoJSON.
 - Keep async cache operations awaited where correctness depends on write ordering (for example cache invalidation before re-render).
 
 ## Data Refresh Workflow
@@ -57,6 +73,7 @@ Before finishing changes, run:
 
 ```sh
 npm run format:check
+npm run check
 npm run build
 ```
 

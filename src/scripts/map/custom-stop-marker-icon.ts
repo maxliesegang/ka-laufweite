@@ -1,4 +1,3 @@
-import L from 'leaflet';
 import { STOP_TYPE_CONFIG } from '../../lib/stop-type-config';
 import type { StopType } from '../../lib/types';
 
@@ -6,18 +5,17 @@ const CUSTOM_STOP_TOUCH_TARGET_PX = 38;
 const CUSTOM_STOP_MARKER_RING_BORDER_PX = 3;
 const CUSTOM_STOP_MARKER_CROSS_THICKNESS_PX = 2;
 
-export function createCustomStopMarkerIcon(stopType: StopType, color: string): L.DivIcon {
+export function createCustomStopMarkerElement(stopType: StopType, color: string): HTMLElement {
   const targetSize = CUSTOM_STOP_TOUCH_TARGET_PX;
   const ringSize = Math.max(18, STOP_TYPE_CONFIG[stopType].markerRadius * 3 + 4);
   const coreSize = Math.max(6, Math.round(STOP_TYPE_CONFIG[stopType].markerRadius * 1.6));
   const crossSize = ringSize - 8;
 
-  return L.divIcon({
-    className: 'custom-stop-drag-marker',
-    iconSize: [targetSize, targetSize],
-    iconAnchor: [targetSize / 2, targetSize / 2],
-    popupAnchor: [0, -(targetSize / 2)],
-    html: `
+  const element = document.createElement('div');
+  element.className = 'custom-stop-drag-marker';
+  element.style.width = `${targetSize}px`;
+  element.style.height = `${targetSize}px`;
+  element.innerHTML = `
       <span
         aria-hidden="true"
         style="
@@ -73,6 +71,6 @@ export function createCustomStopMarkerIcon(stopType: StopType, color: string): L
           ></span>
         </span>
       </span>
-    `,
-  });
+    `;
+  return element;
 }

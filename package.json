@@ -19,12 +19,11 @@
   "dependencies": {
     "astro": "^7.1.1",
     "concaveman": "^2.0.0",
-    "leaflet": "^1.9.4"
+    "maplibre-gl": "^5.24.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@types/concaveman": "^1.1.6",
-    "@types/leaflet": "^1.9.21",
     "@types/node": "^26.1.1",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",

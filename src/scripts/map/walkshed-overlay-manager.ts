@@ -1,8 +1,11 @@
-import L from 'leaflet';
+import type { Feature, FeatureCollection, Polygon } from 'geojson';
+import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl';
 import { STOP_TYPE_CONFIG } from '../../lib/stop-type-config';
 import type { Stop, StopType } from '../../lib/types';
 import { walkshedCacheKey, walkshedCacheKeyPrefixForStop } from '../../lib/walkshed/cache-key';
 import { buildWalkshedPolygon, peekCachedWalkshedPolygon } from '../../lib/walkshed/service';
+import type { LatLng } from '../../lib/walkshed/types';
+import { circlePolygon, emptyPolygonCollection, type PolygonFeature } from './map-geometry';
 
 const FILL_OPACITY = 0.16;
 const STROKE_OPACITY = 0.9;
@@ -11,6 +14,12 @@ const VIEWPORT_SYNC_DEBOUNCE_MS = 120;
 const BOUNDS_PADDING = 0.08;
 const PLACEHOLDER_FILL_OPACITY = 0.035;
 const PLACEHOLDER_STROKE_OPACITY = 0.5;
+const POLYGON_SOURCE_ID = 'walkshed-polygons';
+const POLYGON_FILL_LAYER_ID = 'walkshed-polygons-fill';
+const POLYGON_LINE_LAYER_ID = 'walkshed-polygons-line';
+const PLACEHOLDER_SOURCE_ID = 'walkshed-placeholders';
+const PLACEHOLDER_FILL_LAYER_ID = 'walkshed-placeholders-fill';
+const PLACEHOLDER_LINE_LAYER_ID = 'walkshed-placeholders-line';
 
 export interface WalkshedLoadProgress {
   loaded: number;
@@ -20,30 +29,25 @@ export interface WalkshedLoadProgress {
 }
 
 interface OverlayManagerOptions {
-  map: L.Map;
+  map: MapLibreMap;
   getRadiusMetersForType: (stopType: StopType) => number;
   isEnabled: () => boolean;
-  paneName?: string;
   onLoadProgressChange?: (progress: WalkshedLoadProgress) => void;
 }
 
 export class WalkshedOverlayManager {
-  private readonly map: L.Map;
+  private readonly map: MapLibreMap;
   private readonly getRadiusMetersForType: (stopType: StopType) => number;
   private readonly isEnabled: () => boolean;
-  private readonly paneName?: string;
   private readonly onLoadProgressChange?: (progress: WalkshedLoadProgress) => void;
-  private readonly overlayLayerGroup: L.LayerGroup;
-
   private readonly stopsById = new Map<string, Stop>();
-  private readonly polygonsByStopId = new Map<string, L.Polygon>();
-  private readonly placeholderCirclesByStopId = new Map<string, L.Circle>();
+  private readonly polygonsByStopId = new Map<string, PolygonFeature>();
+  private readonly placeholdersByStopId = new Map<string, PolygonFeature>();
   private readonly queuedStopIds = new Set<string>();
   private readonly loadingStopIds = new Set<string>();
   private readonly priorityStopIds = new Set<string>();
   private readonly unavailableWalkshedKeys = new Set<string>();
   private readonly visibleStopIds = new Set<string>();
-
   private loadGeneration = 0;
   private viewportSyncTimeoutId: number | null = null;
   private activeLoadCount = 0;
@@ -52,17 +56,68 @@ export class WalkshedOverlayManager {
     this.map = options.map;
     this.getRadiusMetersForType = options.getRadiusMetersForType;
     this.isEnabled = options.isEnabled;
-    this.paneName = options.paneName;
     this.onLoadProgressChange = options.onLoadProgressChange;
-    this.overlayLayerGroup = L.layerGroup().addTo(this.map);
+    this.addMapLayers();
+  }
+
+  private addMapLayers(): void {
+    this.map.addSource(POLYGON_SOURCE_ID, { type: 'geojson', data: emptyPolygonCollection() });
+    this.map.addLayer({
+      id: POLYGON_FILL_LAYER_ID,
+      type: 'fill',
+      source: POLYGON_SOURCE_ID,
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': FILL_OPACITY },
+    });
+    this.map.addLayer({
+      id: POLYGON_LINE_LAYER_ID,
+      type: 'line',
+      source: POLYGON_SOURCE_ID,
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-opacity': STROKE_OPACITY,
+        'line-width': 2,
+      },
+    });
+    this.map.addSource(PLACEHOLDER_SOURCE_ID, { type: 'geojson', data: emptyPolygonCollection() });
+    this.map.addLayer({
+      id: PLACEHOLDER_FILL_LAYER_ID,
+      type: 'fill',
+      source: PLACEHOLDER_SOURCE_ID,
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': PLACEHOLDER_FILL_OPACITY },
+    });
+    this.map.addLayer({
+      id: PLACEHOLDER_LINE_LAYER_ID,
+      type: 'line',
+      source: PLACEHOLDER_SOURCE_ID,
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-opacity': PLACEHOLDER_STROKE_OPACITY,
+        'line-width': 1,
+        'line-dasharray': [5, 5],
+      },
+    });
+  }
+
+  private updateSource(sourceId: string, features: PolygonFeature[]): void {
+    const source = this.map.getSource(sourceId) as GeoJSONSource | undefined;
+    const collection: FeatureCollection<Polygon, PolygonFeature['properties']> = {
+      type: 'FeatureCollection',
+      features,
+    };
+    source?.setData(collection);
+  }
+
+  private updatePolygonSource(): void {
+    this.updateSource(POLYGON_SOURCE_ID, [...this.polygonsByStopId.values()]);
+  }
+
+  private updatePlaceholderSource(): void {
+    this.updateSource(PLACEHOLDER_SOURCE_ID, [...this.placeholdersByStopId.values()]);
   }
 
   setStops(stops: Stop[]): void {
     this.stopsById.clear();
-    for (const stop of stops) {
-      this.stopsById.set(stop.id, stop);
-    }
-
+    for (const stop of stops) this.stopsById.set(stop.id, stop);
     this.clearOverlay();
     this.scheduleViewportSyncIfEnabled();
   }
@@ -86,14 +141,12 @@ export class WalkshedOverlayManager {
 
   prioritizeStop(stop: Stop): void {
     if (!this.isEnabled()) return;
-
     this.stopsById.set(stop.id, stop);
     if (this.queuedStopIds.has(stop.id)) {
       this.priorityStopIds.add(stop.id);
       return;
     }
     if (!this.isStopEligibleForLoad(stop)) return;
-
     this.priorityStopIds.add(stop.id);
     this.showPlaceholderCircle(stop);
     void this.renderCachedOrEnqueueStops([stop], this.loadGeneration);
@@ -109,43 +162,47 @@ export class WalkshedOverlayManager {
   }
 
   onCoverageModeChanged(enabled: boolean): void {
-    if (!enabled) {
-      this.clearOverlay();
-      return;
-    }
-
-    this.scheduleViewportSync();
+    if (!enabled) this.clearOverlay();
+    else this.scheduleViewportSync();
   }
 
-  private walkshedKey(stopId: string, radiusMeters: number): string {
-    return walkshedCacheKey(stopId, radiusMeters);
+  private radiusForStop(stop: Stop): number {
+    return this.getRadiusMetersForType(stop.type);
   }
 
   private isWalkshedUnavailable(stopId: string, radiusMeters: number): boolean {
-    return this.unavailableWalkshedKeys.has(this.walkshedKey(stopId, radiusMeters));
+    return this.unavailableWalkshedKeys.has(walkshedCacheKey(stopId, radiusMeters));
   }
 
   private removeUnavailableWalkshedKeysForStop(stopId: string): void {
     const prefix = walkshedCacheKeyPrefixForStop(stopId);
     for (const key of [...this.unavailableWalkshedKeys]) {
-      if (key.startsWith(prefix)) {
-        this.unavailableWalkshedKeys.delete(key);
-      }
+      if (key.startsWith(prefix)) this.unavailableWalkshedKeys.delete(key);
     }
   }
 
-  private paddedViewportBounds(): L.LatLngBounds {
-    return this.map.getBounds().pad(BOUNDS_PADDING);
-  }
-
-  private isStopWithinBounds(stop: Stop, bounds = this.paddedViewportBounds()): boolean {
-    return bounds.contains([stop.lat, stop.lon]);
+  private isStopWithinBounds(stop: Stop): boolean {
+    const bounds = this.map.getBounds();
+    const latPadding = (bounds.getNorth() - bounds.getSouth()) * BOUNDS_PADDING;
+    const lonPadding = (bounds.getEast() - bounds.getWest()) * BOUNDS_PADDING;
+    return (
+      stop.lat >= bounds.getSouth() - latPadding &&
+      stop.lat <= bounds.getNorth() + latPadding &&
+      stop.lon >= bounds.getWest() - lonPadding &&
+      stop.lon <= bounds.getEast() + lonPadding
+    );
   }
 
   private scheduleViewportSyncIfEnabled(): void {
-    if (this.isEnabled()) {
-      this.scheduleViewportSync();
-    }
+    if (this.isEnabled()) this.scheduleViewportSync();
+  }
+
+  private scheduleViewportSync(): void {
+    this.cancelScheduledViewportSync();
+    this.viewportSyncTimeoutId = window.setTimeout(() => {
+      this.viewportSyncTimeoutId = null;
+      this.syncVisibleWalksheds();
+    }, VIEWPORT_SYNC_DEBOUNCE_MS);
   }
 
   private cancelScheduledViewportSync(): void {
@@ -159,51 +216,45 @@ export class WalkshedOverlayManager {
     this.queuedStopIds.clear();
     this.priorityStopIds.clear();
     this.cancelScheduledViewportSync();
-    this.overlayLayerGroup.clearLayers();
     this.polygonsByStopId.clear();
-    this.placeholderCirclesByStopId.clear();
+    this.placeholdersByStopId.clear();
     this.unavailableWalkshedKeys.clear();
     this.visibleStopIds.clear();
+    this.updatePolygonSource();
+    this.updatePlaceholderSource();
     this.emitLoadProgress();
   }
 
-  private removePolygon(stopId: string): void {
-    const polygon = this.polygonsByStopId.get(stopId);
-    if (!polygon) return;
-
-    this.overlayLayerGroup.removeLayer(polygon);
-    this.polygonsByStopId.delete(stopId);
+  private removePolygon(stopId: string, updateSource = true): boolean {
+    const removed = this.polygonsByStopId.delete(stopId);
+    if (removed && updateSource) this.updatePolygonSource();
+    return removed;
   }
 
-  private showPlaceholderCircle(stop: Stop): void {
-    if (this.placeholderCirclesByStopId.has(stop.id) || this.polygonsByStopId.has(stop.id)) return;
-
-    const color = STOP_TYPE_CONFIG[stop.type].color;
-    const placeholderCircle = L.circle([stop.lat, stop.lon], {
-      radius: this.radiusForStop(stop),
-      color,
-      fillColor: color,
-      fillOpacity: PLACEHOLDER_FILL_OPACITY,
-      opacity: PLACEHOLDER_STROKE_OPACITY,
-      weight: 1,
-      dashArray: '5 5',
-      interactive: false,
-      pane: this.paneName,
-    });
-    this.placeholderCirclesByStopId.set(stop.id, placeholderCircle);
-    this.overlayLayerGroup.addLayer(placeholderCircle);
+  private showPlaceholderCircle(stop: Stop, updateSource = true): boolean {
+    if (this.placeholdersByStopId.has(stop.id) || this.polygonsByStopId.has(stop.id)) return false;
+    this.placeholdersByStopId.set(
+      stop.id,
+      circlePolygon(
+        stop.id,
+        stop.lat,
+        stop.lon,
+        this.radiusForStop(stop),
+        STOP_TYPE_CONFIG[stop.type].color,
+      ),
+    );
+    if (updateSource) this.updatePlaceholderSource();
+    return true;
   }
 
-  private removePlaceholderCircle(stopId: string): void {
-    const placeholderCircle = this.placeholderCirclesByStopId.get(stopId);
-    if (!placeholderCircle) return;
-    this.overlayLayerGroup.removeLayer(placeholderCircle);
-    this.placeholderCirclesByStopId.delete(stopId);
+  private removePlaceholderCircle(stopId: string, updateSource = true): boolean {
+    const removed = this.placeholdersByStopId.delete(stopId);
+    if (removed && updateSource) this.updatePlaceholderSource();
+    return removed;
   }
 
   private emitLoadProgress(): void {
     if (!this.onLoadProgressChange) return;
-
     let loaded = 0;
     let unavailable = 0;
     for (const stopId of this.visibleStopIds) {
@@ -212,7 +263,6 @@ export class WalkshedOverlayManager {
       if (this.polygonsByStopId.has(stop.id)) loaded += 1;
       else if (this.isWalkshedUnavailable(stop.id, this.radiusForStop(stop))) unavailable += 1;
     }
-
     const total = this.visibleStopIds.size;
     this.onLoadProgressChange({
       loaded,
@@ -222,14 +272,6 @@ export class WalkshedOverlayManager {
     });
   }
 
-  private radiusForStop(stop: Stop): number {
-    return this.getRadiusMetersForType(stop.type);
-  }
-
-  /**
-   * A stop is eligible for (re)queuing only if it has no rendered layer yet,
-   * is not already being loaded, and is not currently marked unavailable.
-   */
   private isStopEligibleForLoad(stop: Stop): boolean {
     return (
       !this.polygonsByStopId.has(stop.id) &&
@@ -242,11 +284,6 @@ export class WalkshedOverlayManager {
     return this.isStopEligibleForLoad(stop) && !this.queuedStopIds.has(stop.id);
   }
 
-  /**
-   * After an await, a resolved polygon is only worth rendering if the load generation,
-   * settings, radius, stop set, and viewport still match what was captured when
-   * the work started. Shared by both the cached pre-pass and the network worker.
-   */
   private isLoadResultCurrent(stop: Stop, generation: number, radiusMeters: number): boolean {
     return (
       generation === this.loadGeneration &&
@@ -258,163 +295,121 @@ export class WalkshedOverlayManager {
   }
 
   private dequeueNextStopId(): string | null {
-    if (this.queuedStopIds.size === 0) return null;
-
     for (const stopId of this.priorityStopIds) {
       if (!this.queuedStopIds.has(stopId)) continue;
       this.priorityStopIds.delete(stopId);
       this.queuedStopIds.delete(stopId);
       return stopId;
     }
-
     const center = this.map.getCenter();
     let nearestStopId: string | null = null;
     let nearestDistance = Number.POSITIVE_INFINITY;
     for (const stopId of this.queuedStopIds) {
       const stop = this.stopsById.get(stopId);
       if (!stop) continue;
-      const distance = center.distanceTo([stop.lat, stop.lon]);
+      const latDistance = stop.lat - center.lat;
+      const lonDistance = (stop.lon - center.lng) * Math.cos((center.lat * Math.PI) / 180);
+      const distance = latDistance * latDistance + lonDistance * lonDistance;
       if (distance < nearestDistance) {
         nearestDistance = distance;
         nearestStopId = stopId;
       }
     }
-
     if (nearestStopId) this.queuedStopIds.delete(nearestStopId);
     return nearestStopId;
   }
 
-  private scheduleViewportSync(): void {
-    this.cancelScheduledViewportSync();
-    this.viewportSyncTimeoutId = window.setTimeout(() => {
-      this.viewportSyncTimeoutId = null;
-      this.syncVisibleWalksheds();
-    }, VIEWPORT_SYNC_DEBOUNCE_MS);
-  }
-
   private syncVisibleWalksheds(): void {
     if (!this.isEnabled()) return;
-
     const generation = this.loadGeneration;
-    const bounds = this.paddedViewportBounds();
     const loadableStops: Stop[] = [];
+    let polygonsChanged = false;
+    let placeholdersChanged = false;
     this.visibleStopIds.clear();
-
     for (const stop of this.stopsById.values()) {
-      if (!this.isStopWithinBounds(stop, bounds)) continue;
+      if (!this.isStopWithinBounds(stop)) continue;
       this.visibleStopIds.add(stop.id);
       if (this.canEnqueueStop(stop)) {
         loadableStops.push(stop);
-        this.showPlaceholderCircle(stop);
+        placeholdersChanged = this.showPlaceholderCircle(stop, false) || placeholdersChanged;
       }
     }
-
     for (const stopId of [...this.polygonsByStopId.keys()]) {
       if (!this.visibleStopIds.has(stopId)) {
-        this.removePolygon(stopId);
+        polygonsChanged = this.removePolygon(stopId, false) || polygonsChanged;
       }
     }
-
-    for (const stopId of [...this.placeholderCirclesByStopId.keys()]) {
-      if (!this.visibleStopIds.has(stopId)) this.removePlaceholderCircle(stopId);
+    for (const stopId of [...this.placeholdersByStopId.keys()]) {
+      if (!this.visibleStopIds.has(stopId)) {
+        placeholdersChanged = this.removePlaceholderCircle(stopId, false) || placeholdersChanged;
+      }
     }
-
     for (const stopId of [...this.queuedStopIds]) {
       if (!this.visibleStopIds.has(stopId)) {
         this.queuedStopIds.delete(stopId);
         this.priorityStopIds.delete(stopId);
       }
     }
-
+    if (polygonsChanged) this.updatePolygonSource();
+    if (placeholdersChanged) this.updatePlaceholderSource();
     void this.renderCachedOrEnqueueStops(loadableStops, generation);
     this.emitLoadProgress();
   }
 
-  /**
-   * Fast pre-pass: render every stop that already has a cached polygon without
-   * consuming a network worker slot, then enqueue only the genuine misses for the
-   * bounded-concurrency Overpass compute. This prevents cached stops from being
-   * blocked behind uncached neighbours that are still fetching from the network.
-   */
   private async renderCachedOrEnqueueStops(stops: Stop[], generation: number): Promise<void> {
     await Promise.all(stops.map((stop) => this.renderCachedOrEnqueue(stop, generation)));
-
-    if (generation !== this.loadGeneration) return;
-    this.processLoadQueue();
+    if (generation === this.loadGeneration) this.processLoadQueue();
   }
 
   private async renderCachedOrEnqueue(stop: Stop, generation: number): Promise<void> {
     const radiusMeters = this.radiusForStop(stop);
     const polygon = await peekCachedWalkshedPolygon(stop, radiusMeters);
-
-    if (!this.isLoadResultCurrent(stop, generation, radiusMeters)) return;
-    if (!this.canEnqueueStop(stop)) return;
-
-    if (polygon) {
-      this.renderPolygon(stop, polygon, radiusMeters);
+    if (!this.isLoadResultCurrent(stop, generation, radiusMeters) || !this.canEnqueueStop(stop))
       return;
-    }
-
-    this.queuedStopIds.add(stop.id);
+    if (polygon) this.renderPolygon(stop, polygon, radiusMeters);
+    else this.queuedStopIds.add(stop.id);
   }
 
-  private async loadWalkshedForStop(
-    stop: Stop,
-    generation: number,
-    radiusMeters: number,
-  ): Promise<void> {
+  private async loadWalkshedForStop(stop: Stop, generation: number, radiusMeters: number) {
     const polygon = await buildWalkshedPolygon(stop, radiusMeters);
-
     if (!this.isLoadResultCurrent(stop, generation, radiusMeters)) return;
-
     if (!polygon) {
-      this.unavailableWalkshedKeys.add(this.walkshedKey(stop.id, radiusMeters));
+      this.unavailableWalkshedKeys.add(walkshedCacheKey(stop.id, radiusMeters));
       this.priorityStopIds.delete(stop.id);
       this.removePlaceholderCircle(stop.id);
       this.emitLoadProgress();
       return;
     }
-
     this.renderPolygon(stop, polygon, radiusMeters);
   }
 
-  private renderPolygon(stop: Stop, polygon: L.LatLngExpression[], radiusMeters: number): void {
-    this.unavailableWalkshedKeys.delete(this.walkshedKey(stop.id, radiusMeters));
+  private renderPolygon(stop: Stop, polygon: LatLng[], radiusMeters: number): void {
+    this.unavailableWalkshedKeys.delete(walkshedCacheKey(stop.id, radiusMeters));
     this.priorityStopIds.delete(stop.id);
-    this.removePolygon(stop.id);
     this.removePlaceholderCircle(stop.id);
-
-    const color = STOP_TYPE_CONFIG[stop.type].color;
-    const polygonLayer = L.polygon(polygon, {
-      color,
-      fillColor: color,
-      fillOpacity: FILL_OPACITY,
-      opacity: STROKE_OPACITY,
-      weight: 2,
-      interactive: false,
-      pane: this.paneName,
-    });
-
-    this.polygonsByStopId.set(stop.id, polygonLayer);
-    this.overlayLayerGroup.addLayer(polygonLayer);
+    const coordinates = polygon.map(([lat, lon]): [number, number] => [lon, lat]);
+    if (coordinates.length > 0) coordinates.push(coordinates[0]);
+    const feature: Feature<Polygon, PolygonFeature['properties']> = {
+      type: 'Feature',
+      properties: { stopId: stop.id, color: STOP_TYPE_CONFIG[stop.type].color },
+      geometry: { type: 'Polygon', coordinates: [coordinates] },
+    };
+    this.polygonsByStopId.set(stop.id, feature);
+    this.updatePolygonSource();
     this.emitLoadProgress();
   }
 
   private processLoadQueue(): void {
     if (!this.isEnabled()) return;
-
     while (this.activeLoadCount < MAX_CONCURRENT_LOADS) {
       const stopId = this.dequeueNextStopId();
       if (!stopId) return;
-
       const stop = this.stopsById.get(stopId);
       if (!stop || !this.isStopEligibleForLoad(stop)) continue;
-
       const radiusMeters = this.radiusForStop(stop);
       const generation = this.loadGeneration;
       this.activeLoadCount += 1;
       this.loadingStopIds.add(stopId);
-
       void this.loadWalkshedForStop(stop, generation, radiusMeters)
         .catch((error) => console.error(`Walkshed failed for ${stopId}:`, error))
         .finally(() => {

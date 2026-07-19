@@ -14,6 +14,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 - **Type filters in the legend** — show/hide train, tram, and bus markers with persisted state across reloads
 - **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
 - **Fully static** — no backend required, deploys to GitHub Pages
+- **Vector basemap** — rendered client-side with MapLibre GL JS and OpenFreeMap
 - **Persistent client cache for API protection** — walkshed polygons are cached in IndexedDB (with localStorage fallback) and can be reset from the config page
 - **Temporary backoff on failures** — unavailable walksheds are cached briefly to avoid repeated API retries
 
@@ -32,11 +33,28 @@ npm run build
 npm run preview
 ```
 
+The map uses OpenFreeMap's Liberty style by default. To use another MapLibre-compatible style,
+set its URL at build time:
+
+```sh
+PUBLIC_MAP_STYLE_URL=https://example.com/style.json npm run build
+```
+
+`PUBLIC_MAP_STYLE_URL` is embedded in the client bundle. Use a public style URL and never put a
+private provider token in this value. The Astro output remains static: browsers load the style and
+vector tiles directly from the configured provider.
+
 ## Formatting
 
 ```sh
 npm run format        # apply formatting
 npm run format:check  # verify formatting in CI
+```
+
+Type-check the Astro and TypeScript sources with:
+
+```sh
+npm run check
 ```
 
 ### GitHub Pages
@@ -71,7 +89,8 @@ The stop snapshot is refreshed automatically on the first day of every month. Th
 ## Tech Stack
 
 - [Astro](https://astro.build) — static site generator
-- [Leaflet](https://leafletjs.com) — map rendering
+- [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/) — client-side vector map rendering
+- [OpenFreeMap](https://openfreemap.org) — default OpenStreetMap vector basemap
 - [Overpass API](https://overpass-api.de) — OSM data for stops and footpaths
 - TypeScript
 
@@ -82,6 +101,14 @@ The stop snapshot is refreshed automatically on the first day of every month. Th
 3. Dijkstra's shortest path algorithm computes reachable distances, seeded from the nearest walkable node(s) near the stop
 4. Boundary points are collected where the walking budget runs out (including interpolated edge cutoffs)
 5. A concave hull wraps the boundary points into a polygon, with convex hull as fallback
+
+## Map Rendering
+
+- Built-in stops share one GeoJSON source and MapLibre circle layer.
+- Custom stops use draggable DOM markers because they require direct pointer interaction.
+- Radius coverage, loading placeholders, and walksheds are GeoJSON polygon sources.
+- Viewport changes batch polygon source updates to avoid repeatedly rebuilding MapLibre data.
+- Walkshed computation and persistence are independent from the basemap provider.
 
 ## Cache Behavior
 
@@ -108,7 +135,8 @@ src/
     map.ts                      # map controller and interaction logic
     config.ts                   # settings page behavior
     map/
-      custom-stop-marker-icon.ts   # custom marker icon builder for draggable stops
+      custom-stop-marker-icon.ts   # custom marker element builder for draggable stops
+      map-geometry.ts              # GeoJSON and geodesic circle helpers
       walkshed-overlay-manager.ts  # async polygon loading and rendering
   lib/
     types.ts                    # shared types and type guards
