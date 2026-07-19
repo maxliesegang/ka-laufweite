@@ -26,6 +26,27 @@ export const MAX_START_NODE_FALLBACK_DISTANCE_DELTA_METERS = 40;
 export const MAX_REASONABLE_STREET_CROSSING_METERS = 30;
 export const MIN_REASONABLE_STREET_CROSSING_METERS = 3;
 
+// --- Connectivity-aware seed snapping (see graph.ts findNearestEdgeSeeds) ---
+
+/**
+ * Beyond the plain nearest edge, a stop whose nearest edge sits on a tiny
+ * disconnected stub (common for rail/tram platforms, where the platform-side
+ * footway is not joined to the street network in OSM) also snaps to the nearest
+ * edge of a substantial component within this distance. The walkshed then
+ * spreads across the real network instead of collapsing onto the stub. Kept
+ * small so a bridge can never jump a wide barrier (rail corridor, river).
+ */
+export const COMPONENT_BRIDGE_DISTANCE_METERS = 40;
+
+/**
+ * A graph component counts as substantial — worth bridging a stub to — when its
+ * node count is at least this floor and at least SUBSTANTIAL_COMPONENT_FRACTION
+ * of the largest component. The fraction keeps the test scale-invariant across
+ * sparse and dense areas; the floor guards tiny graphs.
+ */
+export const MIN_SUBSTANTIAL_COMPONENT_NODES = 30;
+export const SUBSTANTIAL_COMPONENT_FRACTION = 0.1;
+
 // --- Batched shared-network loading (see service.ts buildWalkshedPolygons) ---
 
 /**

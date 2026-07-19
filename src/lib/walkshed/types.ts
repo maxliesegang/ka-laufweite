@@ -31,6 +31,10 @@ export interface WalkGraph {
   nodes: LatLng[];
   adjacency: WalkGraphEdge[][];
   edgeIndex?: GraphSegmentIndex;
+  /** Connected-component id per node index; assigned by buildWalkGraph. */
+  componentIdByNode?: Int32Array;
+  /** Node count of each connected component, indexed by component id. */
+  componentSizes?: number[];
 }
 
 export interface WalkGraphEdge {

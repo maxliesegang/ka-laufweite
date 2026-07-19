@@ -1,7 +1,10 @@
 import {
+  COMPONENT_BRIDGE_DISTANCE_METERS,
   MAX_REASONABLE_STREET_CROSSING_METERS,
   MIN_REASONABLE_STREET_CROSSING_METERS,
+  MIN_SUBSTANTIAL_COMPONENT_NODES,
   SNAP_DISTANCE_METERS,
+  SUBSTANTIAL_COMPONENT_FRACTION,
 } from './constants';
 import { haversineMeters } from './geo';
 import { MinDistanceQueue } from './priority-queue';
@@ -271,7 +274,51 @@ export function buildWalkGraph(
     addReasonableStreetCrossings(graph, roadSegments, roadNodeIndexes);
   }
   graph.edgeIndex = buildGraphSegmentIndex(graph, graphSegments(graph), SNAP_DISTANCE_METERS);
+  // Components are assigned after crossings, whose extra edges merge stubs into
+  // the network, so seed snapping bridges only genuinely isolated components.
+  assignConnectedComponents(graph);
   return graph;
+}
+
+/** Label every node with its connected-component id and record component sizes. */
+function assignConnectedComponents(graph: WalkGraph): void {
+  const componentIdByNode = new Int32Array(graph.nodes.length).fill(-1);
+  const componentSizes: number[] = [];
+
+  for (let start = 0; start < graph.nodes.length; start += 1) {
+    if (componentIdByNode[start] !== -1) continue;
+
+    const componentId = componentSizes.length;
+    const stack = [start];
+    componentIdByNode[start] = componentId;
+    let size = 0;
+
+    while (stack.length > 0) {
+      const nodeIndex = stack.pop();
+      if (nodeIndex === undefined) break;
+      size += 1;
+      for (const edge of graph.adjacency[nodeIndex]) {
+        if (componentIdByNode[edge.toNodeIndex] === -1) {
+          componentIdByNode[edge.toNodeIndex] = componentId;
+          stack.push(edge.toNodeIndex);
+        }
+      }
+    }
+
+    componentSizes.push(size);
+  }
+
+  graph.componentIdByNode = componentIdByNode;
+  graph.componentSizes = componentSizes;
+}
+
+/** Smallest component that is worth bridging a disconnected stub to. */
+function substantialComponentThreshold(componentSizes: number[]): number {
+  const largest = componentSizes.reduce((max, size) => Math.max(max, size), 0);
+  return Math.max(
+    MIN_SUBSTANTIAL_COMPONENT_NODES,
+    Math.floor(SUBSTANTIAL_COMPONENT_FRACTION * largest),
+  );
 }
 
 export function findNearestNodeSeeds(
@@ -293,18 +340,30 @@ export function findNearestNodeSeeds(
   return matches.slice(0, limit);
 }
 
-export function findNearestEdgeSeeds(graph: WalkGraph, lat: number, lon: number): GraphSeed[] {
+/**
+ * Project the stop onto the nearest edge within `maxSnapDistanceMeters`. When
+ * `isAllowedNode` is given, only edges whose endpoints satisfy it are eligible,
+ * which lets callers restrict snapping to substantial components.
+ */
+function projectNearestEdge(
+  graph: WalkGraph,
+  lat: number,
+  lon: number,
+  maxSnapDistanceMeters: number,
+  isAllowedNode?: (nodeIndex: number) => boolean,
+): EdgeProjectionMatch | null {
   const origin: LatLng = [lat, lon];
   let nearest: EdgeProjectionMatch | null = null;
   const lonScale = Math.max(0.2, Math.cos((lat * Math.PI) / 180));
   const indexedSegments = graph.edgeIndex;
   const segments = indexedSegments
-    ? findSegmentIndexesNearLine(indexedSegments, origin, origin, SNAP_DISTANCE_METERS).map(
+    ? findSegmentIndexesNearLine(indexedSegments, origin, origin, maxSnapDistanceMeters).map(
         (segmentIndex) => indexedSegments.segments[segmentIndex],
       )
     : graphSegments(graph);
 
   for (const { fromNodeIndex: from, toNodeIndex: to, distanceMeters } of segments) {
+    if (isAllowedNode && !isAllowedNode(from)) continue;
     const a = graph.nodes[from];
     const b = graph.nodes[to];
     const ax = (a[1] - lon) * lonScale;
@@ -319,7 +378,7 @@ export function findNearestEdgeSeeds(graph: WalkGraph, lat: number, lon: number)
     const projection: LatLng = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
     const snapDistance = haversineMeters(origin, projection);
     if (
-      snapDistance > SNAP_DISTANCE_METERS ||
+      snapDistance > maxSnapDistanceMeters ||
       (nearest && snapDistance >= nearest.snapDistanceMeters)
     )
       continue;
@@ -332,17 +391,51 @@ export function findNearestEdgeSeeds(graph: WalkGraph, lat: number, lon: number)
     };
   }
 
-  if (!nearest) return [];
+  return nearest;
+}
+
+function seedsFromEdgeProjection(match: EdgeProjectionMatch): GraphSeed[] {
   return [
     {
-      nodeIndex: nearest.fromNodeIndex,
-      initialDistanceMeters: nearest.snapDistanceMeters + nearest.distanceToFromNodeMeters,
+      nodeIndex: match.fromNodeIndex,
+      initialDistanceMeters: match.snapDistanceMeters + match.distanceToFromNodeMeters,
     },
     {
-      nodeIndex: nearest.toNodeIndex,
-      initialDistanceMeters: nearest.snapDistanceMeters + nearest.distanceToToNodeMeters,
+      nodeIndex: match.toNodeIndex,
+      initialDistanceMeters: match.snapDistanceMeters + match.distanceToToNodeMeters,
     },
   ];
+}
+
+/**
+ * Snap the stop onto the walk graph. Normally this is just the nearest edge, but
+ * when that edge sits on a tiny disconnected stub (a common rail/tram-platform
+ * artifact) the walkshed would collapse onto the stub, so the stop additionally
+ * snaps to the nearest substantial component within COMPONENT_BRIDGE_DISTANCE_METERS.
+ * The stub seeds are kept too — that is where the rider stands and it is contiguous.
+ */
+export function findNearestEdgeSeeds(graph: WalkGraph, lat: number, lon: number): GraphSeed[] {
+  const nearest = projectNearestEdge(graph, lat, lon, SNAP_DISTANCE_METERS);
+  if (!nearest) return [];
+  const seeds = seedsFromEdgeProjection(nearest);
+
+  const { componentIdByNode, componentSizes } = graph;
+  if (!componentIdByNode || !componentSizes) return seeds;
+
+  const threshold = substantialComponentThreshold(componentSizes);
+  const nearestComponentSize = componentSizes[componentIdByNode[nearest.fromNodeIndex]] ?? 0;
+  if (nearestComponentSize >= threshold) return seeds;
+
+  const bridge = projectNearestEdge(
+    graph,
+    lat,
+    lon,
+    COMPONENT_BRIDGE_DISTANCE_METERS,
+    (nodeIndex) => (componentSizes[componentIdByNode[nodeIndex]] ?? 0) >= threshold,
+  );
+  if (bridge) seeds.push(...seedsFromEdgeProjection(bridge));
+
+  return seeds;
 }
 
 export function calculateShortestPathDistances(

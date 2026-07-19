@@ -70,6 +70,38 @@ describe('walk graph', () => {
     expect(new Set(seeds.map((seed) => seed.nodeIndex))).toEqual(new Set([0, 1]));
   });
 
+  it('bridges a stub stop to a nearby substantial component', () => {
+    const chainNodes = Array.from({ length: 31 }, (_, i) => i + 1);
+    const networkData: OverpassResponse = {
+      elements: [
+        // Substantial component: a 31-node footway chain along lat 49.0000.
+        ...chainNodes.map((id, i) => ({
+          type: 'node' as const,
+          id,
+          lat: 49.0,
+          lon: 8.0 + i * 0.0002,
+        })),
+        { type: 'way', id: 1000, nodes: chainNodes, tags: { highway: 'footway' } },
+        // Tiny disconnected stub ~1 m from the stop, ~32 m from the chain.
+        { type: 'node', id: 100, lat: 49.00028, lon: 8.003 },
+        { type: 'node', id: 101, lat: 49.00028, lon: 8.00305 },
+        { type: 'way', id: 1001, nodes: [100, 101], tags: { highway: 'footway' } },
+      ],
+    };
+    const graph = buildWalkGraph(networkData, false);
+    if (!graph) throw new Error('expected graph');
+    const { componentSizes, componentIdByNode } = graph;
+    if (!componentSizes || !componentIdByNode) throw new Error('expected components');
+    expect(Math.max(...componentSizes)).toBe(31);
+
+    const seeds = findNearestEdgeSeeds(graph, 49.00029, 8.003);
+    const substantialComponentId = componentSizes.indexOf(31);
+    const seedsInSubstantial = seeds.filter(
+      (seed) => componentIdByNode[seed.nodeIndex] === substantialComponentId,
+    );
+    expect(seedsInSubstantial.length).toBeGreaterThan(0);
+  });
+
   it('respects the distance budget in Dijkstra traversal', () => {
     const graph = lineGraph();
     const distanceByNodeIndex = calculateShortestPathDistances(
