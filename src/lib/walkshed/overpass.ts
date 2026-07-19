@@ -166,8 +166,7 @@ async function fetchFromEndpoint(endpoint: string, query: string): Promise<Overp
 }
 
 export type FootwayFetchResult =
-  | { status: 'ok'; response: OverpassResponse }
-  | { status: 'all-endpoints-failed' };
+  { status: 'ok'; response: OverpassResponse } | { status: 'all-endpoints-failed' };
 
 export async function fetchFootways(
   lat: number,
