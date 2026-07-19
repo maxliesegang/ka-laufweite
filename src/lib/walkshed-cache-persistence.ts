@@ -37,8 +37,12 @@ function isLatLng(value: unknown): value is LatLng {
     value.length === 2 &&
     typeof value[0] === 'number' &&
     Number.isFinite(value[0]) &&
+    value[0] >= -90 &&
+    value[0] <= 90 &&
     typeof value[1] === 'number' &&
-    Number.isFinite(value[1])
+    Number.isFinite(value[1]) &&
+    value[1] >= -180 &&
+    value[1] <= 180
   );
 }
 
@@ -57,8 +61,11 @@ function parseCacheEntry(value: unknown): CacheEntry | null {
   }>;
 
   if (
+    entry.kind === 'polygon' &&
     Array.isArray(entry.polygon) &&
+    entry.polygon.length >= 3 &&
     entry.polygon.every(isLatLng) &&
+    new Set(entry.polygon.map(([lat, lon]) => `${lat}:${lon}`)).size >= 3 &&
     isFiniteNumber(entry.updatedAt)
   ) {
     return {

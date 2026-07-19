@@ -30,6 +30,7 @@ import {
   type StopRadiusByType,
   type StopTypeVisibilityByType,
   getConfiguredCoverageShape,
+  getAllowReasonableStreetCrossings,
   getConfiguredStopRadii,
   getConfiguredStopTypeVisibility,
   setConfiguredStopTypeVisibility,
@@ -100,6 +101,7 @@ class TransitMapController {
   private radiusMetersByType: StopRadiusByType = getConfiguredStopRadii();
   private visibleStopTypes: StopTypeVisibilityByType = getConfiguredStopTypeVisibility();
   private coverageShape: CoverageShape = getConfiguredCoverageShape();
+  private allowReasonableStreetCrossings = getAllowReasonableStreetCrossings();
   private walkshedDisabledStopIds = getWalkshedDisabledStopIds();
   private walkshedCacheResetMarker = getWalkshedCacheResetMarker();
   private stopLoadGeneration = 0;
@@ -111,6 +113,7 @@ class TransitMapController {
       map,
       getRadiusMetersForType: (stopType) => this.radiusMetersByType[stopType],
       isEnabled: () => this.coverageShape === 'walkshed',
+      getAllowReasonableStreetCrossings: () => this.allowReasonableStreetCrossings,
       onLoadProgressChange: (progress) => this.updateWalkshedLoadProgress(progress),
     });
     this.addStopLayers();
@@ -428,6 +431,12 @@ class TransitMapController {
     this.renderRadiusCoverage();
   }
 
+  private setAllowReasonableStreetCrossings(allow: boolean): void {
+    if (allow === this.allowReasonableStreetCrossings) return;
+    this.allowReasonableStreetCrossings = allow;
+    this.walkshedOverlay.onSettingsChanged();
+  }
+
   private setWalkshedDisabledStopIds(next: Set<string>): void {
     const changed =
       next.size !== this.walkshedDisabledStopIds.size ||
@@ -448,6 +457,7 @@ class TransitMapController {
     this.setVisibleStopTypes(getConfiguredStopTypeVisibility());
     this.setWalkshedDisabledStopIds(getWalkshedDisabledStopIds());
     this.setCoverageShape(getConfiguredCoverageShape());
+    this.setAllowReasonableStreetCrossings(getAllowReasonableStreetCrossings());
     this.setRadii(getConfiguredStopRadii());
   }
 

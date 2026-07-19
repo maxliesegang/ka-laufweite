@@ -12,6 +12,7 @@ export interface OverpassWayElement {
   type: 'way';
   id: number;
   nodes: number[];
+  tags?: Record<string, string>;
 }
 
 export interface OverpassResponse {
@@ -26,6 +27,14 @@ export interface WalkGraph {
 export interface NearestNodeMatch {
   index: number;
   distanceMeters: number;
+}
+
+export interface NearestEdgeMatch {
+  from: number;
+  to: number;
+  distanceMeters: number;
+  distanceFromProjectionToFromMeters: number;
+  distanceFromProjectionToToMeters: number;
 }
 
 export interface WalkshedAttempt {

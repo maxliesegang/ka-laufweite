@@ -1,21 +1,17 @@
 import {
   getCachedWalkshedPolygon,
-  isWalkshedTemporarilyUnavailable,
+  getWalkshedCacheResetMarker,
+  getWalkshedUnavailableRetryAfter,
   setCachedWalkshedPolygon,
   setCachedWalkshedUnavailable,
 } from '../walkshed-cache';
 import type { Stop } from '../types';
-import {
-  GRAPH_CACHE_COORD_PRECISION,
-  MAX_START_NODE_FALLBACK_DISTANCE_DELTA_METERS,
-  MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON,
-  START_NODE_CANDIDATE_LIMIT,
-} from './constants';
+import { GRAPH_CACHE_COORD_PRECISION } from './constants';
 import { walkshedCacheKey, walkshedCacheKeyPrefixForStop } from './cache-key';
-import { buildWalkGraph, nearestNodeCandidates } from './graph';
+import { buildWalkGraph, nearestEdgeSeeds } from './graph';
 import { fetchFootways } from './overpass';
 import { buildPolygonFromSeedNodes } from './polygon';
-import type { LatLng, NearestNodeMatch, WalkGraph } from './types';
+import type { LatLng, WalkGraph } from './types';
 
 const TRANSIENT_UNAVAILABLE_RETRY_MS = 2 * 60 * 1_000;
 const NO_DATA_UNAVAILABLE_RETRY_MS = 24 * 60 * 60 * 1_000;
@@ -27,24 +23,37 @@ interface GraphLoadResult {
 
 const graphCache = new Map<string, Promise<GraphLoadResult>>();
 const polygonCache = new Map<string, LatLng[]>();
+let cacheEpoch = 0;
+const stopRevisions = new Map<string, number>();
 
-function graphCacheKey(stop: Stop, distanceMeters: number): string {
-  return `${stop.lat.toFixed(GRAPH_CACHE_COORD_PRECISION)}:${stop.lon.toFixed(GRAPH_CACHE_COORD_PRECISION)}:${distanceMeters}`;
+function graphCacheKey(
+  stop: Stop,
+  distanceMeters: number,
+  allowReasonableStreetCrossings: boolean,
+): string {
+  return `${stop.lat.toFixed(GRAPH_CACHE_COORD_PRECISION)}:${stop.lon.toFixed(GRAPH_CACHE_COORD_PRECISION)}:${distanceMeters}:${allowReasonableStreetCrossings}`;
 }
 
-function polygonCacheKey(stop: Stop, distanceMeters: number): string {
-  return walkshedCacheKey(stop.id, distanceMeters);
+function polygonCacheKey(
+  stop: Stop,
+  distanceMeters: number,
+  allowReasonableStreetCrossings: boolean,
+): string {
+  return walkshedCacheKey(
+    stop.id,
+    distanceMeters,
+    stop.lat,
+    stop.lon,
+    allowReasonableStreetCrossings,
+  );
 }
 
-function selectPreferredSeedNodes(candidates: NearestNodeMatch[]): NearestNodeMatch[] {
-  if (candidates.length === 0) return [];
-  const nearestDistance = candidates[0].distanceMeters;
-  const maxSeedDistance = nearestDistance + MAX_START_NODE_FALLBACK_DISTANCE_DELTA_METERS;
-  return candidates.filter((candidate) => candidate.distanceMeters <= maxSeedDistance);
-}
-
-async function loadWalkGraph(stop: Stop, distanceMeters: number): Promise<GraphLoadResult> {
-  const graphKey = graphCacheKey(stop, distanceMeters);
+async function loadWalkGraph(
+  stop: Stop,
+  distanceMeters: number,
+  allowReasonableStreetCrossings: boolean,
+): Promise<GraphLoadResult> {
+  const graphKey = graphCacheKey(stop, distanceMeters, allowReasonableStreetCrossings);
   const cached = graphCache.get(graphKey);
   if (cached) {
     return cached;
@@ -57,7 +66,7 @@ async function loadWalkGraph(stop: Stop, distanceMeters: number): Promise<GraphL
       }
 
       return {
-        graph: buildWalkGraph(result.response),
+        graph: buildWalkGraph(result.response, allowReasonableStreetCrossings),
         transientFailure: false,
       };
     })
@@ -74,11 +83,13 @@ async function loadWalkGraph(stop: Stop, distanceMeters: number): Promise<GraphL
 }
 
 export function clearWalkshedRuntimeCache(): void {
+  cacheEpoch += 1;
   graphCache.clear();
   polygonCache.clear();
 }
 
 export function removeWalkshedRuntimeCacheForStop(stopId: string): void {
+  stopRevisions.set(stopId, (stopRevisions.get(stopId) ?? 0) + 1);
   const prefix = walkshedCacheKeyPrefixForStop(stopId);
   for (const cacheKey of [...polygonCache.keys()]) {
     if (cacheKey.startsWith(prefix)) {
@@ -98,8 +109,9 @@ export function removeWalkshedRuntimeCacheForStop(stopId: string): void {
 export async function peekCachedWalkshedPolygon(
   stop: Stop,
   distanceMeters: number,
+  allowReasonableStreetCrossings = true,
 ): Promise<LatLng[] | null> {
-  const cacheKey = polygonCacheKey(stop, distanceMeters);
+  const cacheKey = polygonCacheKey(stop, distanceMeters, allowReasonableStreetCrossings);
   const inMemoryPolygon = polygonCache.get(cacheKey);
   if (inMemoryPolygon) {
     return inMemoryPolygon;
@@ -117,66 +129,82 @@ export async function peekCachedWalkshedPolygon(
 export async function buildWalkshedPolygon(
   stop: Stop,
   distanceMeters: number,
-): Promise<LatLng[] | null> {
-  const cachedPolygon = await peekCachedWalkshedPolygon(stop, distanceMeters);
+  allowReasonableStreetCrossings = true,
+): Promise<WalkshedBuildResult> {
+  const calculationEpoch = cacheEpoch;
+  const persistentCacheMarker = getWalkshedCacheResetMarker();
+  const stopRevision = stopRevisions.get(stop.id) ?? 0;
+  const isCurrent = () =>
+    calculationEpoch === cacheEpoch &&
+    stopRevision === (stopRevisions.get(stop.id) ?? 0) &&
+    persistentCacheMarker === getWalkshedCacheResetMarker();
+  const cachedPolygon = await peekCachedWalkshedPolygon(
+    stop,
+    distanceMeters,
+    allowReasonableStreetCrossings,
+  );
   if (cachedPolygon) {
-    return cachedPolygon;
+    return { status: 'polygon', polygon: cachedPolygon };
   }
 
-  const cacheKey = polygonCacheKey(stop, distanceMeters);
-  if (await isWalkshedTemporarilyUnavailable(cacheKey)) {
-    return null;
+  const cacheKey = polygonCacheKey(stop, distanceMeters, allowReasonableStreetCrossings);
+  const cachedRetryAfter = await getWalkshedUnavailableRetryAfter(cacheKey);
+  if (cachedRetryAfter !== null) {
+    return { status: 'unavailable', retryAfter: cachedRetryAfter, reason: 'cached' };
   }
 
-  const graphResult = await loadWalkGraph(stop, distanceMeters);
+  const graphResult = await loadWalkGraph(stop, distanceMeters, allowReasonableStreetCrossings);
   if (!graphResult.graph) {
-    await setCachedWalkshedUnavailable(
-      cacheKey,
-      graphResult.transientFailure ? TRANSIENT_UNAVAILABLE_RETRY_MS : NO_DATA_UNAVAILABLE_RETRY_MS,
-    );
-    return null;
+    const retryMs = graphResult.transientFailure
+      ? TRANSIENT_UNAVAILABLE_RETRY_MS
+      : NO_DATA_UNAVAILABLE_RETRY_MS;
+    if (isCurrent()) await setCachedWalkshedUnavailable(cacheKey, retryMs);
+    return {
+      status: 'unavailable',
+      retryAfter: Date.now() + retryMs,
+      reason: graphResult.transientFailure ? 'network' : 'no-data',
+    };
   }
   const graph = graphResult.graph;
 
-  const candidates = nearestNodeCandidates(graph, stop.lat, stop.lon, START_NODE_CANDIDATE_LIMIT);
-  if (candidates.length === 0) {
-    await setCachedWalkshedUnavailable(cacheKey, NO_DATA_UNAVAILABLE_RETRY_MS);
-    return null;
+  const seeds = nearestEdgeSeeds(graph, stop.lat, stop.lon);
+  if (seeds.length === 0) {
+    if (isCurrent()) await setCachedWalkshedUnavailable(cacheKey, NO_DATA_UNAVAILABLE_RETRY_MS);
+    return {
+      status: 'unavailable',
+      retryAfter: Date.now() + NO_DATA_UNAVAILABLE_RETRY_MS,
+      reason: 'no-nearby-edge',
+    };
   }
 
-  const preferredSeeds = selectPreferredSeedNodes(candidates);
-  const preferredAttempt = buildPolygonFromSeedNodes(
+  const polygon = buildPolygonFromSeedNodes(
     graph,
     stop.lat,
     stop.lon,
     distanceMeters,
-    preferredSeeds,
-  );
-  let polygon = preferredAttempt.polygon;
-  let bestBoundaryPointCount = preferredAttempt.boundaryPointCount;
-
-  if (
-    preferredAttempt.boundaryPointCount < MIN_BOUNDARY_POINTS_FOR_RELIABLE_POLYGON &&
-    preferredSeeds.length < candidates.length
-  ) {
-    const expandedAttempt = buildPolygonFromSeedNodes(
-      graph,
-      stop.lat,
-      stop.lon,
-      distanceMeters,
-      candidates,
-    );
-    if (expandedAttempt.polygon && expandedAttempt.boundaryPointCount > bestBoundaryPointCount) {
-      polygon = expandedAttempt.polygon;
-    }
-  }
+    seeds,
+  ).polygon;
 
   if (polygon) {
+    if (!isCurrent()) return { status: 'superseded' };
     polygonCache.set(cacheKey, polygon);
     await setCachedWalkshedPolygon(cacheKey, polygon);
-    return polygon;
+    return { status: 'polygon', polygon };
   }
 
-  await setCachedWalkshedUnavailable(cacheKey, NO_DATA_UNAVAILABLE_RETRY_MS);
-  return null;
+  if (isCurrent()) await setCachedWalkshedUnavailable(cacheKey, NO_DATA_UNAVAILABLE_RETRY_MS);
+  return {
+    status: 'unavailable',
+    retryAfter: Date.now() + NO_DATA_UNAVAILABLE_RETRY_MS,
+    reason: 'invalid-polygon',
+  };
 }
+
+export type WalkshedBuildResult =
+  | { status: 'polygon'; polygon: LatLng[] }
+  | {
+      status: 'unavailable';
+      retryAfter: number;
+      reason: 'cached' | 'network' | 'no-data' | 'no-nearby-edge' | 'invalid-polygon';
+    }
+  | { status: 'superseded' };

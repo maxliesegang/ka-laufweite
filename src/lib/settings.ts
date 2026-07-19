@@ -22,6 +22,9 @@ export const MAX_STOP_RADIUS_METERS = 5000;
 export const STOP_RADIUS_STEP_METERS = 10;
 export const COVERAGE_SHAPE_STORAGE_KEY = 'karlsruhe-opnv-coverage-shape';
 export const STOP_TYPE_VISIBILITY_STORAGE_KEY = 'karlsruhe-opnv-stop-type-visibility-v1';
+export const REASONABLE_STREET_CROSSINGS_STORAGE_KEY =
+  'karlsruhe-opnv-reasonable-street-crossings-v1';
+export const DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS = true;
 
 export type CoverageShape = 'circle' | 'walkshed';
 export type StopRadiusByType = Record<StopType, number>;
@@ -74,6 +77,15 @@ export function setConfiguredCoverageShape(value: unknown): CoverageShape {
   return shape;
 }
 
+export function getAllowReasonableStreetCrossings(): boolean {
+  return getStorageItem(REASONABLE_STREET_CROSSINGS_STORAGE_KEY) !== 'false';
+}
+
+export function setAllowReasonableStreetCrossings(value: boolean): boolean {
+  setStorageItem(REASONABLE_STREET_CROSSINGS_STORAGE_KEY, String(value));
+  return value;
+}
+
 function normalizeStopTypeVisibility(value: unknown): StopTypeVisibilityByType {
   if (!value || typeof value !== 'object') {
     return { ...DEFAULT_STOP_TYPE_VISIBILITY_BY_TYPE };
@@ -104,6 +116,7 @@ export const SETTINGS_STORAGE_KEYS: readonly string[] = [
   LEGACY_STOP_RADIUS_STORAGE_KEY,
   COVERAGE_SHAPE_STORAGE_KEY,
   STOP_TYPE_VISIBILITY_STORAGE_KEY,
+  REASONABLE_STREET_CROSSINGS_STORAGE_KEY,
 ];
 
 export const COVERAGE_SHAPE_DISPLAY_LABELS: Record<CoverageShape, string> = {

@@ -47,6 +47,17 @@ const mapHref = import.meta.env.BASE_URL;
               } m.
             </p>
           </div>
+
+          <div class="field-group">
+            <label class="checkbox-label" for="reasonable-street-crossings">
+              <input id="reasonable-street-crossings" type="checkbox" />
+              Vernünftige Straßenquerungen erlauben
+            </label>
+            <p class="help">
+              Verbindet nahe, gegenüberliegende Fußwege über kurze Straßenquerungen. Diese Option
+              ist standardmäßig aktiv und vermeidet weiterhin Sprünge über größere Hindernisse.
+            </p>
+          </div>
         </section>
 
         <aside class="panel panel-side" aria-labelledby="actions-heading">
@@ -151,6 +162,17 @@ const mapHref = import.meta.env.BASE_URL;
     display: block;
     font-weight: 600;
     color: #243b53;
+  }
+
+  .field-group .checkbox-label {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+  }
+
+  .checkbox-label input {
+    width: 18px;
+    height: 18px;
   }
 
   .field-group h3 {

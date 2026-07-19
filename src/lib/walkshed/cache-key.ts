@@ -1,12 +1,23 @@
 /**
  * Single source of truth for the walkshed cache-key format.
  *
- * A walkshed polygon is cached per stop and per walking distance. The runtime
- * cache, the persistent cache, and the overlay manager all address entries by
- * this key, so the format lives here rather than being re-spelled in each module.
+ * A walkshed polygon is cached per stop, algorithm version, walking distance,
+ * and normalized coordinates. The runtime cache, persistent cache, and overlay
+ * manager all address entries by this key.
  */
-export function walkshedCacheKey(stopId: string, distanceMeters: number): string {
-  return `${stopId}:${distanceMeters}`;
+const WALKSHED_ALGORITHM_VERSION = 2;
+
+export function walkshedCacheKey(
+  stopId: string,
+  distanceMeters: number,
+  lat?: number,
+  lon?: number,
+  allowReasonableStreetCrossings = true,
+): string {
+  const coordinateSuffix =
+    lat === undefined || lon === undefined ? '' : `:${lat.toFixed(6)}:${lon.toFixed(6)}`;
+  const crossingMode = allowReasonableStreetCrossings ? 'crossings' : 'mapped-only';
+  return `${stopId}:v${WALKSHED_ALGORITHM_VERSION}:${crossingMode}:${distanceMeters}${coordinateSuffix}`;
 }
 
 /**

@@ -1,5 +1,6 @@
 import {
   DEFAULT_COVERAGE_SHAPE,
+  DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
   DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
   MAX_STOP_RADIUS_METERS,
   MIN_STOP_RADIUS_METERS,
@@ -10,6 +11,8 @@ import {
   COVERAGE_SHAPE_COMPACT_LABELS,
   getConfiguredCoverageShape,
   getConfiguredStopRadii,
+  getAllowReasonableStreetCrossings,
+  setAllowReasonableStreetCrossings,
   setConfiguredCoverageShape,
   setConfiguredStopRadius,
 } from '../lib/settings';
@@ -49,6 +52,7 @@ export function initConfigPage(): void {
   let radiusInputs: Record<StopType, HTMLInputElement>;
   let shapeSelect: HTMLSelectElement;
   let resetDefaultsBtn: HTMLButtonElement;
+  let crossingsInput: HTMLInputElement;
   let deleteCustomStopsBtn: HTMLButtonElement;
   let resetCacheBtn: HTMLButtonElement;
   let saveStatus: HTMLParagraphElement;
@@ -59,6 +63,7 @@ export function initConfigPage(): void {
       requireElement(STOP_RADIUS_INPUT_IDS[stopType], HTMLInputElement),
     );
     shapeSelect = requireElement('coverage-shape', HTMLSelectElement);
+    crossingsInput = requireElement('reasonable-street-crossings', HTMLInputElement);
     resetDefaultsBtn = requireElement('reset-radius', HTMLButtonElement);
     deleteCustomStopsBtn = requireElement('delete-custom-stops', HTMLButtonElement);
     resetCacheBtn = requireElement('reset-walkshed-cache', HTMLButtonElement);
@@ -71,12 +76,14 @@ export function initConfigPage(): void {
   let autosaveTimer: number | null = null;
   let currentRadiusByType = getConfiguredStopRadii();
   let currentShape = getConfiguredCoverageShape();
+  let currentAllowCrossings = getAllowReasonableStreetCrossings();
 
   for (const stopType of STOP_TYPES_CONFIG_ORDER) {
     radiusInputs[stopType].value = String(currentRadiusByType[stopType]);
   }
 
   shapeSelect.value = currentShape;
+  crossingsInput.checked = currentAllowCrossings;
   cacheStatus.textContent = 'Polygon-Cache Einträge: ...';
   saveStatus.textContent = statusText('Automatisch aktiv', currentRadiusByType, currentShape);
 
@@ -115,6 +122,7 @@ export function initConfigPage(): void {
     }
 
     const shape = setConfiguredCoverageShape(shapeSelect.value);
+    const allowCrossings = setAllowReasonableStreetCrossings(crossingsInput.checked);
 
     for (const stopType of STOP_TYPES_CONFIG_ORDER) {
       radiusInputs[stopType].value = String(nextRadiusByType[stopType]);
@@ -123,10 +131,12 @@ export function initConfigPage(): void {
 
     const changed =
       stopTypeRecordChanged(nextRadiusByType, currentRadiusByType, STOP_TYPES_CONFIG_ORDER) ||
-      shape !== currentShape;
+      shape !== currentShape ||
+      allowCrossings !== currentAllowCrossings;
 
     currentRadiusByType = nextRadiusByType;
     currentShape = shape;
+    currentAllowCrossings = allowCrossings;
 
     const allInvalid = invalidTypes.length === STOP_TYPES_CONFIG_ORDER.length;
     if (allInvalid && !changed) {
@@ -169,12 +179,18 @@ export function initConfigPage(): void {
     runAsyncAction(() => persistSettings('Automatisch gespeichert'));
   });
 
+  crossingsInput.addEventListener('change', () => {
+    clearTimer();
+    runAsyncAction(() => persistSettings('Automatisch gespeichert'));
+  });
+
   resetDefaultsBtn.addEventListener('click', () => {
     clearTimer();
     for (const stopType of STOP_TYPES_CONFIG_ORDER) {
       radiusInputs[stopType].value = String(DEFAULT_STOP_RADIUS_METERS_BY_TYPE[stopType]);
     }
     shapeSelect.value = DEFAULT_COVERAGE_SHAPE;
+    crossingsInput.checked = DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS;
     runAsyncAction(() => persistSettings('Standardwerte übernommen', true));
   });
 

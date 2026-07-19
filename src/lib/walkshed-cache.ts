@@ -30,6 +30,17 @@ const persistence = createWalkshedCachePersistence({
 let cachedStore: CacheStore | null = null;
 let loadStorePromise: Promise<CacheStore> | null = null;
 let cachedResetMarker: string | null = null;
+let storeEpoch = 0;
+let mutationQueue: Promise<void> = Promise.resolve();
+
+function serializeMutation<T>(mutation: () => Promise<T>): Promise<T> {
+  const result = mutationQueue.then(mutation, mutation);
+  mutationQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
 
 function currentResetMarker(): string {
   return getStorageItem(WALKSHED_CACHE_RESET_MARKER_KEY) ?? '';
@@ -92,10 +103,12 @@ async function ensureStore(): Promise<CacheStore> {
   if (loadStorePromise && cachedResetMarker === marker) return loadStorePromise;
 
   cachedResetMarker = marker;
+  const loadEpoch = storeEpoch;
   loadStorePromise = loadStoreFromPersistence()
     .then((entries) => {
+      if (loadEpoch !== storeEpoch) return cachedStore ?? {};
       cachedStore = entries;
-      return entries;
+      return cachedStore;
     })
     .finally(() => {
       loadStorePromise = null;
@@ -169,16 +182,18 @@ export async function getCachedWalkshedPolygon(cacheKey: string): Promise<LatLng
 }
 
 export async function setCachedWalkshedPolygon(cacheKey: string, polygon: LatLng[]): Promise<void> {
-  await upsertCacheEntry(cacheKey, {
-    kind: 'polygon',
-    polygon,
-    updatedAt: Date.now(),
-  });
+  await serializeMutation(() =>
+    upsertCacheEntry(cacheKey, {
+      kind: 'polygon',
+      polygon,
+      updatedAt: Date.now(),
+    }),
+  );
 }
 
-export async function isWalkshedTemporarilyUnavailable(cacheKey: string): Promise<boolean> {
+export async function getWalkshedUnavailableRetryAfter(cacheKey: string): Promise<number | null> {
   const entry = await getCacheEntry(cacheKey);
-  return entry?.kind === 'unavailable';
+  return entry?.kind === 'unavailable' ? entry.retryAfter : null;
 }
 
 export async function setCachedWalkshedUnavailable(
@@ -187,11 +202,13 @@ export async function setCachedWalkshedUnavailable(
 ): Promise<void> {
   const boundedRetryAfterMs = Math.max(1_000, Math.round(retryAfterMs));
   const now = Date.now();
-  await upsertCacheEntry(cacheKey, {
-    kind: 'unavailable',
-    retryAfter: now + boundedRetryAfterMs,
-    updatedAt: now,
-  });
+  await serializeMutation(() =>
+    upsertCacheEntry(cacheKey, {
+      kind: 'unavailable',
+      retryAfter: now + boundedRetryAfterMs,
+      updatedAt: now,
+    }),
+  );
 }
 
 export async function getWalkshedCacheSize(): Promise<number> {
@@ -210,6 +227,7 @@ export function reloadCacheIfExternallyReset(): void {
   const marker = currentResetMarker();
   if (marker === cachedResetMarker) return;
 
+  storeEpoch += 1;
   cachedStore = null;
   loadStorePromise = null;
   cachedResetMarker = marker;
@@ -231,31 +249,36 @@ export async function removeCachedWalkshedPolygonsForStops(
   if (prefixes.size === 0) return 0;
   const prefixList = [...prefixes];
 
-  const entries = await ensureStore();
-  const nextEntries: CacheStore = {};
-  const removedKeys: string[] = [];
+  return serializeMutation(async () => {
+    const entries = await ensureStore();
+    const nextEntries: CacheStore = {};
+    const removedKeys: string[] = [];
 
-  for (const [key, entry] of Object.entries(entries)) {
-    if (prefixList.some((prefix) => key.startsWith(prefix))) {
-      removedKeys.push(key);
-      continue;
+    for (const [key, entry] of Object.entries(entries)) {
+      if (prefixList.some((prefix) => key.startsWith(prefix))) {
+        removedKeys.push(key);
+        continue;
+      }
+      nextEntries[key] = entry;
     }
 
-    nextEntries[key] = entry;
-  }
+    if (removedKeys.length === 0) return 0;
 
-  if (removedKeys.length === 0) return 0;
-
-  cachedStore = nextEntries;
-  await persistRemovals(removedKeys, nextEntries);
-  touchResetMarker();
-  return removedKeys.length;
+    storeEpoch += 1;
+    cachedStore = nextEntries;
+    await persistRemovals(removedKeys, nextEntries);
+    touchResetMarker();
+    return removedKeys.length;
+  });
 }
 
 export async function clearWalkshedCache(): Promise<void> {
-  const emptyStore: CacheStore = {};
-  cachedStore = emptyStore;
-  loadStorePromise = null;
-  await persistClear(emptyStore);
-  touchResetMarker();
+  await serializeMutation(async () => {
+    const emptyStore: CacheStore = {};
+    storeEpoch += 1;
+    cachedStore = emptyStore;
+    loadStorePromise = null;
+    await persistClear(emptyStore);
+    touchResetMarker();
+  });
 }

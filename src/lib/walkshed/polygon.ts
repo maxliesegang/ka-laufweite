@@ -210,8 +210,8 @@ export function buildPolygonFromSeedNodes(
 
   const distances = shortestPathDistancesFromSeeds(graph, effectiveSeeds, distanceMeters);
   const boundaryPoints = collectReachableBoundaryPoints(graph, distances, distanceMeters);
-  const boundaryPointSet = new Set(boundaryPoints.map((point) => pointKey(point)));
-  addUniquePoint(boundaryPoints, boundaryPointSet, [centerLat, centerLon]);
+  // This remains a visual hull approximation of the reachable network. Do not
+  // force the stop into it: the straight snap connector may cross a real barrier.
 
   return {
     polygon: polygonFromBoundaryPoints(boundaryPoints, centerLat, centerLon),

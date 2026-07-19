@@ -128,20 +128,24 @@ function isWayElement(value: unknown): value is OverpassWayElement {
     typeof element.id === 'number' &&
     Number.isFinite(element.id) &&
     Array.isArray(element.nodes) &&
-    element.nodes.every((nodeId) => typeof nodeId === 'number' && Number.isFinite(nodeId))
+    element.nodes.every((nodeId) => typeof nodeId === 'number' && Number.isFinite(nodeId)) &&
+    (element.tags === undefined ||
+      (typeof element.tags === 'object' &&
+        element.tags !== null &&
+        Object.values(element.tags).every((tag) => typeof tag === 'string')))
   );
 }
 
-function parseOverpassResponse(payload: unknown): OverpassResponse | null {
+export function parseOverpassResponse(payload: unknown): OverpassResponse | null {
   if (!payload || typeof payload !== 'object') return null;
   const response = payload as Partial<OverpassResponse>;
   if (!Array.isArray(response.elements)) return null;
 
-  return {
-    elements: response.elements.filter(
-      (element) => isNodeElement(element) || isWayElement(element),
-    ),
-  };
+  const elements = response.elements.filter(
+    (element) => isNodeElement(element) || isWayElement(element),
+  );
+  if (elements.length !== response.elements.length) return null;
+  return { elements };
 }
 
 async function fetchFromEndpoint(endpoint: string, query: string): Promise<OverpassResponse> {
