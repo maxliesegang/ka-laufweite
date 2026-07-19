@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -25,6 +28,6 @@
     "@types/node": "^26.1.1",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
