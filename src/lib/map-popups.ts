@@ -30,13 +30,18 @@ function escapeHtml(value: string): string {
 }
 
 export function createStopPopupHtml(stop: Stop, options: StopPopupOptions = {}): string {
-  const typeLabel = STOP_TYPE_CONFIG[stop.type].label;
-  const details = stop.isCustom ? `${typeLabel} (Eigene Haltestelle)` : typeLabel;
+  const { label: typeLabel, color } = STOP_TYPE_CONFIG[stop.type];
   const escapedStopId = escapeHtml(stop.id);
+  const customBadge = stop.isCustom
+    ? '<span class="stop-popup__badge">Eigene Haltestelle</span>'
+    : '';
   const base = `
     <div class="stop-popup">
-      <strong>${escapeHtml(stop.name)}</strong>
-      <em>${details}</em>
+      <div class="stop-popup__header">
+        <span class="stop-popup__dot" style="background:${color}"></span>
+        <strong class="stop-popup__name">${escapeHtml(stop.name)}</strong>
+      </div>
+      <p class="stop-popup__type">${escapeHtml(typeLabel)}${customBadge}</p>
     </div>
   `;
 
