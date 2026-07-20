@@ -18116,6 +18116,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-3110844106",
+    "name": "Europahalle/Europabad",
+    "lat": 48.9986388,
+    "lon": 8.3762909,
+    "type": "tram"
+  },
+  {
     "id": "osm-25313806",
     "name": "Europäische Schule",
     "lat": 49.0453921,
@@ -51067,15 +51074,8 @@
   {
     "id": "osm-8725382346",
     "name": "Rößlestaffel",
-    "lat": 48.9093284,
-    "lon": 8.7444922,
-    "type": "bus"
-  },
-  {
-    "id": "osm-12892168944",
-    "name": "Rößlestaffel",
-    "lat": 48.9099144,
-    "lon": 8.7451488,
+    "lat": 48.9093707,
+    "lon": 8.7445378,
     "type": "bus"
   },
   {
@@ -60589,13 +60589,6 @@
     "name": "Unbekannte Haltestelle",
     "lat": 48.7762221,
     "lon": 8.5711743,
-    "type": "bus"
-  },
-  {
-    "id": "osm-12892168945",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.9094276,
-    "lon": 8.7444668,
     "type": "bus"
   },
   {
