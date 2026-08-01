@@ -12035,8 +12035,8 @@
   {
     "id": "osm-317439466",
     "name": "Christoph-Lutz-Straße",
-    "lat": 48.8457783,
-    "lon": 8.5760935,
+    "lat": 48.8457807,
+    "lon": 8.5761217,
     "type": "bus"
   },
   {
@@ -20890,8 +20890,8 @@
   {
     "id": "osm-2848020285",
     "name": "Gäufelden",
-    "lat": 48.5599535,
-    "lon": 8.8503135,
+    "lat": 48.5596695,
+    "lon": 8.8500413,
     "type": "train"
   },
   {
@@ -33245,8 +33245,8 @@
   {
     "id": "osm-310688763",
     "name": "Krankenhaus",
-    "lat": 48.8522216,
-    "lon": 8.5895271,
+    "lat": 48.8522172,
+    "lon": 8.5895361,
     "type": "bus"
   },
   {
@@ -36384,13 +36384,6 @@
     "lat": 48.7778925,
     "lon": 7.8666022,
     "type": "bus"
-  },
-  {
-    "id": "osm-5200824955",
-    "name": "Lessingstraße",
-    "lat": 49.0043751,
-    "lon": 8.3842354,
-    "type": "tram"
   },
   {
     "id": "osm-6140017141",
@@ -44865,15 +44858,15 @@
   {
     "id": "osm-1616631948",
     "name": "Österle",
-    "lat": 48.7908969,
-    "lon": 8.6706214,
+    "lat": 48.7909067,
+    "lon": 8.6706012,
     "type": "bus"
   },
   {
     "id": "osm-11057121387",
     "name": "Österle",
-    "lat": 48.7910402,
-    "lon": 8.6708401,
+    "lat": 48.7910431,
+    "lon": 8.670819,
     "type": "bus"
   },
   {
@@ -45498,13 +45491,6 @@
     "lat": 48.9437344,
     "lon": 8.8344276,
     "type": "bus"
-  },
-  {
-    "id": "osm-3111073162",
-    "name": "Otto-Sachs-Straße",
-    "lat": 49.0034407,
-    "lon": 8.3893802,
-    "type": "tram"
   },
   {
     "id": "osm-3991093467",
@@ -48505,22 +48491,8 @@
   {
     "id": "osm-758705405",
     "name": "Rathaus",
-    "lat": 48.6910841,
-    "lon": 8.6700367,
-    "type": "bus"
-  },
-  {
-    "id": "osm-945536687",
-    "name": "Rathaus",
-    "lat": 48.7262866,
-    "lon": 8.7948265,
-    "type": "bus"
-  },
-  {
-    "id": "osm-945536746",
-    "name": "Rathaus",
-    "lat": 48.7263529,
-    "lon": 8.7949808,
+    "lat": 48.6910699,
+    "lon": 8.6701078,
     "type": "bus"
   },
   {
@@ -54573,14 +54545,14 @@
   },
   {
     "id": "osm-336588844",
-    "name": "Schwarzmißhütte",
+    "name": "Schwarzmisshütte",
     "lat": 48.7139275,
     "lon": 8.42554,
     "type": "bus"
   },
   {
     "id": "osm-336588848",
-    "name": "Schwarzmißhütte",
+    "name": "Schwarzmisshütte",
     "lat": 48.7139195,
     "lon": 8.4253048,
     "type": "bus"
@@ -55713,13 +55685,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-8020889678",
-    "name": "Sinsheim PreZero Arena",
-    "lat": 49.2392238,
-    "lon": 8.8836996,
-    "type": "bus"
-  },
-  {
     "id": "osm-1165402105",
     "name": "Sinsheim Quellbergweg",
     "lat": 49.2470432,
@@ -55731,6 +55696,13 @@
     "name": "Sinsheim Schlesienstraße",
     "lat": 49.2548103,
     "lon": 8.89445,
+    "type": "bus"
+  },
+  {
+    "id": "osm-8020889678",
+    "name": "Sinsheim SNP Arena",
+    "lat": 49.2390748,
+    "lon": 8.8834863,
     "type": "bus"
   },
   {
@@ -58202,20 +58174,6 @@
     "name": "Stettfeld Bahnhof",
     "lat": 49.1788394,
     "lon": 8.6432091,
-    "type": "bus"
-  },
-  {
-    "id": "osm-13526239634",
-    "name": "Stettfeld Feuerwehr",
-    "lat": 49.1834818,
-    "lon": 8.6443523,
-    "type": "bus"
-  },
-  {
-    "id": "osm-13526239635",
-    "name": "Stettfeld Feuerwehr",
-    "lat": 49.1835503,
-    "lon": 8.6443243,
     "type": "bus"
   },
   {
@@ -62106,8 +62064,8 @@
   {
     "id": "osm-302084041",
     "name": "Waisenhausplatz",
-    "lat": 48.8900019,
-    "lon": 8.7017553,
+    "lat": 48.889988,
+    "lon": 8.7017544,
     "type": "bus"
   },
   {
@@ -62120,7 +62078,7 @@
   {
     "id": "osm-821600416",
     "name": "Waisenhausplatz",
-    "lat": 48.8901258,
+    "lat": 48.8901186,
     "lon": 8.7015845,
     "type": "bus"
   },
@@ -65809,8 +65767,8 @@
   {
     "id": "osm-1697686241",
     "name": "Wörth, Silcherstraße",
-    "lat": 49.0560313,
-    "lon": 8.2453913,
+    "lat": 49.0560351,
+    "lon": 8.2453916,
     "type": "bus"
   },
   {
