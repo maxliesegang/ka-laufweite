@@ -3,10 +3,17 @@ import {
   Marker,
   NavigationControl,
   Popup,
+  setWorkerUrl,
   type GeoJSONSource,
   type LngLat,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// MapLibre v6 resolves its worker at runtime from `import.meta.url`, which after
+// bundling points at our own chunk — the worker 404s and no tiles ever render.
+// Let Vite emit the worker as an asset instead and hand MapLibre that URL.
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+
+setWorkerUrl(maplibreWorkerUrl);
 import type { Feature, FeatureCollection, Point, Polygon } from 'geojson';
 import {
   addCustomStop,
