@@ -16,99 +16,96 @@ concurrency:
 jobs:
   matrix:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       builds: ${{ steps.builds.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
+      - name: Setup project
+        uses: ./.github/actions/setup
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Read configured type and radius combinations
+      - name: Read configured stop types
         id: builds
-        run: echo "matrix=$(npx tsx scripts/list-walkshed-builds.ts)" >> "$GITHUB_OUTPUT"
+        run: echo "matrix=$(npm exec -- tsx scripts/list-walkshed-builds.ts)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 2
       matrix: ${{ fromJSON(needs.matrix.outputs.builds) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
+      - name: Setup project
+        uses: ./.github/actions/setup
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build ${{ matrix.type }} walksheds at ${{ matrix.radius }} m
+      - name: Build all ${{ matrix.type }} walksheds
+        env:
+          WALKSHED_TYPE: ${{ matrix.type }}
         run: >-
           npm run build:walksheds --
-          --types "${{ matrix.type }}"
-          --radius "${{ matrix.radius }}"
+          --types "$WALKSHED_TYPE"
           --out-dir walkshed-output
+          --progress-file walkshed-progress.txt
 
       - name: Upload generated dataset
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: walkshed-${{ matrix.type }}-${{ matrix.radius }}
-          path: walkshed-output/walksheds-${{ matrix.type }}-${{ matrix.radius }}.json
+          name: walkshed-${{ matrix.type }}
+          path: walkshed-output/walksheds-${{ matrix.type }}-*.json
           if-no-files-found: error
           retention-days: 1
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: diagnostics-${{ matrix.type }}
+          path: walkshed-progress.txt
+          if-no-files-found: ignore
+          retention-days: 7
 
   commit:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
+      actions: read
       contents: write
     steps:
       - name: Checkout latest default branch
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.repository.default_branch }}
 
       - name: Download generated datasets
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: walkshed-*
           path: public/data
           merge-multiple: true
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup project
+        uses: ./.github/actions/setup
 
       - name: Verify generated data
         run: |
-          npm run format:check
-          npm run check
-          npm test
+          npm run verify
           npm run build
 
       - name: Commit updated walkshed data
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           git add public/data/walksheds-*.json
           if git diff --cached --quiet; then
@@ -119,4 +116,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update precomputed walkshed data"
-          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          git push origin "HEAD:$DEFAULT_BRANCH"
