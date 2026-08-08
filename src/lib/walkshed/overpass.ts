@@ -72,11 +72,13 @@ function orderedEndpointUrls(): string[] {
 }
 
 function markEndpointSuccess(endpointUrl: string, durationMs: number): void {
-  const duration = Math.max(1, Math.round(durationMs));
+  const roundedDurationMs = Math.max(1, Math.round(durationMs));
   const previous = endpointStatsByUrl.get(endpointUrl);
   const latencyMs = previous
-    ? Math.round(previous.latencyMs * (1 - LATENCY_SMOOTHING) + duration * LATENCY_SMOOTHING)
-    : duration;
+    ? Math.round(
+        previous.latencyMs * (1 - LATENCY_SMOOTHING) + roundedDurationMs * LATENCY_SMOOTHING,
+      )
+    : roundedDurationMs;
 
   endpointStatsByUrl.set(endpointUrl, { latencyMs, failureStreak: 0 });
 
@@ -155,6 +157,47 @@ export function parseOverpassResponse(payload: unknown): OverpassResponse | null
   return { elements };
 }
 
+/** One actual HTTP attempt against one endpoint — not one `fetchFootwayNetworkInBounds`
+ *  call, which may span several attempts and backoff sleeps. */
+export interface OverpassAttemptEvent {
+  endpointUrl: string;
+  /** Time spent in the HTTP request itself, excluding any backoff sleep. */
+  durationMs: number;
+  outcome: 'ok' | 'retryable-failure' | 'fatal-failure';
+  /** HTTP status when the attempt reached the server; null for network/timeout/parse errors. */
+  status: number | null;
+}
+
+export interface OverpassObserver {
+  onAttempt?: (event: OverpassAttemptEvent) => void;
+  /** Emitted before sleeping between retry rounds, with the planned delay. */
+  onBackoff?: (delayMs: number) => void;
+}
+
+let activeObserver: OverpassObserver | null = null;
+
+/** Install a diagnostics observer (build script only). Observers are best-effort:
+ *  a throwing observer must never fail a request. */
+export function setOverpassObserver(observer: OverpassObserver | null): void {
+  activeObserver = observer;
+}
+
+function notifyAttempt(event: OverpassAttemptEvent): void {
+  try {
+    activeObserver?.onAttempt?.(event);
+  } catch {
+    /* ignore */
+  }
+}
+
+function notifyBackoff(delayMs: number): void {
+  try {
+    activeObserver?.onBackoff?.(delayMs);
+  } catch {
+    /* ignore */
+  }
+}
+
 class OverpassRequestError extends Error {
   constructor(
     message: string,
@@ -165,7 +208,7 @@ class OverpassRequestError extends Error {
   }
 }
 
-function retryAfterMs(response: Response): number | null {
+function parseRetryAfterMs(response: Response): number | null {
   const value = response.headers.get('Retry-After');
   if (!value) return null;
   const seconds = Number(value);
@@ -216,7 +259,7 @@ async function fetchFromEndpoint(
     throw new OverpassRequestError(
       `Overpass status ${response.status}`,
       response.status,
-      retryAfterMs(response),
+      parseRetryAfterMs(response),
     );
   }
 
@@ -256,20 +299,40 @@ export async function fetchFootwayNetworkInBounds(
         const networkData = await fetchFromEndpoint(endpointUrl, query, signal);
         const durationMs = Date.now() - startedAt;
         markEndpointSuccess(endpointUrl, durationMs);
+        notifyAttempt({ endpointUrl, durationMs, outcome: 'ok', status: 200 });
         return { status: 'ok', networkData };
       } catch (error) {
         if (signal?.aborted) throw signal.reason;
         markEndpointFailure(endpointUrl);
+        const durationMs = Date.now() - startedAt;
         if (error instanceof OverpassRequestError) {
-          if (!RETRYABLE_STATUS_CODES.has(error.status)) return { status: 'all-endpoints-failed' };
+          if (!RETRYABLE_STATUS_CODES.has(error.status)) {
+            notifyAttempt({
+              endpointUrl,
+              durationMs,
+              outcome: 'fatal-failure',
+              status: error.status,
+            });
+            return { status: 'all-endpoints-failed' };
+          }
+          notifyAttempt({
+            endpointUrl,
+            durationMs,
+            outcome: 'retryable-failure',
+            status: error.status,
+          });
           retryDelayMs = Math.max(retryDelayMs, error.retryAfterMs ?? 0);
+        } else {
+          notifyAttempt({ endpointUrl, durationMs, outcome: 'retryable-failure', status: null });
         }
         retryableFailure = true;
       }
     }
 
     if (!retryableFailure || round === MAX_REQUEST_ROUNDS - 1) break;
-    await abortableDelay(retryDelayMs + Math.random() * RETRY_JITTER_MS, signal);
+    const backoffMs = retryDelayMs + Math.random() * RETRY_JITTER_MS;
+    notifyBackoff(backoffMs);
+    await abortableDelay(backoffMs, signal);
   }
 
   return { status: 'all-endpoints-failed' };

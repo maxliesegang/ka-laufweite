@@ -70,10 +70,12 @@ export interface EdgeProjectionMatch {
 
 export interface WalkshedPolygonAttempt {
   polygon: LatLng[] | null;
+  /** Boundary points collected from the reachable subgraph, before deduplication. */
   boundaryPointCount: number;
 }
 
 export interface ShortestPathsResult {
   distanceByNodeIndex: Float64Array;
+  /** Node indexes in nondecreasing shortest-path distance order. */
   settledNodeIndexes: number[];
 }

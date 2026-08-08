@@ -4,7 +4,6 @@ import {
   CONCAVE_HULL_LENGTH_THRESHOLD_METERS,
   LOCAL_POINT_KEY_DECIMALS,
   MIN_EFFECTIVE_WALK_DISTANCE_METERS,
-  POINT_KEY_DECIMALS,
 } from './constants';
 import { METERS_PER_LAT_DEGREE, metersPerLonDegree } from './geo';
 import { calculateShortestPaths } from './graph';
@@ -19,67 +18,61 @@ function interpolate(a: LatLng, b: LatLng, t: number): LatLng {
   return [a[0] + (b[0] - a[0]) * clamped, a[1] + (b[1] - a[1]) * clamped];
 }
 
-function pointKey(point: LatLng): string {
-  return `${point[0].toFixed(POINT_KEY_DECIMALS)}:${point[1].toFixed(POINT_KEY_DECIMALS)}`;
-}
-
-function addUniquePoint(points: LatLng[], seen: Set<string>, point: LatLng): void {
-  const key = pointKey(point);
-  if (seen.has(key)) return;
-  seen.add(key);
-  points.push(point);
-}
-
+/**
+ * Outline material for the reachable subgraph: every settled node, plus the
+ * point where an edge leaving that node runs out of remaining distance.
+ *
+ * Points may repeat — `polygonFromBoundaryPoints` deduplicates in projected
+ * meters anyway, so this loop stays free of per-point keys and allocations. It
+ * runs once per stop and radius over the whole reachable subgraph.
+ */
 function collectReachableBoundaryPoints(
   graph: WalkGraph,
   distanceByNodeIndex: Float64Array,
-  maxDistanceMeters: number,
+  radiusMeters: number,
   settledNodeIndexes: number[],
 ): LatLng[] {
-  const points: LatLng[] = [];
-  const seen = new Set<string>();
-  const visitedEdges = new Set<string>();
+  const boundaryPoints: LatLng[] = [];
 
-  for (const from of settledNodeIndexes) {
-    const fromDistance = distanceByNodeIndex[from];
-    const fromReachable = Number.isFinite(fromDistance) && fromDistance <= maxDistanceMeters;
+  for (const fromNodeIndex of settledNodeIndexes) {
+    const fromDistanceMeters = distanceByNodeIndex[fromNodeIndex];
+    // Dijkstra settles nodes in nondecreasing distance order. A shared traversal
+    // can therefore stop scanning as soon as it passes this radius.
+    if (!Number.isFinite(fromDistanceMeters) || fromDistanceMeters > radiusMeters) break;
 
-    for (const edge of graph.adjacency[from]) {
-      const to = edge.toNodeIndex;
-      const edgeKey = from < to ? `${from}:${to}` : `${to}:${from}`;
-      if (visitedEdges.has(edgeKey)) continue;
-      visitedEdges.add(edgeKey);
+    const fromPoint = graph.nodes[fromNodeIndex];
+    const fromRemainingMeters = radiusMeters - fromDistanceMeters;
+    boundaryPoints.push(fromPoint);
 
-      const toDistance = distanceByNodeIndex[to];
-      const toReachable = Number.isFinite(toDistance) && toDistance <= maxDistanceMeters;
-      if (!fromReachable && !toReachable) continue;
+    for (const edge of graph.adjacency[fromNodeIndex]) {
+      const { toNodeIndex, distanceMeters: edgeDistanceMeters } = edge;
+      const toDistanceMeters = distanceByNodeIndex[toNodeIndex];
+      const isToNodeReachable =
+        Number.isFinite(toDistanceMeters) && toDistanceMeters <= radiusMeters;
+      // Every reachable node is settled exactly once, so an edge between two of
+      // them is scanned from both ends: keep the lower-index end and skip the
+      // mirror. Edges to unreachable nodes are only ever seen from this end.
+      if (isToNodeReachable && toNodeIndex < fromNodeIndex) continue;
 
-      const fromPoint = graph.nodes[from];
-      const toPoint = graph.nodes[to];
-
-      if (fromReachable) {
-        addUniquePoint(points, seen, fromPoint);
-
-        const fromRemaining = maxDistanceMeters - fromDistance;
-        if (fromRemaining > 0 && fromRemaining < edge.distanceMeters) {
-          const t = fromRemaining / edge.distanceMeters;
-          addUniquePoint(points, seen, interpolate(fromPoint, toPoint, t));
-        }
+      const toPoint = graph.nodes[toNodeIndex];
+      if (fromRemainingMeters > 0 && fromRemainingMeters < edgeDistanceMeters) {
+        boundaryPoints.push(
+          interpolate(fromPoint, toPoint, fromRemainingMeters / edgeDistanceMeters),
+        );
       }
 
-      if (toReachable) {
-        addUniquePoint(points, seen, toPoint);
-
-        const toRemaining = maxDistanceMeters - toDistance;
-        if (toRemaining > 0 && toRemaining < edge.distanceMeters) {
-          const t = toRemaining / edge.distanceMeters;
-          addUniquePoint(points, seen, interpolate(toPoint, fromPoint, t));
+      if (isToNodeReachable) {
+        const toRemainingMeters = radiusMeters - toDistanceMeters;
+        if (toRemainingMeters > 0 && toRemainingMeters < edgeDistanceMeters) {
+          boundaryPoints.push(
+            interpolate(toPoint, fromPoint, toRemainingMeters / edgeDistanceMeters),
+          );
         }
       }
     }
   }
 
-  return points;
+  return boundaryPoints;
 }
 
 function toLocalMeters(point: LatLng, centerLat: number, centerLon: number): LocalPoint {
@@ -98,6 +91,16 @@ function fromLocalMeters(point: LocalPoint, centerLat: number, centerLon: number
 
 function localPointKey(point: LocalPoint): string {
   return `${point[0].toFixed(LOCAL_POINT_KEY_DECIMALS)}:${point[1].toFixed(LOCAL_POINT_KEY_DECIMALS)}`;
+}
+
+const LOCAL_POINT_KEY_GRID = 10 ** LOCAL_POINT_KEY_DECIMALS;
+
+/** The one coordinate every point sharing a `localPointKey` collapses to. */
+function snapToLocalPointKeyGrid(point: LocalPoint): LocalPoint {
+  return [
+    Math.round(point[0] * LOCAL_POINT_KEY_GRID) / LOCAL_POINT_KEY_GRID,
+    Math.round(point[1] * LOCAL_POINT_KEY_GRID) / LOCAL_POINT_KEY_GRID,
+  ];
 }
 
 function cross(o: LocalPoint, a: LocalPoint, b: LocalPoint): number {
@@ -169,7 +172,10 @@ function polygonFromBoundaryPoints(
   const localPoints: LocalPoint[] = [];
 
   for (const point of boundaryPoints) {
-    const localPoint = toLocalMeters(point, centerLat, centerLon);
+    // Snap before deduplicating rather than keeping whichever representative arrived
+    // first: two collection orders otherwise retain coordinates that differ below a
+    // centimetre, which is enough to change what concaveman does below.
+    const localPoint = snapToLocalPointKeyGrid(toLocalMeters(point, centerLat, centerLon));
     const key = localPointKey(localPoint);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -177,6 +183,13 @@ function polygonFromBoundaryPoints(
   }
 
   if (localPoints.length < 3) return null;
+
+  // Some point sets admit more than one valid concave hull, and concaveman picks
+  // between them by input order — so the same reachable network could yield a
+  // different polygon purely because points were collected in another sequence.
+  // Sorting makes the hull a function of the point set alone, which keeps output
+  // stable across refactors of the collection loop above.
+  localPoints.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 
   const concaveHullRaw = concaveman(
     localPoints,
@@ -198,25 +211,30 @@ function polygonFromBoundaryPoints(
   return fallbackHull.map((point) => fromLocalMeters(point, centerLat, centerLon));
 }
 
-export function buildWalkshedPolygonFromSeeds(
+/** Radii that share one effective seed set, and therefore one Dijkstra traversal. */
+interface SharedTraversalGroup {
+  effectiveSeeds: GraphSeed[];
+  radiiMeters: number[];
+}
+
+function effectiveSeedsForRadius(seeds: GraphSeed[], radiusMeters: number): GraphSeed[] {
+  return seeds.filter(
+    (seed) => radiusMeters - seed.initialDistanceMeters >= MIN_EFFECTIVE_WALK_DISTANCE_METERS,
+  );
+}
+
+function effectiveSeedsKey(effectiveSeeds: GraphSeed[]): string {
+  return effectiveSeeds.map((seed) => `${seed.nodeIndex}:${seed.initialDistanceMeters}`).join('|');
+}
+
+function buildWalkshedPolygonFromShortestPaths(
   graph: WalkGraph,
   centerLat: number,
   centerLon: number,
   radiusMeters: number,
-  seeds: GraphSeed[],
+  distanceByNodeIndex: Float64Array,
+  settledNodeIndexes: number[],
 ): WalkshedPolygonAttempt {
-  const effectiveSeeds = seeds.filter(
-    (seed) => radiusMeters - seed.initialDistanceMeters >= MIN_EFFECTIVE_WALK_DISTANCE_METERS,
-  );
-  if (effectiveSeeds.length === 0) {
-    return { polygon: null, boundaryPointCount: 0 };
-  }
-
-  const { distanceByNodeIndex, settledNodeIndexes } = calculateShortestPaths(
-    graph,
-    effectiveSeeds,
-    radiusMeters,
-  );
   const boundaryPoints = collectReachableBoundaryPoints(
     graph,
     distanceByNodeIndex,
@@ -230,4 +248,90 @@ export function buildWalkshedPolygonFromSeeds(
     polygon: polygonFromBoundaryPoints(boundaryPoints, centerLat, centerLon),
     boundaryPointCount: boundaryPoints.length,
   };
+}
+
+/**
+ * Build several radii for one stop while reusing Dijkstra results. Radii with
+ * the same effective graph seeds share one traversal up to their largest
+ * distance; seed groups remain separate so every result matches an independent
+ * single-radius calculation exactly.
+ */
+export function buildWalkshedPolygonsFromSeeds(
+  graph: WalkGraph,
+  centerLat: number,
+  centerLon: number,
+  radiiMeters: readonly number[],
+  seeds: GraphSeed[],
+): Map<number, WalkshedPolygonAttempt> {
+  const attemptsByRadiusMeters = new Map<number, WalkshedPolygonAttempt>();
+  const traversalGroupsBySeedKey = new Map<string, SharedTraversalGroup>();
+  const uniqueRadiiMeters = [...new Set(radiiMeters)].sort((a, b) => a - b);
+
+  for (const radiusMeters of uniqueRadiiMeters) {
+    const effectiveSeeds = effectiveSeedsForRadius(seeds, radiusMeters);
+    if (effectiveSeeds.length === 0) {
+      attemptsByRadiusMeters.set(radiusMeters, { polygon: null, boundaryPointCount: 0 });
+      continue;
+    }
+
+    const seedKey = effectiveSeedsKey(effectiveSeeds);
+    const traversalGroup = traversalGroupsBySeedKey.get(seedKey);
+    if (traversalGroup) traversalGroup.radiiMeters.push(radiusMeters);
+    else traversalGroupsBySeedKey.set(seedKey, { effectiveSeeds, radiiMeters: [radiusMeters] });
+  }
+
+  for (const {
+    effectiveSeeds,
+    radiiMeters: groupRadiiMeters,
+  } of traversalGroupsBySeedKey.values()) {
+    const largestRadiusMeters = groupRadiiMeters[groupRadiiMeters.length - 1];
+    const { distanceByNodeIndex, settledNodeIndexes } = calculateShortestPaths(
+      graph,
+      effectiveSeeds,
+      largestRadiusMeters,
+    );
+
+    for (const radiusMeters of groupRadiiMeters) {
+      attemptsByRadiusMeters.set(
+        radiusMeters,
+        buildWalkshedPolygonFromShortestPaths(
+          graph,
+          centerLat,
+          centerLon,
+          radiusMeters,
+          distanceByNodeIndex,
+          settledNodeIndexes,
+        ),
+      );
+    }
+  }
+
+  return attemptsByRadiusMeters;
+}
+
+export function buildWalkshedPolygonFromSeeds(
+  graph: WalkGraph,
+  centerLat: number,
+  centerLon: number,
+  radiusMeters: number,
+  seeds: GraphSeed[],
+): WalkshedPolygonAttempt {
+  const effectiveSeeds = effectiveSeedsForRadius(seeds, radiusMeters);
+  if (effectiveSeeds.length === 0) {
+    return { polygon: null, boundaryPointCount: 0 };
+  }
+
+  const { distanceByNodeIndex, settledNodeIndexes } = calculateShortestPaths(
+    graph,
+    effectiveSeeds,
+    radiusMeters,
+  );
+  return buildWalkshedPolygonFromShortestPaths(
+    graph,
+    centerLat,
+    centerLon,
+    radiusMeters,
+    distanceByNodeIndex,
+    settledNodeIndexes,
+  );
 }

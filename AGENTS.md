@@ -71,7 +71,7 @@ Guidance for coding agents and contributors working in this repository.
 ## Data Refresh Workflow
 
 - OSM snapshot generator: `scripts/update-osm-stops.mjs`
-- Shipped walkshed generator: `scripts/build-walksheds.ts`
+- Shipped walkshed generator: `scripts/build-walksheds.ts` (orchestration only; options, batching, dataset writing, progress, and CI diagnostics live in `scripts/walkshed-build/`)
 - Refresh data with:
 
 ```sh

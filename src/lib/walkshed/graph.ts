@@ -133,69 +133,69 @@ function addReasonableStreetCrossings(
 ): void {
   const cellSizeDegrees = MAX_REASONABLE_STREET_CROSSING_METERS / 111_320;
   const lonScale = Math.max(0.2, Math.cos(((graph.nodes[0]?.[0] ?? 0) * Math.PI) / 180));
-  const buckets = new Map<string, number[]>();
-  const bucketKey = (point: LatLng) =>
-    `${Math.floor(point[0] / cellSizeDegrees)}:${Math.floor((point[1] * lonScale) / cellSizeDegrees)}`;
-  for (let index = 0; index < graph.nodes.length; index += 1) {
-    if (roadNodeIndexes.has(index)) continue;
-    const key = bucketKey(graph.nodes[index]);
-    const bucket = buckets.get(key) ?? [];
-    bucket.push(index);
-    buckets.set(key, bucket);
+  const nodeIndexesByCellKey = new Map<string, number[]>();
+  const cellKey = (point: LatLng) =>
+    spatialCellKey(
+      Math.floor(point[0] / cellSizeDegrees),
+      Math.floor((point[1] * lonScale) / cellSizeDegrees),
+    );
+  for (let nodeIndex = 0; nodeIndex < graph.nodes.length; nodeIndex += 1) {
+    if (roadNodeIndexes.has(nodeIndex)) continue;
+    const key = cellKey(graph.nodes[nodeIndex]);
+    const cellNodeIndexes = nodeIndexesByCellKey.get(key) ?? [];
+    cellNodeIndexes.push(nodeIndex);
+    nodeIndexesByCellKey.set(key, cellNodeIndexes);
   }
 
-  const added = new Set<string>();
   const roadIndex = buildGraphSegmentIndex(
     graph,
     roadSegments,
     MAX_REASONABLE_STREET_CROSSING_METERS,
   );
-  for (let from = 0; from < graph.nodes.length; from += 1) {
-    if (roadNodeIndexes.has(from)) continue;
-    const point = graph.nodes[from];
-    const latCell = Math.floor(point[0] / cellSizeDegrees);
-    const lonCell = Math.floor((point[1] * lonScale) / cellSizeDegrees);
+  for (let fromNodeIndex = 0; fromNodeIndex < graph.nodes.length; fromNodeIndex += 1) {
+    if (roadNodeIndexes.has(fromNodeIndex)) continue;
+    const fromPoint = graph.nodes[fromNodeIndex];
+    const latCell = Math.floor(fromPoint[0] / cellSizeDegrees);
+    const lonCell = Math.floor((fromPoint[1] * lonScale) / cellSizeDegrees);
     let bestCrossing: { toNodeIndex: number; distanceMeters: number } | null = null;
     for (let latOffset = -1; latOffset <= 1; latOffset += 1) {
       for (let lonOffset = -1; lonOffset <= 1; lonOffset += 1) {
-        for (const to of buckets.get(`${latCell + latOffset}:${lonCell + lonOffset}`) ?? []) {
-          if (to <= from) continue;
-          const distanceMeters = haversineMeters(point, graph.nodes[to]);
+        const cellNodeIndexes =
+          nodeIndexesByCellKey.get(spatialCellKey(latCell + latOffset, lonCell + lonOffset)) ?? [];
+        for (const toNodeIndex of cellNodeIndexes) {
+          if (toNodeIndex <= fromNodeIndex) continue;
+          const toPoint = graph.nodes[toNodeIndex];
+          const distanceMeters = haversineMeters(fromPoint, toPoint);
           if (
             distanceMeters < MIN_REASONABLE_STREET_CROSSING_METERS ||
             distanceMeters > MAX_REASONABLE_STREET_CROSSING_METERS ||
             (bestCrossing && distanceMeters >= bestCrossing.distanceMeters)
           )
             continue;
-          const candidateLine = graph.nodes[to];
-          const crossesRoad = findSegmentIndexesNearLine(roadIndex, point, candidateLine).some(
+          const crossesRoad = findSegmentIndexesNearLine(roadIndex, fromPoint, toPoint).some(
             (roadSegmentIndex) => {
-              const { fromNodeIndex: roadFrom, toNodeIndex: roadTo } =
+              const { fromNodeIndex: roadFromNodeIndex, toNodeIndex: roadToNodeIndex } =
                 roadSegments[roadSegmentIndex];
-              const roadA = graph.nodes[roadFrom];
-              const roadB = graph.nodes[roadTo];
+              const roadFromPoint = graph.nodes[roadFromNodeIndex];
+              const roadToPoint = graph.nodes[roadToNodeIndex];
               return (
-                segmentsIntersect(point, candidateLine, roadA, roadB) &&
-                isApproximatelyPerpendicular(point, candidateLine, roadA, roadB)
+                segmentsIntersect(fromPoint, toPoint, roadFromPoint, roadToPoint) &&
+                isApproximatelyPerpendicular(fromPoint, toPoint, roadFromPoint, roadToPoint)
               );
             },
           );
-          if (crossesRoad) bestCrossing = { toNodeIndex: to, distanceMeters };
+          if (crossesRoad) bestCrossing = { toNodeIndex, distanceMeters };
         }
       }
     }
     if (!bestCrossing) continue;
-    const key = `${from}:${bestCrossing.toNodeIndex}`;
-    if (added.has(key)) continue;
-    added.add(key);
-    graph.adjacency[from].push({
-      toNodeIndex: bestCrossing.toNodeIndex,
-      distanceMeters: bestCrossing.distanceMeters,
-    });
-    graph.adjacency[bestCrossing.toNodeIndex].push({
-      toNodeIndex: from,
-      distanceMeters: bestCrossing.distanceMeters,
-    });
+    // A crossing may re-propose a pair the ways already connect. Way edges are
+    // deduplicated at build time, and a parallel edge can never shorten a route,
+    // so it would only duplicate work in Dijkstra and in boundary extraction.
+    const { toNodeIndex, distanceMeters } = bestCrossing;
+    if (graph.adjacency[fromNodeIndex].some((edge) => edge.toNodeIndex === toNodeIndex)) continue;
+    graph.adjacency[fromNodeIndex].push({ toNodeIndex, distanceMeters });
+    graph.adjacency[toNodeIndex].push({ toNodeIndex: fromNodeIndex, distanceMeters });
   }
 }
 
@@ -340,6 +340,33 @@ export function findNearestNodeSeeds(
   return matches.slice(0, limit);
 }
 
+function comparePoints(a: LatLng, b: LatLng): number {
+  return a[0] - b[0] || a[1] - b[1];
+}
+
+/**
+ * Order two segments by geometry alone. Node indexes reflect the order ways
+ * arrived from Overpass, so they cannot break a tie reproducibly; the endpoint
+ * coordinates are a property of the network itself.
+ *
+ * Segments that are geometrically identical compare equal — nothing here can
+ * separate them, and their projections are interchangeable anyway.
+ */
+function compareSegmentsByGeometry(
+  graph: WalkGraph,
+  a: { fromNodeIndex: number; toNodeIndex: number },
+  b: { fromNodeIndex: number; toNodeIndex: number },
+): number {
+  const orderedEndpoints = ({ fromNodeIndex, toNodeIndex }: typeof a): [LatLng, LatLng] => {
+    const from = graph.nodes[fromNodeIndex];
+    const to = graph.nodes[toNodeIndex];
+    return comparePoints(from, to) <= 0 ? [from, to] : [to, from];
+  };
+  const [aFirst, aSecond] = orderedEndpoints(a);
+  const [bFirst, bSecond] = orderedEndpoints(b);
+  return comparePoints(aFirst, bFirst) || comparePoints(aSecond, bSecond);
+}
+
 /**
  * Project the stop onto the nearest edge within `maxSnapDistanceMeters`. When
  * `isAllowedNode` is given, only edges whose endpoints satisfy it are eligible,
@@ -377,11 +404,20 @@ function projectNearestEdge(
       lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / lengthSquared));
     const projection: LatLng = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
     const snapDistance = haversineMeters(origin, projection);
-    if (
-      snapDistance > maxSnapDistanceMeters ||
-      (nearest && snapDistance >= nearest.snapDistanceMeters)
-    )
-      continue;
+    if (snapDistance > maxSnapDistanceMeters) continue;
+    if (nearest) {
+      if (snapDistance > nearest.snapDistanceMeters) continue;
+      // A stop equidistant from two edges — mirrored geometry, a platform mapped
+      // from both sides — would otherwise snap to whichever the index yielded
+      // first, and pick a different walkshed when the ways arrive in another order.
+      const candidate = { fromNodeIndex: from, toNodeIndex: to };
+      if (
+        snapDistance === nearest.snapDistanceMeters &&
+        compareSegmentsByGeometry(graph, candidate, nearest) >= 0
+      ) {
+        continue;
+      }
+    }
     nearest = {
       fromNodeIndex: from,
       toNodeIndex: to,
