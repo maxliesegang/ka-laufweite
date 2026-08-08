@@ -1,9 +1,10 @@
-import maplibregl, {
+import {
+  Map as MapLibreMap,
+  Marker,
+  NavigationControl,
+  Popup,
   type GeoJSONSource,
   type LngLat,
-  type Map as MapLibreMap,
-  type Marker,
-  type Popup,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Feature, FeatureCollection, Point, Polygon } from 'geojson';
@@ -250,7 +251,7 @@ class TransitMapController {
     const content = this.popupElement(
       createStopPopupHtml(stop, { walkshedDisabled: this.walkshedDisabledStopIds.has(stop.id) }),
     );
-    const popup = new maplibregl.Popup({ offset: marker ? 20 : 8 })
+    const popup = new Popup({ offset: marker ? 20 : 8 })
       .setLngLat([stop.lon, stop.lat])
       .setDOMContent(content)
       .addTo(this.map);
@@ -305,7 +306,7 @@ class TransitMapController {
       if (this.coverageShape === 'walkshed') this.walkshedOverlay.prioritizeStop(stop);
       this.releaseMapClickSuppression();
     });
-    const marker = new maplibregl.Marker({ element, draggable: true })
+    const marker = new Marker({ element, draggable: true })
       .setLngLat([stop.lon, stop.lat])
       .addTo(this.map);
     let dragStart = marker.getLngLat();
@@ -532,7 +533,7 @@ class TransitMapController {
 
   private showAddStopPopup(lngLat: LngLat): void {
     const content = this.popupElement(createAddStopPopupHtml());
-    const popup = new maplibregl.Popup().setLngLat(lngLat).setDOMContent(content).addTo(this.map);
+    const popup = new Popup().setLngLat(lngLat).setDOMContent(content).addTo(this.map);
     const form = content.querySelector<HTMLFormElement>(ADD_STOP_FORM_SELECTOR);
     const input = content.querySelector<HTMLInputElement>(ADD_STOP_NAME_SELECTOR);
     const typeInput = content.querySelector<HTMLSelectElement>(ADD_STOP_TYPE_SELECTOR);
@@ -553,12 +554,12 @@ class TransitMapController {
 export function initMap(): void {
   if (!document.getElementById(MAP_CONTAINER_ID)) return;
   const styleUrl = import.meta.env.PUBLIC_MAP_STYLE_URL || DEFAULT_MAP_STYLE_URL;
-  const map = new maplibregl.Map({
+  const map = new MapLibreMap({
     container: MAP_CONTAINER_ID,
     style: styleUrl,
     center: MAP_INITIAL_CENTER,
     zoom: MAP_INITIAL_ZOOM,
   });
-  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+  map.addControl(new NavigationControl(), 'top-right');
   map.once('load', () => new TransitMapController(map).init());
 }
