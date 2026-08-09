@@ -17,6 +17,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 - **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
 - **Fully static** — no backend required, deploys to GitHub Pages
 - **Vector basemap** — rendered client-side with MapLibre GL JS and OpenFreeMap
+- **Optional railway overlay** — OpenRailwayMap can highlight tracks, stations, line numbers, and switches above the basemap
 - **Persistent client cache for API protection** — walkshed polygons are cached in IndexedDB (with localStorage fallback) and can be reset from the config page
 - **Temporary backoff on failures** — unavailable walksheds are cached briefly to avoid repeated API retries
 
@@ -114,6 +115,7 @@ commit after all jobs succeed. Both workflows can also be started manually from 
 - [Astro](https://astro.build) — static site generator
 - [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/) — client-side vector map rendering
 - [OpenFreeMap](https://openfreemap.org) — default OpenStreetMap vector basemap
+- [OpenRailwayMap](https://www.openrailwaymap.org) — optional railway-infrastructure overlay
 - [Overpass API](https://overpass-api.de) — OSM data for stops and footpaths
 - TypeScript
 

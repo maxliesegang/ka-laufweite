@@ -2,6 +2,7 @@ import {
   DEFAULT_COVERAGE_SHAPE,
   DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
   DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
+  DEFAULT_RAILWAY_INFRASTRUCTURE_VISIBLE,
   MAX_STOP_RADIUS_METERS,
   MIN_STOP_RADIUS_METERS,
   STOP_RADIUS_INPUT_IDS,
@@ -11,9 +12,11 @@ import {
   getConfiguredCoverageShape,
   getConfiguredStopRadii,
   getAllowReasonableStreetCrossings,
+  getRailwayInfrastructureVisible,
   setAllowReasonableStreetCrossings,
   setConfiguredCoverageShape,
   setConfiguredStopRadius,
+  setRailwayInfrastructureVisible,
 } from '../lib/settings';
 import { STOP_TYPE_CONFIG, STOP_TYPES_CONFIG_ORDER } from '../lib/stop-type-config';
 import { mapStopTypes, stopTypeRecordChanged, type StopType } from '../lib/types';
@@ -56,6 +59,7 @@ export function initConfigPage(): void {
   let shapeSelect: HTMLSelectElement;
   let resetDefaultsBtn: HTMLButtonElement;
   let crossingsInput: HTMLInputElement;
+  let railwayInfrastructureInput: HTMLInputElement;
   let deleteCustomStopsBtn: HTMLButtonElement;
   let resetCacheBtn: HTMLButtonElement;
   let saveStatus: HTMLParagraphElement;
@@ -67,6 +71,7 @@ export function initConfigPage(): void {
     );
     shapeSelect = requireElement('coverage-shape', HTMLSelectElement);
     crossingsInput = requireElement('reasonable-street-crossings', HTMLInputElement);
+    railwayInfrastructureInput = requireElement('railway-infrastructure', HTMLInputElement);
     resetDefaultsBtn = requireElement('reset-radius', HTMLButtonElement);
     deleteCustomStopsBtn = requireElement('delete-custom-stops', HTMLButtonElement);
     resetCacheBtn = requireElement('reset-walkshed-cache', HTMLButtonElement);
@@ -80,6 +85,7 @@ export function initConfigPage(): void {
   let currentRadiusByType = getConfiguredStopRadii();
   let currentShape = getConfiguredCoverageShape();
   let currentAllowCrossings = getAllowReasonableStreetCrossings();
+  let currentRailwayInfrastructureVisible = getRailwayInfrastructureVisible();
 
   for (const stopType of STOP_TYPES_CONFIG_ORDER) {
     radiusInputs[stopType].value = String(currentRadiusByType[stopType]);
@@ -87,6 +93,7 @@ export function initConfigPage(): void {
 
   shapeSelect.value = currentShape;
   crossingsInput.checked = currentAllowCrossings;
+  railwayInfrastructureInput.checked = currentRailwayInfrastructureVisible;
   cacheStatus.textContent = 'Polygon-Cache Einträge: ...';
   saveStatus.textContent = 'Änderungen werden automatisch gespeichert.';
 
@@ -126,6 +133,9 @@ export function initConfigPage(): void {
 
     const shape = setConfiguredCoverageShape(shapeSelect.value);
     const allowCrossings = setAllowReasonableStreetCrossings(crossingsInput.checked);
+    const railwayInfrastructureVisible = setRailwayInfrastructureVisible(
+      railwayInfrastructureInput.checked,
+    );
 
     for (const stopType of STOP_TYPES_CONFIG_ORDER) {
       radiusInputs[stopType].value = String(nextRadiusByType[stopType]);
@@ -139,11 +149,15 @@ export function initConfigPage(): void {
     );
     const shapeChanged = shape !== currentShape;
     const crossingsChanged = allowCrossings !== currentAllowCrossings;
-    const changed = radiiChanged || shapeChanged || crossingsChanged;
+    const railwayInfrastructureChanged =
+      railwayInfrastructureVisible !== currentRailwayInfrastructureVisible;
+    const walkshedSettingsChanged = radiiChanged || shapeChanged || crossingsChanged;
+    const changed = walkshedSettingsChanged || railwayInfrastructureChanged;
 
     currentRadiusByType = nextRadiusByType;
     currentShape = shape;
     currentAllowCrossings = allowCrossings;
+    currentRailwayInfrastructureVisible = railwayInfrastructureVisible;
 
     const allInvalid = invalidTypes.length === STOP_TYPES_CONFIG_ORDER.length;
     if (allInvalid && !changed) {
@@ -155,6 +169,11 @@ export function initConfigPage(): void {
 
     if (changed) {
       saveStatus.textContent = 'Wird aktualisiert …';
+      if (!walkshedSettingsChanged) {
+        window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
+        saveStatus.textContent = `${prefix}.` + invalidRadiusHint(invalidTypes);
+        return;
+      }
       // New radii have distinct cache keys, so the map can show those changes
       // immediately. Crossing changes must wait because they reuse radius keys.
       if (!crossingsChanged) window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
@@ -193,6 +212,11 @@ export function initConfigPage(): void {
     runAsyncAction(() => persistSettings('Automatisch gespeichert'));
   });
 
+  railwayInfrastructureInput.addEventListener('change', () => {
+    clearTimer();
+    runAsyncAction(() => persistSettings('Automatisch gespeichert'));
+  });
+
   resetDefaultsBtn.addEventListener('click', () => {
     clearTimer();
     for (const stopType of STOP_TYPES_CONFIG_ORDER) {
@@ -200,6 +224,7 @@ export function initConfigPage(): void {
     }
     shapeSelect.value = DEFAULT_COVERAGE_SHAPE;
     crossingsInput.checked = DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS;
+    railwayInfrastructureInput.checked = DEFAULT_RAILWAY_INFRASTRUCTURE_VISIBLE;
     runAsyncAction(() => persistSettings('Standardwerte übernommen', true));
   });
 

@@ -31,7 +31,10 @@ export const COVERAGE_SHAPE_STORAGE_KEY = 'karlsruhe-opnv-coverage-shape';
 export const STOP_TYPE_VISIBILITY_STORAGE_KEY = 'karlsruhe-opnv-stop-type-visibility-v1';
 export const REASONABLE_STREET_CROSSINGS_STORAGE_KEY =
   'karlsruhe-opnv-reasonable-street-crossings-v1';
+export const RAILWAY_INFRASTRUCTURE_VISIBILITY_STORAGE_KEY =
+  'karlsruhe-opnv-railway-infrastructure-visible-v1';
 export const DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS = true;
+export const DEFAULT_RAILWAY_INFRASTRUCTURE_VISIBLE = false;
 export const SETTINGS_CHANGED_EVENT = 'karlsruhe-opnv-settings-changed';
 
 export type CoverageShape = 'circle' | 'walkshed';
@@ -99,6 +102,15 @@ export function setAllowReasonableStreetCrossings(value: boolean): boolean {
   return value;
 }
 
+export function getRailwayInfrastructureVisible(): boolean {
+  return getStorageItem(RAILWAY_INFRASTRUCTURE_VISIBILITY_STORAGE_KEY) === 'true';
+}
+
+export function setRailwayInfrastructureVisible(value: boolean): boolean {
+  setStorageItem(RAILWAY_INFRASTRUCTURE_VISIBILITY_STORAGE_KEY, String(value));
+  return value;
+}
+
 function normalizeStopTypeVisibility(value: unknown): StopTypeVisibilityByType {
   if (!value || typeof value !== 'object') {
     return { ...DEFAULT_STOP_TYPE_VISIBILITY_BY_TYPE };
@@ -130,6 +142,7 @@ export const SETTINGS_STORAGE_KEYS: readonly string[] = [
   COVERAGE_SHAPE_STORAGE_KEY,
   STOP_TYPE_VISIBILITY_STORAGE_KEY,
   REASONABLE_STREET_CROSSINGS_STORAGE_KEY,
+  RAILWAY_INFRASTRUCTURE_VISIBILITY_STORAGE_KEY,
 ];
 
 /**

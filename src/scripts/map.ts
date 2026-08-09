@@ -42,6 +42,7 @@ import {
   getAllowReasonableStreetCrossings,
   getConfiguredStopRadii,
   getConfiguredStopTypeVisibility,
+  getRailwayInfrastructureVisible,
   setConfiguredStopTypeVisibility,
 } from '../lib/settings';
 import { STOP_TYPE_CONFIG } from '../lib/stop-type-config';
@@ -71,6 +72,10 @@ import {
 } from '../lib/types';
 import { createCustomStopMarkerElement } from './map/custom-stop-marker-icon';
 import { circlePolygon, emptyPolygonCollection, type PolygonFeature } from './map/map-geometry';
+import {
+  addRailwayInfrastructureOverlay,
+  setRailwayInfrastructureOverlayVisible,
+} from './map/railway-infrastructure-overlay';
 import { WalkshedOverlayManager, type WalkshedLoadProgress } from './map/walkshed-overlay-manager';
 
 const MAP_CONTAINER_ID = 'map';
@@ -117,6 +122,7 @@ class TransitMapController {
   private visibleStopTypes: StopTypeVisibilityByType = getConfiguredStopTypeVisibility();
   private coverageShape: CoverageShape = getConfiguredCoverageShape();
   private allowReasonableStreetCrossings = getAllowReasonableStreetCrossings();
+  private railwayInfrastructureVisible = getRailwayInfrastructureVisible();
   private walkshedDisabledStopIds = getWalkshedDisabledStopIds();
   private walkshedCacheResetMarker = getWalkshedCacheResetMarker();
   private stopLoadGeneration = 0;
@@ -124,6 +130,7 @@ class TransitMapController {
 
   constructor(map: MapLibreMap) {
     this.map = map;
+    addRailwayInfrastructureOverlay(map, this.railwayInfrastructureVisible);
     this.walkshedOverlay = new WalkshedOverlayManager({
       map,
       getRadiusMetersForType: (stopType) => this.radiusMetersByType[stopType],
@@ -475,6 +482,12 @@ class TransitMapController {
     this.walkshedOverlay.onSettingsChanged();
   }
 
+  private setRailwayInfrastructureVisible(visible: boolean): void {
+    if (visible === this.railwayInfrastructureVisible) return;
+    this.railwayInfrastructureVisible = visible;
+    setRailwayInfrastructureOverlayVisible(this.map, visible);
+  }
+
   private setWalkshedDisabledStopIds(next: Set<string>): void {
     const changed =
       next.size !== this.walkshedDisabledStopIds.size ||
@@ -496,6 +509,7 @@ class TransitMapController {
     this.setWalkshedDisabledStopIds(getWalkshedDisabledStopIds());
     this.setCoverageShape(getConfiguredCoverageShape());
     this.setAllowReasonableStreetCrossings(getAllowReasonableStreetCrossings());
+    this.setRailwayInfrastructureVisible(getRailwayInfrastructureVisible());
     this.setRadii(getConfiguredStopRadii());
   }
 
