@@ -32,8 +32,8 @@ import {
   getStopWalkshedToggleLabel,
 } from '../lib/map-popups';
 import {
-  COVERAGE_SHAPE_DISPLAY_LABELS,
   SETTINGS_STORAGE_KEYS,
+  SETTINGS_CHANGED_EVENT,
   type CoverageShape,
   type StopRadiusByType,
   type StopTypeVisibilityByType,
@@ -44,7 +44,7 @@ import {
   getConfiguredStopTypeVisibility,
   setConfiguredStopTypeVisibility,
 } from '../lib/settings';
-import { formatStopRadiusSummary, STOP_TYPE_CONFIG } from '../lib/stop-type-config';
+import { STOP_TYPE_CONFIG } from '../lib/stop-type-config';
 import { loadAllStops } from '../lib/stops-repository';
 import {
   WALKSHED_DISABLED_STOPS_STORAGE_KEY,
@@ -99,8 +99,10 @@ interface StopProperties {
 
 class TransitMapController {
   private readonly map: MapLibreMap;
-  private readonly coverageInfoEl = document.querySelector<HTMLElement>('[data-coverage-info]');
   private readonly radiusInfoEl = document.querySelector<HTMLElement>('[data-radius-info]');
+  private readonly visibleStopCountEl = document.querySelector<HTMLElement>(
+    '[data-visible-stop-count]',
+  );
   private readonly walkshedLoadProgressEl = document.querySelector<HTMLElement>(
     '[data-walkshed-load-progress]',
   );
@@ -237,10 +239,13 @@ class TransitMapController {
 
   private updateLegend(): void {
     if (this.radiusInfoEl) {
-      this.radiusInfoEl.textContent = `Radien: ${formatStopRadiusSummary(this.radiusMetersByType)}`;
-    }
-    if (this.coverageInfoEl) {
-      this.coverageInfoEl.textContent = `Darstellung: ${COVERAGE_SHAPE_DISPLAY_LABELS[this.coverageShape]}`;
+      const radii = STOP_TYPES.map((stopType) => this.radiusMetersByType[stopType]);
+      const minimumRadius = Math.min(...radii);
+      const maximumRadius = Math.max(...radii);
+      this.radiusInfoEl.textContent =
+        minimumRadius === maximumRadius
+          ? `${minimumRadius} m`
+          : `${minimumRadius}–${maximumRadius} m`;
     }
   }
 
@@ -496,6 +501,7 @@ class TransitMapController {
 
   private bindSettingsSync(): void {
     const sync = () => this.syncSettingsFromStorage();
+    window.addEventListener(SETTINGS_CHANGED_EVENT, sync);
     window.addEventListener('focus', sync);
     window.addEventListener('pageshow', sync);
     window.addEventListener('storage', (event) => {
@@ -509,6 +515,10 @@ class TransitMapController {
       this.stopTypeToggleButtons
         .get(type)
         ?.setAttribute('aria-pressed', String(this.visibleStopTypes[type]));
+    }
+    if (this.visibleStopCountEl) {
+      const visibleCount = STOP_TYPES.filter((type) => this.visibleStopTypes[type]).length;
+      this.visibleStopCountEl.textContent = `${visibleCount} von ${STOP_TYPES.length}`;
     }
   }
 

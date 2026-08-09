@@ -5,9 +5,8 @@ import {
   MAX_STOP_RADIUS_METERS,
   MIN_STOP_RADIUS_METERS,
   STOP_RADIUS_INPUT_IDS,
-  type CoverageShape,
   type StopRadiusByType,
-  COVERAGE_SHAPE_COMPACT_LABELS,
+  SETTINGS_CHANGED_EVENT,
   matchesShippedWalkshedConfiguration,
   getConfiguredCoverageShape,
   getConfiguredStopRadii,
@@ -16,11 +15,7 @@ import {
   setConfiguredCoverageShape,
   setConfiguredStopRadius,
 } from '../lib/settings';
-import {
-  formatStopRadiusSummary,
-  STOP_TYPE_CONFIG,
-  STOP_TYPES_CONFIG_ORDER,
-} from '../lib/stop-type-config';
+import { STOP_TYPE_CONFIG, STOP_TYPES_CONFIG_ORDER } from '../lib/stop-type-config';
 import { mapStopTypes, stopTypeRecordChanged, type StopType } from '../lib/types';
 import { clearCustomStops } from '../lib/custom-stops-client';
 import { clearWalkshedDisabledStops } from '../lib/walkshed-disabled-stops';
@@ -30,16 +25,12 @@ import {
   removeCachedWalkshedPolygonsForStops,
 } from '../lib/walkshed-cache';
 
-const AUTOSAVE_DEBOUNCE_MS = 800;
+const AUTOSAVE_DEBOUNCE_MS = 180;
 
 function requireElement<T extends HTMLElement>(id: string, type: new (...args: never[]) => T): T {
   const el = document.getElementById(id);
   if (!(el instanceof type)) throw new Error(`Missing element #${id}`);
   return el;
-}
-
-function statusText(prefix: string, radii: StopRadiusByType, shape: CoverageShape): string {
-  return `${prefix}: ${formatStopRadiusSummary(radii, STOP_TYPES_CONFIG_ORDER)}, ${COVERAGE_SHAPE_COMPACT_LABELS[shape]}`;
 }
 
 function invalidRadiusHint(invalidTypes: StopType[]): string {
@@ -48,14 +39,15 @@ function invalidRadiusHint(invalidTypes: StopType[]): string {
   return ` Ungültig und unverändert: ${labels}.`;
 }
 
-/** The input step controls the spinner increment but does not restrict manually
- * entered radii, which can still be calculated live when no shipped dataset exists. */
+/** Only complete values inside the configured 50 m steps are saved while typing.
+ * Blur normalization snaps a manually entered value to its nearest valid step. */
 function hasSavableRadius(input: HTMLInputElement): boolean {
   return (
     !input.validity.valueMissing &&
     !input.validity.badInput &&
     !input.validity.rangeUnderflow &&
-    !input.validity.rangeOverflow
+    !input.validity.rangeOverflow &&
+    !input.validity.stepMismatch
   );
 }
 
@@ -96,7 +88,7 @@ export function initConfigPage(): void {
   shapeSelect.value = currentShape;
   crossingsInput.checked = currentAllowCrossings;
   cacheStatus.textContent = 'Polygon-Cache Einträge: ...';
-  saveStatus.textContent = statusText('Automatisch aktiv', currentRadiusByType, currentShape);
+  saveStatus.textContent = 'Änderungen werden automatisch gespeichert.';
 
   const clearTimer = () => {
     if (autosaveTimer !== null) {
@@ -140,10 +132,14 @@ export function initConfigPage(): void {
     }
     shapeSelect.value = shape;
 
-    const changed =
-      stopTypeRecordChanged(nextRadiusByType, currentRadiusByType, STOP_TYPES_CONFIG_ORDER) ||
-      shape !== currentShape ||
-      allowCrossings !== currentAllowCrossings;
+    const radiiChanged = stopTypeRecordChanged(
+      nextRadiusByType,
+      currentRadiusByType,
+      STOP_TYPES_CONFIG_ORDER,
+    );
+    const shapeChanged = shape !== currentShape;
+    const crossingsChanged = allowCrossings !== currentAllowCrossings;
+    const changed = radiiChanged || shapeChanged || crossingsChanged;
 
     currentRadiusByType = nextRadiusByType;
     currentShape = shape;
@@ -158,14 +154,16 @@ export function initConfigPage(): void {
     }
 
     if (changed) {
+      saveStatus.textContent = 'Wird aktualisiert …';
+      // New radii have distinct cache keys, so the map can show those changes
+      // immediately. Crossing changes must wait because they reuse radius keys.
+      if (!crossingsChanged) window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
       await clearWalkshedCache();
       await updateCacheStatus();
-      saveStatus.textContent =
-        statusText(`${prefix} (Cache zurückgesetzt)`, nextRadiusByType, shape) +
-        invalidRadiusHint(invalidTypes);
+      window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
+      saveStatus.textContent = `${prefix}.` + invalidRadiusHint(invalidTypes);
     } else {
-      saveStatus.textContent =
-        statusText(prefix, nextRadiusByType, shape) + invalidRadiusHint(invalidTypes);
+      saveStatus.textContent = `${prefix}.` + invalidRadiusHint(invalidTypes);
     }
   };
 

@@ -1,225 +1,570 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import StopLegendItems from '../components/StopLegendItems.astro';
+import StopRadiusInputs from '../components/StopRadiusInputs.astro';
 import PopupStyles from '../components/PopupStyles.astro';
 ---
 
 <Layout title="KA Laufweite">
   <div id="map-shell">
-    <div id="map"></div>
-    <details id="legend" open>
+    <div id="map" aria-label="Karte der Karlsruher Haltestellen"></div>
+
+    <div class="brand-card" aria-label="KA Laufweite">
+      <span class="brand-mark" aria-hidden="true">KA</span>
+      <span>
+        <strong>Laufweite</strong>
+        <small>Haltestellen in Karlsruhe</small>
+      </span>
+    </div>
+
+    <details id="map-controls" class="map-card" open>
       <summary>
-        <span>Kartenlegende</span>
-        <span class="summary-action" aria-hidden="true">Ein-/ausklappen</span>
+        <span class="summary-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" focusable="false">
+            <path d="M4 5h12M4 10h12M4 15h12M7 3v4M13 8v4M9 13v4"></path>
+          </svg>
+        </span>
+        <span class="summary-title">Karteneinstellungen</span>
+        <span class="summary-values">
+          <span class="summary-value" data-radius-info></span>
+          <span class="summary-value" data-visible-stop-count></span>
+        </span>
       </summary>
-      <div class="legend-content">
-        <div class="legend-section">
-          <p class="section-label">Haltestellen anzeigen</p>
-          <div class="stop-type-list">
-            <StopLegendItems />
+
+      <div class="controls-content" id="settings-panel">
+        <div class="settings-content">
+          <div class="setting-section coverage-section">
+            <div class="section-heading">
+              <span>Reichweite</span>
+              <span>Berechnung</span>
+            </div>
+            <div class="shape-switch" aria-label="Darstellung der Reichweite">
+              <label>
+                <input type="radio" name="coverage-shape-choice" value="walkshed" />
+                <span>Zu Fuß</span>
+              </label>
+              <label>
+                <input type="radio" name="coverage-shape-choice" value="circle" />
+                <span>Luftlinie</span>
+              </label>
+            </div>
           </div>
-          <p class="filter-hint">Antippen, um einen Typ ein- oder auszublenden.</p>
-        </div>
+          <select id="coverage-shape" name="coverageShape" class="visually-hidden" tabindex="-1">
+            <option value="circle">Kreis (Luftlinie)</option>
+            <option value="walkshed">Polygon entlang Fußwegen (OSM)</option>
+          </select>
 
-        <div class="legend-section settings-summary" aria-label="Aktuelle Darstellung">
-          <p class="coverage" data-coverage-info></p>
-          <p class="radius" data-radius-info></p>
-        </div>
+          <div class="setting-section stop-settings-section">
+            <div class="section-heading" aria-hidden="true">
+              <span>Haltestellen</span>
+              <span>An / Aus · Meter</span>
+            </div>
+            <StopRadiusInputs showVisibilityControls />
+          </div>
 
-        <div
-          class="walkshed-status"
-          data-walkshed-load-progress
-          role="status"
-          aria-live="polite"
-          hidden
-        >
-          <span class="spinner" data-walkshed-spinner aria-hidden="true"></span>
-          <span class="status-icon" data-walkshed-status-icon aria-hidden="true">✓</span>
-          <span data-walkshed-progress-text></span>
-        </div>
+          <p id="save-status" class="status" aria-live="polite"></p>
 
-        <details class="map-help">
-          <summary>Tipps zur Bedienung</summary>
-          <ul>
-            <li>In die Karte klicken: eigene Haltestelle hinzufügen.</li>
-            <li>Eigene Haltestellen ziehen: Position ändern.</li>
-            <li>Haltestelle öffnen: Laufweite ein-/ausblenden.</li>
-          </ul>
-        </details>
+          <div class="secondary-controls">
+            <details class="more-settings">
+              <summary>Weitere Optionen</summary>
+              <label class="checkbox-label" for="reasonable-street-crossings">
+                <input id="reasonable-street-crossings" type="checkbox" />
+                Kurze Straßenquerungen erlauben
+              </label>
+              <div class="actions">
+                <button id="reset-radius" type="button">Standardwerte</button>
+                <button id="reset-walkshed-cache" type="button">Kartendaten neu laden</button>
+                <button id="delete-custom-stops" type="button" class="danger">
+                  Eigene Haltestellen löschen
+                </button>
+              </div>
+              <p id="cache-status" class="cache-status"></p>
+            </details>
+            <details class="map-help">
+              <summary>Karte bedienen</summary>
+              <ul>
+                <li>In die Karte klicken: eigene Haltestelle hinzufügen.</li>
+                <li>Eigene Haltestelle ziehen: Position ändern.</li>
+                <li>Haltestelle öffnen: Laufweite ein-/ausblenden.</li>
+              </ul>
+            </details>
+          </div>
+        </div>
       </div>
     </details>
+
+    <div
+      class="walkshed-status map-card"
+      data-walkshed-load-progress
+      role="status"
+      aria-live="polite"
+      hidden
+    >
+      <span class="spinner" data-walkshed-spinner aria-hidden="true"></span>
+      <span class="status-icon" data-walkshed-status-icon aria-hidden="true">✓</span>
+      <span data-walkshed-progress-text></span>
+    </div>
   </div>
   <PopupStyles />
 </Layout>
 
 <script>
+  import { initConfigPage } from '../scripts/config';
   import { initMap } from '../scripts/map';
+  const mapControls = document.querySelector<HTMLDetailsElement>('#map-controls');
+
+  const shapeSelect = document.querySelector<HTMLSelectElement>('#coverage-shape');
+  const shapeChoices = document.querySelectorAll<HTMLInputElement>(
+    'input[name="coverage-shape-choice"]',
+  );
+
+  document.addEventListener('pointerdown', (event) => {
+    if (mapControls?.open && event.target instanceof Node && !mapControls.contains(event.target)) {
+      mapControls.open = false;
+    }
+  });
+
+  mapControls?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !mapControls.open) return;
+    mapControls.open = false;
+    mapControls.querySelector<HTMLElement>(':scope > summary')?.focus();
+  });
+
+  initConfigPage();
+
+  if (shapeSelect) {
+    for (const choice of shapeChoices) {
+      choice.checked = choice.value === shapeSelect.value;
+      choice.addEventListener('change', () => {
+        if (!choice.checked) return;
+        shapeSelect.value = choice.value;
+        shapeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    }
+    shapeSelect.addEventListener('change', () => {
+      for (const choice of shapeChoices) choice.checked = choice.value === shapeSelect.value;
+    });
+  }
+
   initMap();
 </script>
 
 <style>
-  #map-shell {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-  }
-
+  #map-shell,
   #map {
     width: 100%;
     height: 100%;
   }
 
-  #legend {
-    position: absolute;
-    bottom: 24px;
-    left: 12px;
-    z-index: 1000;
-    background: white;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    font-size: 14px;
-    max-width: min(320px, calc(100% - 24px));
-    max-height: min(460px, 70%);
-    overflow: auto;
+  #map-shell {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
   }
 
-  #legend > summary {
+  .map-card,
+  .brand-card {
+    position: absolute;
+    z-index: 1000;
+    border: 1px solid rgba(69, 96, 89, 0.2);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+      0 16px 40px rgba(15, 35, 31, 0.14),
+      0 2px 8px rgba(15, 35, 31, 0.08);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand-card {
+    top: 14px;
+    left: 14px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 12px 14px;
+    gap: 10px;
+    padding: 8px 11px 8px 8px;
+  }
+
+  .brand-card > span:last-child {
+    display: grid;
+  }
+
+  .brand-card strong {
+    color: #17352f;
     font-size: 15px;
-    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .brand-card small {
+    color: #60706d;
+    font-size: 10px;
+  }
+
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #1d7569;
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  #map-controls {
+    bottom: 14px;
+    left: 14px;
+    width: min(400px, calc(100% - 28px));
+    overflow: hidden;
+  }
+
+  .map-card > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 54px;
+    padding: 11px 14px;
+    color: #17352f;
+    font-size: 13px;
+    font-weight: 750;
     cursor: pointer;
     list-style: none;
   }
 
-  #legend > summary::-webkit-details-marker {
+  .map-card > summary::-webkit-details-marker {
     display: none;
   }
 
-  #legend > summary::before {
-    content: '›';
-    order: 3;
-    color: #52606d;
-    font-size: 20px;
-    line-height: 1;
-    transform: rotate(0deg);
+  .map-card > summary::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid #667a76;
+    border-bottom: 1.5px solid #667a76;
+    transform: rotate(45deg) translateY(-2px);
     transition: transform 150ms ease;
   }
 
-  #legend[open] > summary::before {
-    transform: rotate(90deg);
+  .map-card[open] > summary::after {
+    transform: rotate(225deg) translate(-2px, -1px);
   }
 
-  #legend > summary:focus-visible {
-    outline: 2px solid #457b9d;
-    outline-offset: -3px;
-    border-radius: 10px;
+  .map-card > summary:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #1d7569;
+    outline-offset: 2px;
   }
 
-  .summary-action {
+  .summary-icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 9px;
+    background: linear-gradient(145deg, #e5f4f0, #d7ebe6);
+    color: #1d7569;
+  }
+
+  .summary-icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+  }
+
+  .summary-title {
+    white-space: nowrap;
+  }
+
+  .summary-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .summary-values {
+    display: flex;
+    min-width: 0;
     margin-left: auto;
-    color: #697684;
+    border: 1px solid #e1e9e7;
+    border-radius: 999px;
+    background: #f5f8f7;
+    padding: 4px 7px;
+    color: #657570;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .summary-values .summary-value + .summary-value::before {
+    content: ' · ';
+    white-space: pre;
+  }
+
+  .controls-content {
+    max-height: calc(100dvh - 152px);
+    overflow-y: auto;
+    border-top: 1px solid #e4ebe9;
+  }
+
+  .settings-content {
+    padding: 14px;
+    display: grid;
+    gap: 14px;
+  }
+
+  .setting-section {
+    display: grid;
+    gap: 7px;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px;
+    color: #28453f;
     font-size: 11px;
-    font-weight: 500;
-  }
-
-  .legend-content {
-    padding: 0 14px 14px;
-  }
-
-  .legend-section {
-    border-top: 1px solid #e5e9ee;
-    padding-top: 10px;
-  }
-
-  .section-label {
-    margin-bottom: 6px;
-    color: #52606d;
-    font-size: 11px;
-    font-weight: 700;
+    font-weight: 750;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
-  .stop-type-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px;
+  .section-heading span:last-child {
+    color: #84918e;
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 0.055em;
   }
 
-  #legend :global(.legend-toggle) {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 34px;
-    border: 1px solid #dce2e8;
-    border-radius: 8px;
-    background: #fff;
-    padding: 5px 7px;
-    text-align: left;
-    font: inherit;
-    color: inherit;
+  .shape-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    border: 1px solid #e0e8e6;
+    border-radius: 11px;
+    background: #eef3f2;
+    padding: 4px;
+  }
+
+  .shape-switch label {
     cursor: pointer;
   }
 
-  #legend :global(.legend-toggle:hover) {
-    background: #f2f6fb;
+  .shape-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
   }
 
-  #legend :global(.legend-toggle[aria-pressed='false']) {
-    background: #f4f6f8;
-    color: #697684;
-    text-decoration: line-through;
+  .shape-switch span {
+    display: block;
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #63736f;
+    font-size: 13px;
+    font-weight: 650;
+    text-align: center;
   }
 
-  #legend :global(.legend-toggle:focus-visible) {
-    outline: 2px solid #457b9d;
+  .shape-switch input:checked + span {
+    background: white;
+    box-shadow:
+      0 1px 4px rgba(15, 35, 31, 0.1),
+      inset 0 0 0 1px rgba(29, 117, 105, 0.08);
+    color: #175e56;
+  }
+
+  .shape-switch input:focus-visible + span {
+    outline: 2px solid #1d7569;
     outline-offset: 1px;
   }
 
-  #legend :global(.dot) {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    flex: 0 0 auto;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
+  .settings-content :global(.radius-grid) {
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid #e1e9e7;
+    border-radius: 12px;
+    background: #f8faf9;
+  }
+
+  .settings-content :global(.radius-row) {
+    border: 0;
+    border-bottom: 1px solid #e8eeec;
+    border-radius: 0;
+    background: transparent;
+    padding: 7px 10px;
+    transition: background-color 120ms ease;
+  }
+
+  .settings-content :global(.radius-row:hover) {
+    background: #f2f7f5;
+  }
+
+  .settings-content :global(.radius-row:last-child) {
+    border-bottom: 0;
+  }
+
+  .settings-content :global(.radius-row--with-visibility .radius-row__control) {
+    gap: 4px;
+    border: 1px solid #d8e2df;
+    border-radius: 8px;
+    background: white;
+    padding: 1px 7px;
+    box-shadow: 0 1px 2px rgba(15, 35, 31, 0.04);
+  }
+
+  .settings-content :global(.radius-row--with-visibility .radius-row__control:focus-within) {
+    border-color: #6eaaa1;
+    outline: 2px solid rgba(29, 117, 105, 0.16);
+  }
+
+  .settings-content :global(.radius-row--with-visibility input) {
+    width: 54px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 5px 1px;
+    outline: 0;
+    box-shadow: none;
+  }
+
+  .status,
+  .cache-status {
+    color: #64736f;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .status:empty,
+  .cache-status:empty {
+    display: none;
+  }
+
+  .more-settings {
+    border-bottom: 1px solid #e7edeb;
+  }
+
+  .secondary-controls {
+    overflow: hidden;
+    border-top: 1px solid #e7edeb;
+  }
+
+  .more-settings > summary,
+  .map-help > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 9px 2px;
+    color: #4c625d;
+    font-size: 11px;
+    font-weight: 650;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .more-settings > summary::-webkit-details-marker,
+  .map-help > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .more-settings > summary::after,
+  .map-help > summary::after {
+    content: '+';
+    color: #83918d;
+    font-size: 15px;
+    font-weight: 400;
+  }
+
+  .more-settings[open] > summary::after,
+  .map-help[open] > summary::after {
+    content: '−';
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 3px 2px 10px;
+    color: #354b46;
+    font-size: 12px;
+  }
+
+  .checkbox-label input {
+    width: 16px;
+    height: 16px;
+    accent-color: #1d7569;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .actions button {
+    border: 1px solid #d5dfdc;
+    border-radius: 8px;
+    background: #f6f8f7;
+    padding: 7px 8px;
+    color: #344945;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease;
+  }
+
+  .actions button:hover {
+    border-color: #bacac6;
+    background: #edf3f1;
+  }
+
+  .actions .danger {
+    grid-column: 1 / -1;
+    color: #9a3434;
+  }
+
+  .actions .danger:hover {
+    border-color: #e6bcbc;
+    background: #fff0f0;
   }
 
   .filter-hint {
-    margin: 6px 2px 10px;
-    color: #697684;
+    color: #71807c;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .map-help {
+    margin: 0;
+  }
+
+  .map-help ul {
+    display: grid;
+    gap: 3px;
+    margin: 1px 2px 10px 20px;
+    color: #667672;
     font-size: 11px;
   }
 
-  .settings-summary {
-    display: grid;
-    gap: 3px;
-    padding-bottom: 10px;
-  }
-
-  .radius,
-  .coverage {
-    font-size: 12px;
-    color: #1f2933;
-  }
-
   .walkshed-status {
+    right: 14px;
+    bottom: 44px;
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: #edf6fb;
-    padding: 9px 10px;
-    color: #28566f;
-    font-size: 12px;
+    max-width: min(370px, calc(100% - 28px));
+    padding: 9px 11px;
+    color: #285f56;
+    font-size: 11px;
     line-height: 1.35;
   }
 
@@ -228,12 +573,11 @@ import PopupStyles from '../components/PopupStyles.astro';
   }
 
   .spinner {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex: 0 0 auto;
-    margin-top: 1px;
-    border: 2px solid #b6d5e5;
-    border-top-color: #28779d;
+    border: 2px solid #b9d8d1;
+    border-top-color: #1d7569;
     border-radius: 50%;
     animation: spin 800ms linear infinite;
   }
@@ -244,11 +588,6 @@ import PopupStyles from '../components/PopupStyles.astro';
     font-weight: 800;
   }
 
-  .walkshed-status[data-complete='true'] {
-    background: #edf8f2;
-    color: #285f49;
-  }
-
   .walkshed-status[data-complete='true'] .spinner {
     display: none;
   }
@@ -257,23 +596,14 @@ import PopupStyles from '../components/PopupStyles.astro';
     display: inline;
   }
 
-  .map-help {
-    border-top: 1px solid #e5e9ee;
-    padding-top: 9px;
-    color: #52606d;
-    font-size: 12px;
-  }
-
-  .map-help > summary {
-    width: fit-content;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .map-help ul {
-    display: grid;
-    gap: 4px;
-    margin: 7px 0 0 18px;
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
   }
 
   @keyframes spin {
@@ -282,32 +612,43 @@ import PopupStyles from '../components/PopupStyles.astro';
     }
   }
 
+  @media (max-width: 640px) {
+    .brand-card {
+      top: 8px;
+      left: 8px;
+    }
+
+    .brand-card small {
+      display: none;
+    }
+
+    #map-controls {
+      bottom: 8px;
+      left: 8px;
+      width: min(390px, calc(100% - 16px));
+    }
+
+    #map-controls:not([open]) {
+      width: min(330px, calc(100% - 64px));
+    }
+
+    .controls-content {
+      max-height: calc(100dvh - 126px);
+    }
+
+    #map-controls[open] .summary-values {
+      display: none;
+    }
+
+    .walkshed-status {
+      right: 8px;
+      bottom: 62px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .spinner {
       animation-duration: 1600ms;
-    }
-  }
-
-  @media (max-width: 720px) {
-    #legend {
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
-      border-radius: 10px;
-      font-size: 13px;
-      max-width: none;
-      max-height: 60%;
-    }
-  }
-
-  @media (max-height: 500px) and (orientation: landscape) {
-    #legend {
-      top: 8px;
-      left: 8px;
-      right: auto;
-      bottom: auto;
-      width: min(300px, calc(100% - 16px));
-      max-height: calc(100% - 16px);
     }
   }
 </style>

@@ -12,7 +12,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 - **Circle mode** — simple air-line radius as a faster alternative
 - **Custom stops** — click anywhere on the map to add your own stops and choose their type
 - **Per-stop walkshed toggle** — hide or show the walkshed polygon for an individual stop from its popup, persisted across reloads
-- **Configurable walking distance per type** — set separate values for tram, train, and bus (50 m to 5000 m)
+- **Configurable walking distance per type** — set separate values for tram, train, and bus (100 m to 2000 m)
 - **Type filters in the legend** — show/hide train, tram, and bus markers with persisted state across reloads
 - **Smart cache invalidation** — moving/removing custom stops only invalidates affected walkshed cache entries
 - **Fully static** — no backend required, deploys to GitHub Pages

@@ -53,7 +53,7 @@ export const SUBSTANTIAL_COMPONENT_FRACTION = 0.1;
  * A batch is padded by the smallest bucket that is >= its largest stop radius,
  * so a graph fetched for a larger bucket fully contains — and can serve — any
  * request with a smaller radius in the same area. The final bucket must cover
- * MAX_STOP_RADIUS_METERS (5000) so every allowed radius maps to a bucket.
+ * MAX_STOP_RADIUS_METERS (2000) so every allowed radius maps to a bucket.
  */
 export const WALKSHED_RADIUS_BUCKETS_METERS = [300, 600, 1200, 2400, 5000] as const;
 

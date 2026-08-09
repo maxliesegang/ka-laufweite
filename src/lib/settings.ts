@@ -24,14 +24,15 @@ export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number
   bus: [200, 250, 300, 350, 400, 450],
 };
 
-export const MIN_STOP_RADIUS_METERS = 50;
-export const MAX_STOP_RADIUS_METERS = 5000;
+export const MIN_STOP_RADIUS_METERS = 100;
+export const MAX_STOP_RADIUS_METERS = 2000;
 export const STOP_RADIUS_STEP_METERS = 50;
 export const COVERAGE_SHAPE_STORAGE_KEY = 'karlsruhe-opnv-coverage-shape';
 export const STOP_TYPE_VISIBILITY_STORAGE_KEY = 'karlsruhe-opnv-stop-type-visibility-v1';
 export const REASONABLE_STREET_CROSSINGS_STORAGE_KEY =
   'karlsruhe-opnv-reasonable-street-crossings-v1';
 export const DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS = true;
+export const SETTINGS_CHANGED_EVENT = 'karlsruhe-opnv-settings-changed';
 
 export type CoverageShape = 'circle' | 'walkshed';
 export type StopRadiusByType = Record<StopType, number>;
@@ -51,7 +52,8 @@ export function clampStopRadius(value: unknown, fallback = DEFAULT_STOP_RADIUS_M
 
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(MAX_STOP_RADIUS_METERS, Math.max(MIN_STOP_RADIUS_METERS, Math.round(parsed)));
+  const stepped = Math.round(parsed / STOP_RADIUS_STEP_METERS) * STOP_RADIUS_STEP_METERS;
+  return Math.min(MAX_STOP_RADIUS_METERS, Math.max(MIN_STOP_RADIUS_METERS, stepped));
 }
 
 function readStoredRadius(stopType: StopType): unknown {

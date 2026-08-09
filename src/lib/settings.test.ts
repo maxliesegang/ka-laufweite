@@ -4,10 +4,22 @@ import {
   DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS,
   DEFAULT_COVERAGE_SHAPE,
   DEFAULT_STOP_RADIUS_METERS_BY_TYPE,
+  MAX_STOP_RADIUS_METERS,
+  MIN_STOP_RADIUS_METERS,
   SHIPPED_STOP_RADII_METERS_BY_TYPE,
+  clampStopRadius,
   matchesShippedWalkshedConfiguration,
 } from './settings';
 import { STOP_TYPES } from './types';
+
+describe('stop radius normalization', () => {
+  it('clamps to 100–2000 m and rounds to 50 m increments', () => {
+    expect(clampStopRadius(1)).toBe(MIN_STOP_RADIUS_METERS);
+    expect(clampStopRadius(124)).toBe(100);
+    expect(clampStopRadius(126)).toBe(150);
+    expect(clampStopRadius(2000)).toBe(MAX_STOP_RADIUS_METERS);
+  });
+});
 
 describe('shipped walkshed configuration', () => {
   it('recognizes the default and additional shipped radii', () => {
