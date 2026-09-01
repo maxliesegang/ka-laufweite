@@ -20,18 +20,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.0",
+    "astro": "^7.2.9",
     "concaveman": "^2.0.0",
-    "maplibre-gl": "^6.2.0"
+    "maplibre-gl": "^6.6.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/concaveman": "^1.1.6",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.4.0",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "tsx": "^4.23.11",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
