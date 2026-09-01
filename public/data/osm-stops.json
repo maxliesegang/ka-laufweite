@@ -1652,6 +1652,20 @@
     "type": "bus"
   },
   {
+    "id": "osm-14068682291",
+    "name": "Althengstetter Straße",
+    "lat": 48.696972,
+    "lon": 8.8269232,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14068682292",
+    "name": "Althengstetter Straße",
+    "lat": 48.6970703,
+    "lon": 8.8269286,
+    "type": "bus"
+  },
+  {
     "id": "osm-30408053",
     "name": "Altingen (Württ)",
     "lat": 48.5621011,
@@ -1838,6 +1852,27 @@
     "name": "Alzenberg Friedhof",
     "lat": 48.7205529,
     "lon": 8.7163419,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14075390272",
+    "name": "Alzenberg Höhenring",
+    "lat": 48.7248547,
+    "lon": 8.7197623,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14075390276",
+    "name": "Alzenberg Höhenring",
+    "lat": 48.7247459,
+    "lon": 8.7199648,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14075390275",
+    "name": "Alzenberg Postackerweg",
+    "lat": 48.7232383,
+    "lon": 8.7231459,
     "type": "bus"
   },
   {
@@ -5315,8 +5350,8 @@
   {
     "id": "osm-1118773858",
     "name": "Bahnhof",
-    "lat": 48.7266709,
-    "lon": 8.7985897,
+    "lat": 48.726854,
+    "lon": 8.7973747,
     "type": "bus"
   },
   {
@@ -5401,6 +5436,13 @@
     "name": "Bahnhof",
     "lat": 48.9562819,
     "lon": 8.9199107,
+    "type": "bus"
+  },
+  {
+    "id": "osm-13577530383",
+    "name": "Bahnhof",
+    "lat": 48.7341716,
+    "lon": 8.7361762,
     "type": "bus"
   },
   {
@@ -5896,8 +5938,8 @@
   {
     "id": "osm-2094724046",
     "name": "Baumgartenstraße",
-    "lat": 48.8689791,
-    "lon": 8.5092315,
+    "lat": 48.8683465,
+    "lon": 8.5086596,
     "type": "bus"
   },
   {
@@ -7350,17 +7392,17 @@
     "type": "bus"
   },
   {
-    "id": "osm-1805023102",
-    "name": "Birkweiler, Ortsmitte",
-    "lat": 49.2049328,
-    "lon": 8.0376815,
-    "type": "bus"
-  },
-  {
     "id": "osm-13970752395",
     "name": "Birkweiler, Trifelsstraße",
     "lat": 49.2054326,
     "lon": 8.0376135,
+    "type": "bus"
+  },
+  {
+    "id": "osm-1805023102",
+    "name": "Birkweiler, Weinstraße",
+    "lat": 49.2049328,
+    "lon": 8.0376815,
     "type": "bus"
   },
   {
@@ -8050,6 +8092,20 @@
     "type": "bus"
   },
   {
+    "id": "osm-12455538295",
+    "name": "Bolleystraße",
+    "lat": 48.8470935,
+    "lon": 8.5780947,
+    "type": "bus"
+  },
+  {
+    "id": "osm-12455538296",
+    "name": "Bolleystraße",
+    "lat": 48.8472655,
+    "lon": 8.5780222,
+    "type": "bus"
+  },
+  {
     "id": "osm-357501348",
     "name": "Bonhoefferstraße",
     "lat": 48.8924497,
@@ -8661,8 +8717,8 @@
   {
     "id": "osm-3189815646",
     "name": "Bretten Stadtmitte",
-    "lat": 49.0338728,
-    "lon": 8.7029594,
+    "lat": 49.0338829,
+    "lon": 8.7029849,
     "type": "train"
   },
   {
@@ -11545,43 +11601,43 @@
   {
     "id": "osm-12314004033",
     "name": "Calw EnCW",
-    "lat": 48.7065045,
-    "lon": 8.7527833,
+    "lat": 48.7069766,
+    "lon": 8.7519222,
     "type": "bus"
   },
   {
     "id": "osm-12314047492",
     "name": "Calw EnCW",
-    "lat": 48.7064597,
-    "lon": 8.7527072,
+    "lat": 48.7068349,
+    "lon": 8.7518873,
+    "type": "bus"
+  },
+  {
+    "id": "osm-105987919",
+    "name": "Calw Kimmichwiesen",
+    "lat": 48.7062191,
+    "lon": 8.7622084,
     "type": "bus"
   },
   {
     "id": "osm-494456754",
     "name": "Calw Kimmichwiesen",
-    "lat": 48.7065038,
-    "lon": 8.7623283,
+    "lat": 48.7063675,
+    "lon": 8.7621754,
     "type": "bus"
   },
   {
     "id": "osm-494456787",
     "name": "Calw Kimmichwiesen",
-    "lat": 48.7069033,
-    "lon": 8.7628321,
+    "lat": 48.707013,
+    "lon": 8.7628992,
     "type": "bus"
   },
   {
-    "id": "osm-9098618729",
+    "id": "osm-5538285850",
     "name": "Calw Kimmichwiesen",
-    "lat": 48.7067252,
-    "lon": 8.7626037,
-    "type": "bus"
-  },
-  {
-    "id": "osm-7003356763",
-    "name": "Calw Kreiskrankenhaus",
-    "lat": 48.713994,
-    "lon": 8.7478198,
+    "lat": 48.7070863,
+    "lon": 8.7627861,
     "type": "bus"
   },
   {
@@ -14618,8 +14674,8 @@
   {
     "id": "osm-379046415",
     "name": "Dürrmenz Enzbrücke/Lamm",
-    "lat": 48.9409512,
-    "lon": 8.8440554,
+    "lat": 48.9406366,
+    "lon": 8.8439489,
     "type": "bus"
   },
   {
@@ -15159,6 +15215,27 @@
     "name": "Edesheim, Sparkasse",
     "lat": 49.2642165,
     "lon": 8.1339839,
+    "type": "bus"
+  },
+  {
+    "id": "osm-3345332629",
+    "name": "Eduard-Konz-Straße",
+    "lat": 48.7141065,
+    "lon": 8.7477493,
+    "type": "bus"
+  },
+  {
+    "id": "osm-3345348693",
+    "name": "Eduard-Konz-Straße",
+    "lat": 48.7139178,
+    "lon": 8.7478752,
+    "type": "bus"
+  },
+  {
+    "id": "osm-7003356763",
+    "name": "Eduard-Konz-Straße",
+    "lat": 48.713994,
+    "lon": 8.7478198,
     "type": "bus"
   },
   {
@@ -16923,6 +17000,20 @@
     "name": "Eschbach - Parc Économique de la Sauer",
     "lat": 48.8787285,
     "lon": 7.756456,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14092697676",
+    "name": "Eschbach, Am hohen Kreuz",
+    "lat": 49.1759677,
+    "lon": 8.0216552,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14092697677",
+    "name": "Eschbach, Am hohen Kreuz",
+    "lat": 49.1760596,
+    "lon": 8.0216486,
     "type": "bus"
   },
   {
@@ -20517,32 +20608,11 @@
     "type": "bus"
   },
   {
-    "id": "osm-13994503346",
-    "name": "Gare de Beinheim - Roppenheim",
-    "lat": 48.8511823,
-    "lon": 8.0623529,
-    "type": "train"
-  },
-  {
     "id": "osm-11764111886",
     "name": "Gare de Bischwiller",
     "lat": 48.7657851,
     "lon": 7.8517037,
     "type": "bus"
-  },
-  {
-    "id": "osm-13997008103",
-    "name": "Gare de Drusenheim",
-    "lat": 48.765943,
-    "lon": 7.9475482,
-    "type": "train"
-  },
-  {
-    "id": "osm-13997635082",
-    "name": "Gare de Gambsheim",
-    "lat": 48.6951012,
-    "lon": 7.8791486,
-    "type": "train"
   },
   {
     "id": "osm-11517761693",
@@ -20573,55 +20643,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-14021645698",
-    "name": "Gare de Hoelschloch - Surbourg",
-    "lat": 48.9162871,
-    "lon": 7.8314988,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002020793",
-    "name": "Gare de Hoenheim Tram",
-    "lat": 48.6285617,
-    "lon": 7.7576683,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002070654",
-    "name": "Gare de Hoerdt",
-    "lat": 48.703007,
-    "lon": 7.7793395,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002062034",
-    "name": "Gare de Hoffen",
-    "lat": 48.9313198,
-    "lon": 7.9338209,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002489774",
-    "name": "Gare de Kilstett",
-    "lat": 48.679545,
-    "lon": 7.8551317,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002578528",
-    "name": "Gare de Kurtzenhouse",
-    "lat": 48.7417454,
-    "lon": 7.8131067,
-    "type": "train"
-  },
-  {
-    "id": "osm-14002584356",
-    "name": "Gare de La Wantzenau",
-    "lat": 48.6651744,
-    "lon": 7.8245626,
-    "type": "train"
-  },
-  {
     "id": "osm-10594924969",
     "name": "Gare de Marienthal",
     "lat": 48.7814942,
@@ -20634,76 +20655,6 @@
     "lat": 48.7815428,
     "lon": 7.8224044,
     "type": "bus"
-  },
-  {
-    "id": "osm-13999581821",
-    "name": "Gare de Marienthal",
-    "lat": 48.7819657,
-    "lon": 7.823363,
-    "type": "train"
-  },
-  {
-    "id": "osm-14016998482",
-    "name": "Gare de Mothern",
-    "lat": 48.9347681,
-    "lon": 8.1617379,
-    "type": "train"
-  },
-  {
-    "id": "osm-14016979981",
-    "name": "Gare de Munchhausen",
-    "lat": 48.92395,
-    "lon": 8.1410999,
-    "type": "train"
-  },
-  {
-    "id": "osm-14017452827",
-    "name": "Gare de Riedseltz",
-    "lat": 48.9910152,
-    "lon": 7.9630256,
-    "type": "train"
-  },
-  {
-    "id": "osm-14017752035",
-    "name": "Gare de Rountzenheim-Auenheim",
-    "lat": 48.8204284,
-    "lon": 8.0118047,
-    "type": "train"
-  },
-  {
-    "id": "osm-14020045709",
-    "name": "Gare de Seltz",
-    "lat": 48.8966314,
-    "lon": 8.0983149,
-    "type": "train"
-  },
-  {
-    "id": "osm-14020001859",
-    "name": "Gare de Sessenheim",
-    "lat": 48.7963494,
-    "lon": 7.9893681,
-    "type": "train"
-  },
-  {
-    "id": "osm-14021662499",
-    "name": "Gare de Soultz-sous-Forêts",
-    "lat": 48.9345661,
-    "lon": 7.8825501,
-    "type": "train"
-  },
-  {
-    "id": "osm-14021730090",
-    "name": "Gare de Walbourg",
-    "lat": 48.886202,
-    "lon": 7.809377,
-    "type": "train"
-  },
-  {
-    "id": "osm-14021682223",
-    "name": "Gare de Weyersheim",
-    "lat": 48.7178446,
-    "lon": 7.7968904,
-    "type": "train"
   },
   {
     "id": "osm-12313981850",
@@ -20794,20 +20745,6 @@
     "name": "Gärtringen Feuerwehr-Gerätehaus",
     "lat": 48.6425445,
     "lon": 8.8945806,
-    "type": "bus"
-  },
-  {
-    "id": "osm-9554323491",
-    "name": "Gärtringen Lammtal",
-    "lat": 48.6455471,
-    "lon": 8.8957521,
-    "type": "bus"
-  },
-  {
-    "id": "osm-9554352575",
-    "name": "Gärtringen Lammtal",
-    "lat": 48.6456583,
-    "lon": 8.8928752,
     "type": "bus"
   },
   {
@@ -21028,13 +20965,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-13941818111",
-    "name": "Gechingen Im Gailer",
-    "lat": 48.695428,
-    "lon": 8.8248893,
-    "type": "bus"
-  },
-  {
     "id": "osm-6404627436",
     "name": "Gechingen Kirchberg",
     "lat": 48.6963091,
@@ -21074,6 +21004,27 @@
     "name": "Gechingen Rathaus",
     "lat": 48.6951379,
     "lon": 8.829183,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14074484171",
+    "name": "Gechingen Rathaus",
+    "lat": 48.6949511,
+    "lon": 8.8282818,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14074484172",
+    "name": "Gechinger Straße",
+    "lat": 48.7225323,
+    "lon": 8.7960657,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14074484173",
+    "name": "Gechinger Straße",
+    "lat": 48.7224633,
+    "lon": 8.7959504,
     "type": "bus"
   },
   {
@@ -21637,6 +21588,20 @@
     "type": "bus"
   },
   {
+    "id": "osm-14068682251",
+    "name": "Gesundheitscampus",
+    "lat": 48.7043973,
+    "lon": 8.7530109,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14068682252",
+    "name": "Gesundheitscampus",
+    "lat": 48.7043548,
+    "lon": 8.7522331,
+    "type": "bus"
+  },
+  {
     "id": "osm-9397415173",
     "name": "Gesundheitszentrum",
     "lat": 49.0626615,
@@ -21760,6 +21725,20 @@
     "name": "Gewerbepark",
     "lat": 49.0539301,
     "lon": 8.841895,
+    "type": "bus"
+  },
+  {
+    "id": "osm-10766974349",
+    "name": "Gewerbepark",
+    "lat": 48.6787089,
+    "lon": 8.7720771,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11240719769",
+    "name": "Gewerbepark",
+    "lat": 48.6783674,
+    "lon": 8.7728246,
     "type": "bus"
   },
   {
@@ -25475,8 +25454,8 @@
   {
     "id": "osm-287070129",
     "name": "Herrenberg Berliner Straße",
-    "lat": 48.5953751,
-    "lon": 8.856461,
+    "lat": 48.595384,
+    "lon": 8.8566253,
     "type": "bus"
   },
   {
@@ -25552,15 +25531,15 @@
   {
     "id": "osm-3713233472",
     "name": "Herrenberg Hallenbad",
-    "lat": 48.5907136,
-    "lon": 8.8746875,
+    "lat": 48.5910666,
+    "lon": 8.8741859,
     "type": "bus"
   },
   {
     "id": "osm-3837723443",
     "name": "Herrenberg Hallenbad",
-    "lat": 48.5907415,
-    "lon": 8.8747371,
+    "lat": 48.5910745,
+    "lon": 8.8742551,
     "type": "bus"
   },
   {
@@ -25762,8 +25741,8 @@
   {
     "id": "osm-9105899661",
     "name": "Herrenberg Reinhold-Schick-Platz",
-    "lat": 48.5957339,
-    "lon": 8.8658577,
+    "lat": 48.5957307,
+    "lon": 8.8656856,
     "type": "bus"
   },
   {
@@ -25993,15 +25972,15 @@
   {
     "id": "osm-495458411",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 2",
-    "lat": 48.5942662,
-    "lon": 8.8612762,
+    "lat": 48.5942765,
+    "lon": 8.8612893,
     "type": "bus"
   },
   {
     "id": "osm-9667775272",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 2",
-    "lat": 48.5943411,
-    "lon": 8.8612863,
+    "lat": 48.5943235,
+    "lon": 8.861238,
     "type": "bus"
   },
   {
@@ -26014,8 +25993,8 @@
   {
     "id": "osm-9664254476",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 3",
-    "lat": 48.5942515,
-    "lon": 8.8610289,
+    "lat": 48.5942208,
+    "lon": 8.8609549,
     "type": "bus"
   },
   {
@@ -26933,13 +26912,6 @@
     "name": "Hirsau Saint Aurelius",
     "lat": 48.7351267,
     "lon": 8.7351251,
-    "type": "bus"
-  },
-  {
-    "id": "osm-13577530383",
-    "name": "Hirsau Saint Aurelius (SEV)",
-    "lat": 48.7340239,
-    "lon": 8.7361494,
     "type": "bus"
   },
   {
@@ -32641,13 +32613,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-6698951899",
-    "name": "Klinikum Nordschwarzwald",
-    "lat": 48.7457353,
-    "lon": 8.7111604,
-    "type": "bus"
-  },
-  {
     "id": "osm-4568740703",
     "name": "Klinikum Pforzheim",
     "lat": 48.8887542,
@@ -32907,6 +32872,27 @@
     "type": "bus"
   },
   {
+    "id": "osm-11200744361",
+    "name": "Knittlingen ZOB",
+    "lat": 49.0262257,
+    "lon": 8.7586885,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11200744363",
+    "name": "Knittlingen ZOB",
+    "lat": 49.0260788,
+    "lon": 8.7588608,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11200744365",
+    "name": "Knittlingen ZOB",
+    "lat": 49.0259658,
+    "lon": 8.7589953,
+    "type": "bus"
+  },
+  {
     "id": "osm-25479463",
     "name": "Knittlingen-Kleinvillars",
     "lat": 48.9935909,
@@ -32939,6 +32925,13 @@
     "name": "Knittlinger Straße",
     "lat": 48.9780382,
     "lon": 8.8588623,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11200744368",
+    "name": "Knittlingrn ZOB",
+    "lat": 49.0258504,
+    "lon": 8.759129,
     "type": "bus"
   },
   {
@@ -33331,20 +33324,6 @@
     "name": "Kreisberufsschule",
     "lat": 48.9565292,
     "lon": 8.8536188,
-    "type": "bus"
-  },
-  {
-    "id": "osm-3345332629",
-    "name": "Kreiskrankenhaus",
-    "lat": 48.7141065,
-    "lon": 8.7477493,
-    "type": "bus"
-  },
-  {
-    "id": "osm-3345348693",
-    "name": "Kreiskrankenhaus",
-    "lat": 48.7139178,
-    "lon": 8.7478752,
     "type": "bus"
   },
   {
@@ -35560,13 +35539,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-1999704644",
-    "name": "Lauf Neue Schule",
-    "lat": 48.6505512,
-    "lon": 8.130563,
-    "type": "bus"
-  },
-  {
     "id": "osm-1998589148",
     "name": "Lauf Niederhofen",
     "lat": 48.6527666,
@@ -35656,13 +35628,6 @@
     "lat": 48.9675899,
     "lon": 8.1830867,
     "type": "train"
-  },
-  {
-    "id": "osm-1375743161",
-    "name": "Lauterbourg - Gare SNCF",
-    "lat": 48.9679175,
-    "lon": 8.1828205,
-    "type": "bus"
   },
   {
     "id": "osm-3334336551",
@@ -35994,20 +35959,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-1804354082",
-    "name": "Leinsweiler, Ort",
-    "lat": 49.1827999,
-    "lon": 8.0196022,
-    "type": "bus"
-  },
-  {
-    "id": "osm-8659601224",
-    "name": "Leinsweiler, Ort",
-    "lat": 49.1828189,
-    "lon": 8.0193116,
-    "type": "bus"
-  },
-  {
     "id": "osm-1792521345",
     "name": "Leinsweiler, Parkplatz Ahlmühle",
     "lat": 49.1893217,
@@ -36015,10 +35966,31 @@
     "type": "bus"
   },
   {
+    "id": "osm-14092697669",
+    "name": "Leinsweiler, Rathaus",
+    "lat": 49.1831515,
+    "lon": 8.0193234,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14092697671",
+    "name": "Leinsweiler, Rathaus",
+    "lat": 49.1831067,
+    "lon": 8.0191317,
+    "type": "bus"
+  },
+  {
     "id": "osm-538155797",
     "name": "Leinsweilerhof",
     "lat": 49.1803257,
     "lon": 8.0234384,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14092697673",
+    "name": "Leinsweilerhof",
+    "lat": 49.180617,
+    "lon": 8.0233747,
     "type": "bus"
   },
   {
@@ -36859,13 +36831,6 @@
     "name": "Lindenrain",
     "lat": 48.6784564,
     "lon": 8.77646,
-    "type": "bus"
-  },
-  {
-    "id": "osm-10766974349",
-    "name": "Lindenrain",
-    "lat": 48.6787089,
-    "lon": 8.7720771,
     "type": "bus"
   },
   {
@@ -38362,8 +38327,8 @@
   {
     "id": "osm-373494213",
     "name": "Marktplatz",
-    "lat": 48.9401318,
-    "lon": 8.8427129,
+    "lat": 48.9401795,
+    "lon": 8.8426295,
     "type": "bus"
   },
   {
@@ -38649,8 +38614,8 @@
   {
     "id": "osm-10139218336",
     "name": "Maulbronn Keplerstraße/Seehausweg",
-    "lat": 48.9988806,
-    "lon": 8.7977301,
+    "lat": 48.9988625,
+    "lon": 8.7977369,
     "type": "bus"
   },
   {
@@ -39048,15 +39013,15 @@
   {
     "id": "osm-371145284",
     "name": "Medersbuckel",
-    "lat": 48.9702401,
-    "lon": 8.4766241,
+    "lat": 48.9720693,
+    "lon": 8.475631,
     "type": "bus"
   },
   {
     "id": "osm-371145294",
     "name": "Medersbuckel",
-    "lat": 48.9709193,
-    "lon": 8.4760787,
+    "lat": 48.9720884,
+    "lon": 8.4753894,
     "type": "bus"
   },
   {
@@ -39825,8 +39790,8 @@
   {
     "id": "osm-939714246",
     "name": "Mittelfeld",
-    "lat": 48.7482604,
-    "lon": 8.8074546,
+    "lat": 48.7482564,
+    "lon": 8.8074439,
     "type": "bus"
   },
   {
@@ -40301,8 +40266,8 @@
   {
     "id": "osm-2528595188",
     "name": "Mörsch Hertzstraße",
-    "lat": 48.9643328,
-    "lon": 8.2811073,
+    "lat": 48.9643108,
+    "lon": 8.2811093,
     "type": "bus"
   },
   {
@@ -42665,6 +42630,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-1999704644",
+    "name": "Neuwindeck-Schule",
+    "lat": 48.6505512,
+    "lon": 8.130563,
+    "type": "bus"
+  },
+  {
     "id": "osm-520368661",
     "name": "Niebelsbach Grenzsägmühle",
     "lat": 48.89304,
@@ -43598,15 +43570,15 @@
   {
     "id": "osm-12441404561",
     "name": "Oberhausen Marienkapelle",
-    "lat": 49.2576112,
-    "lon": 8.4991191,
+    "lat": 49.2575841,
+    "lon": 8.4993062,
     "type": "bus"
   },
   {
     "id": "osm-12441404562",
     "name": "Oberhausen Marienkapelle",
-    "lat": 49.257688,
-    "lon": 8.4992025,
+    "lat": 49.2576736,
+    "lon": 8.4993078,
     "type": "bus"
   },
   {
@@ -44648,8 +44620,8 @@
   {
     "id": "osm-1179461412",
     "name": "Ortsmitte",
-    "lat": 48.751389,
-    "lon": 8.8113706,
+    "lat": 48.7513642,
+    "lon": 8.8114041,
     "type": "bus"
   },
   {
@@ -44676,8 +44648,8 @@
   {
     "id": "osm-3361278509",
     "name": "Ortsmitte",
-    "lat": 48.7513871,
-    "lon": 8.8113042,
+    "lat": 48.7513694,
+    "lon": 8.8113324,
     "type": "bus"
   },
   {
@@ -47439,20 +47411,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-415228819",
-    "name": "Ranschbach, Ortsmitte",
-    "lat": 49.1963491,
-    "lon": 8.0292181,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11098422782",
-    "name": "Ranschbach, Ortsmitte",
-    "lat": 49.1963241,
-    "lon": 8.0295324,
-    "type": "bus"
-  },
-  {
     "id": "osm-415228818",
     "name": "Ranschbach, Unterdorf",
     "lat": 49.1978037,
@@ -47464,6 +47422,20 @@
     "name": "Ranschbach, Unterdorf",
     "lat": 49.1979139,
     "lon": 8.0350565,
+    "type": "bus"
+  },
+  {
+    "id": "osm-415228819",
+    "name": "Ranschbach, Weinatraße",
+    "lat": 49.1963491,
+    "lon": 8.0292181,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11098422782",
+    "name": "Ranschbach, Weinstraße",
+    "lat": 49.1963241,
+    "lon": 8.0295324,
     "type": "bus"
   },
   {
@@ -48470,8 +48442,8 @@
   {
     "id": "osm-388577845",
     "name": "Rathaus",
-    "lat": 48.6956608,
-    "lon": 8.771683,
+    "lat": 48.695675,
+    "lon": 8.7717474,
     "type": "bus"
   },
   {
@@ -52325,8 +52297,15 @@
     "type": "bus"
   },
   {
+    "id": "osm-335727861",
+    "name": "SAP Headquarters",
+    "lat": 49.2934185,
+    "lon": 8.6427487,
+    "type": "bus"
+  },
+  {
     "id": "osm-3582963630",
-    "name": "SAP-Headquarters",
+    "name": "SAP Headquarters",
     "lat": 49.2929902,
     "lon": 8.6418683,
     "type": "bus"
@@ -54089,6 +54068,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-14069033400",
+    "name": "Schule",
+    "lat": 48.7394766,
+    "lon": 8.7553579,
+    "type": "bus"
+  },
+  {
     "id": "osm-354655869",
     "name": "Schule / Lindenhalle",
     "lat": 48.8860825,
@@ -54338,6 +54324,13 @@
     "name": "Schwalbenstraße",
     "lat": 48.8987381,
     "lon": 8.7455573,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14101278611",
+    "name": "Schwallung",
+    "lat": 48.655313,
+    "lon": 8.2900556,
     "type": "bus"
   },
   {
@@ -55043,15 +55036,15 @@
   {
     "id": "osm-1685962353",
     "name": "Siebeldingen-Birkweiler",
-    "lat": 49.2088922,
-    "lon": 8.0432745,
+    "lat": 49.2090999,
+    "lon": 8.04279,
     "type": "train"
   },
   {
     "id": "osm-1787912657",
-    "name": "Siebeldingen-Birkweiler, Bahnhof",
-    "lat": 49.2083753,
-    "lon": 8.0434163,
+    "name": "Siebeldingen-Birkweiler Bahnhof",
+    "lat": 49.2082614,
+    "lon": 8.043242,
     "type": "bus"
   },
   {
@@ -56459,13 +56452,6 @@
     "name": "Speyer, Göteborger Straße",
     "lat": 49.2962071,
     "lon": 8.4759616,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11594866098",
-    "name": "Speyer, Stockholmer Straße",
-    "lat": 49.2923224,
-    "lon": 8.4775925,
     "type": "bus"
   },
   {
@@ -59899,13 +59885,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-952054491",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.5943817,
-    "lon": 8.8644748,
-    "type": "bus"
-  },
-  {
     "id": "osm-999281715",
     "name": "Unbekannte Haltestelle",
     "lat": 48.9246757,
@@ -60459,41 +60438,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-11200744361",
-    "name": "Unbekannte Haltestelle",
-    "lat": 49.0262257,
-    "lon": 8.7586885,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11200744363",
-    "name": "Unbekannte Haltestelle",
-    "lat": 49.0260788,
-    "lon": 8.7588608,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11200744365",
-    "name": "Unbekannte Haltestelle",
-    "lat": 49.0259658,
-    "lon": 8.7589953,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11200744368",
-    "name": "Unbekannte Haltestelle",
-    "lat": 49.0258504,
-    "lon": 8.759129,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11240719769",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.6783674,
-    "lon": 8.7728246,
-    "type": "bus"
-  },
-  {
     "id": "osm-11362491763",
     "name": "Unbekannte Haltestelle",
     "lat": 49.2509928,
@@ -60568,13 +60512,6 @@
     "name": "Unbekannte Haltestelle",
     "lat": 48.8163171,
     "lon": 8.3027676,
-    "type": "bus"
-  },
-  {
-    "id": "osm-13019860523",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.95296,
-    "lon": 8.8474464,
     "type": "bus"
   },
   {
@@ -62783,13 +62720,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-335727861",
-    "name": "Walldorf SAP-Headquarters",
-    "lat": 49.2934185,
-    "lon": 8.6427487,
-    "type": "bus"
-  },
-  {
     "id": "osm-335727857",
     "name": "Walldorf SAP-Schulungszentrum",
     "lat": 49.2915966,
@@ -64050,10 +63980,24 @@
     "type": "train"
   },
   {
-    "id": "osm-1665262971",
+    "id": "osm-14075390274",
     "name": "Weltenschwann",
+    "lat": 48.7168414,
+    "lon": 8.6845368,
+    "type": "bus"
+  },
+  {
+    "id": "osm-1665262971",
+    "name": "Weltenschwann Dorfwiesenstraße",
     "lat": 48.717844,
     "lon": 8.6843961,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14075390273",
+    "name": "Weltenschwann Dorfwiesenstraße",
+    "lat": 48.7177006,
+    "lon": 8.6845194,
     "type": "bus"
   },
   {
@@ -64855,10 +64799,10 @@
     "type": "bus"
   },
   {
-    "id": "osm-12874832748",
+    "id": "osm-12819287275",
     "name": "Wilferdingen C. Dittler Realschule",
-    "lat": 48.9476702,
-    "lon": 8.5764381,
+    "lat": 48.9476717,
+    "lon": 8.576442,
     "type": "bus"
   },
   {
@@ -66304,6 +66248,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-6698951899",
+    "name": "Zentrum für Psychatrie",
+    "lat": 48.7457353,
+    "lon": 8.7111604,
+    "type": "bus"
+  },
+  {
     "id": "osm-11875048619",
     "name": "Zentrum Ziegelfeld",
     "lat": 48.5948592,
@@ -66542,10 +66493,24 @@
     "type": "bus"
   },
   {
+    "id": "osm-13019860523",
+    "name": "ZOB",
+    "lat": 48.95296,
+    "lon": 8.8474464,
+    "type": "bus"
+  },
+  {
     "id": "osm-265790091",
     "name": "ZOB Herrenberg",
     "lat": 48.5942385,
     "lon": 8.8643706,
+    "type": "bus"
+  },
+  {
+    "id": "osm-952054491",
+    "name": "ZOB/Bahnhofstraße",
+    "lat": 48.5943817,
+    "lon": 8.8644748,
     "type": "bus"
   },
   {
