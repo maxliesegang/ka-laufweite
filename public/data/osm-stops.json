@@ -5350,8 +5350,8 @@
   {
     "id": "osm-1118773858",
     "name": "Bahnhof",
-    "lat": 48.726854,
-    "lon": 8.7973747,
+    "lat": 48.7268639,
+    "lon": 8.7973714,
     "type": "bus"
   },
   {
@@ -7049,6 +7049,20 @@
     "type": "bus"
   },
   {
+    "id": "osm-14191276758",
+    "name": "Beuren (b Nagold), Bürgerhaus",
+    "lat": 48.5946836,
+    "lon": 8.5457928,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14191276756",
+    "name": "Beuren (b Nagold), Haus Bürkle",
+    "lat": 48.5932874,
+    "lon": 8.5394981,
+    "type": "bus"
+  },
+  {
     "id": "osm-669183112",
     "name": "Bhf. Bad Teinach",
     "lat": 48.6787925,
@@ -7422,8 +7436,8 @@
   {
     "id": "osm-10047394636",
     "name": "Bischheim ZA",
-    "lat": 48.6309302,
-    "lon": 7.7737484,
+    "lat": 48.6309209,
+    "lon": 7.7737538,
     "type": "bus"
   },
   {
@@ -7604,8 +7618,8 @@
   {
     "id": "osm-456816260",
     "name": "Blammerbergstraße",
-    "lat": 48.7579565,
-    "lon": 8.8865952,
+    "lat": 48.7579424,
+    "lon": 8.8865939,
     "type": "bus"
   },
   {
@@ -9874,6 +9888,20 @@
     "name": "Bruchweiler, Otto-Muck-Straße",
     "lat": 49.107777,
     "lon": 7.8030957,
+    "type": "bus"
+  },
+  {
+    "id": "osm-2187817590",
+    "name": "Brücke",
+    "lat": 48.7455592,
+    "lon": 8.3474559,
+    "type": "bus"
+  },
+  {
+    "id": "osm-2303294055",
+    "name": "Brücke",
+    "lat": 48.7453905,
+    "lon": 8.3472208,
     "type": "bus"
   },
   {
@@ -12663,13 +12691,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-9098643003",
-    "name": "Dagersheim Aidlinger Straße",
-    "lat": 48.6898533,
-    "lon": 8.9453311,
-    "type": "bus"
-  },
-  {
     "id": "osm-300311018",
     "name": "Dagersheim Post",
     "lat": 48.6917854,
@@ -15113,6 +15134,34 @@
     "type": "bus"
   },
   {
+    "id": "osm-14157841996",
+    "name": "Edenkoben, Schulzentrum",
+    "lat": 49.2866156,
+    "lon": 8.1296231,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14157841997",
+    "name": "Edenkoben, Schulzentrum",
+    "lat": 49.286811,
+    "lon": 8.1298827,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14157841998",
+    "name": "Edenkoben, Schulzentrum",
+    "lat": 49.2870809,
+    "lon": 8.1294696,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14157841999",
+    "name": "Edenkoben, Schulzentrum",
+    "lat": 49.2868171,
+    "lon": 8.1289114,
+    "type": "bus"
+  },
+  {
     "id": "osm-2125823490",
     "name": "Edenkoben, St. Martiner Straße",
     "lat": 49.2852561,
@@ -15297,8 +15346,8 @@
   {
     "id": "osm-3265936001",
     "name": "Egelsee",
-    "lat": 48.8236187,
-    "lon": 8.8676973,
+    "lat": 48.8236205,
+    "lon": 8.8676899,
     "type": "bus"
   },
   {
@@ -15449,24 +15498,10 @@
     "type": "bus"
   },
   {
-    "id": "osm-4182896561",
-    "name": "Ehningen Bahnhof",
-    "lat": 48.6621257,
-    "lon": 8.9433242,
-    "type": "bus"
-  },
-  {
     "id": "osm-4257290347",
     "name": "Ehningen IBM",
     "lat": 48.6532281,
     "lon": 8.9451845,
-    "type": "bus"
-  },
-  {
-    "id": "osm-4753217885",
-    "name": "Ehningen IBM",
-    "lat": 48.6532364,
-    "lon": 8.945089,
     "type": "bus"
   },
   {
@@ -15491,20 +15526,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-8599953100",
-    "name": "Ehningen Im Letten",
-    "lat": 48.6527934,
-    "lon": 8.9299413,
-    "type": "bus"
-  },
-  {
-    "id": "osm-8599953101",
-    "name": "Ehningen Im Letten",
-    "lat": 48.6528392,
-    "lon": 8.9299859,
-    "type": "bus"
-  },
-  {
     "id": "osm-259441155",
     "name": "Ehningen Königsberger Straße",
     "lat": 48.6554057,
@@ -15519,20 +15540,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-8599953102",
-    "name": "Ehningen Königsberger Straße",
-    "lat": 48.6555056,
-    "lon": 8.933039,
-    "type": "bus"
-  },
-  {
-    "id": "osm-8599953103",
-    "name": "Ehningen Königsberger Straße",
-    "lat": 48.6553985,
-    "lon": 8.932894,
-    "type": "bus"
-  },
-  {
     "id": "osm-6404627429",
     "name": "Ehningen Talstraße",
     "lat": 48.6565068,
@@ -15540,24 +15547,10 @@
     "type": "bus"
   },
   {
-    "id": "osm-9167358541",
-    "name": "Ehningen Talstraße",
-    "lat": 48.6565205,
-    "lon": 8.9414238,
-    "type": "bus"
-  },
-  {
     "id": "osm-9167358542",
     "name": "Ehningen Talstraße",
     "lat": 48.6565525,
     "lon": 8.9415018,
-    "type": "bus"
-  },
-  {
-    "id": "osm-36631763",
-    "name": "Ehningen Würmbrücke",
-    "lat": 48.6579527,
-    "lon": 8.9359941,
     "type": "bus"
   },
   {
@@ -15572,13 +15565,6 @@
     "name": "Ehningen Würmbrücke",
     "lat": 48.6583307,
     "lon": 8.9362055,
-    "type": "bus"
-  },
-  {
-    "id": "osm-1209264888",
-    "name": "Ehningen Würmbrücke",
-    "lat": 48.6583953,
-    "lon": 8.9361084,
     "type": "bus"
   },
   {
@@ -18613,13 +18599,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-10062245124",
-    "name": "Fédération",
-    "lat": 48.5617844,
-    "lon": 7.7503758,
-    "type": "tram"
-  },
-  {
     "id": "osm-1876751763",
     "name": "Feierabendweg",
     "lat": 49.02214,
@@ -19462,8 +19441,8 @@
   {
     "id": "osm-1794596513",
     "name": "Frankweiler, Rathaus",
-    "lat": 49.2278715,
-    "lon": 8.0580473,
+    "lat": 49.2279638,
+    "lon": 8.0580584,
     "type": "bus"
   },
   {
@@ -20153,6 +20132,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-14206256804",
+    "name": "Fünfbronn (Württ), Rathaus",
+    "lat": 48.6111545,
+    "lon": 8.4956254,
+    "type": "bus"
+  },
+  {
     "id": "osm-250434630",
     "name": "Furschenbach",
     "lat": 48.5799041,
@@ -20727,13 +20713,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-130576597",
-    "name": "Gärtringen Feuerwehr-Gerätehaus",
-    "lat": 48.6425566,
-    "lon": 8.894104,
-    "type": "bus"
-  },
-  {
     "id": "osm-9641593799",
     "name": "Gärtringen Feuerwehr-Gerätehaus",
     "lat": 48.642619,
@@ -20769,13 +20748,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-11113389890",
-    "name": "Gärtringen Riedbrunnen",
-    "lat": 48.6401646,
-    "lon": 8.9172931,
-    "type": "bus"
-  },
-  {
     "id": "osm-6849236666",
     "name": "Gärtringen Schelmenwiesen",
     "lat": 48.6390822,
@@ -20787,13 +20759,6 @@
     "name": "Gärtringen Schelmenwiesen",
     "lat": 48.6392613,
     "lon": 8.9076886,
-    "type": "bus"
-  },
-  {
-    "id": "osm-11113389889",
-    "name": "Gärtringen Schelmenwiesen",
-    "lat": 48.6391496,
-    "lon": 8.9080002,
     "type": "bus"
   },
   {
@@ -21044,8 +21009,8 @@
   {
     "id": "osm-443473638",
     "name": "Geissberg",
-    "lat": 48.8368523,
-    "lon": 8.8537298,
+    "lat": 48.8368466,
+    "lon": 8.8537097,
     "type": "bus"
   },
   {
@@ -22479,8 +22444,15 @@
   {
     "id": "osm-6849236662",
     "name": "Grabenstraße",
-    "lat": 48.6369866,
-    "lon": 8.8938611,
+    "lat": 48.6368892,
+    "lon": 8.8938599,
+    "type": "bus"
+  },
+  {
+    "id": "osm-6849236663",
+    "name": "Grabenstraße",
+    "lat": 48.6367763,
+    "lon": 8.8936713,
     "type": "bus"
   },
   {
@@ -23193,29 +23165,29 @@
   {
     "id": "osm-274307396",
     "name": "Gültstein Holzsteig",
-    "lat": 48.5806073,
-    "lon": 8.8924458,
+    "lat": 48.5806864,
+    "lon": 8.892481,
     "type": "bus"
   },
   {
     "id": "osm-274307398",
     "name": "Gültstein Holzsteig",
-    "lat": 48.5803244,
-    "lon": 8.8923246,
+    "lat": 48.5802768,
+    "lon": 8.8923074,
     "type": "bus"
   },
   {
     "id": "osm-9195643611",
     "name": "Gültstein Holzsteig",
-    "lat": 48.5806149,
-    "lon": 8.8925662,
+    "lat": 48.5806139,
+    "lon": 8.8925713,
     "type": "bus"
   },
   {
     "id": "osm-9195643612",
     "name": "Gültstein Holzsteig",
-    "lat": 48.5803903,
-    "lon": 8.892245,
+    "lat": 48.5803421,
+    "lon": 8.8922023,
     "type": "bus"
   },
   {
@@ -24236,15 +24208,15 @@
   {
     "id": "osm-258957036",
     "name": "Haslach Kirche",
-    "lat": 48.5830736,
-    "lon": 8.8398116,
+    "lat": 48.5830474,
+    "lon": 8.8399182,
     "type": "bus"
   },
   {
     "id": "osm-304076312",
     "name": "Haslach Kirche",
-    "lat": 48.5830477,
-    "lon": 8.838844,
+    "lat": 48.5830516,
+    "lon": 8.8388311,
     "type": "bus"
   },
   {
@@ -24264,15 +24236,15 @@
   {
     "id": "osm-9319521611",
     "name": "Haslach Schelmenäcker",
-    "lat": 48.5803045,
-    "lon": 8.8349458,
+    "lat": 48.5803234,
+    "lon": 8.8349431,
     "type": "bus"
   },
   {
     "id": "osm-9319521612",
     "name": "Haslach Schelmenäcker",
-    "lat": 48.580395,
-    "lon": 8.8348801,
+    "lat": 48.5803819,
+    "lon": 8.8348073,
     "type": "bus"
   },
   {
@@ -24285,8 +24257,8 @@
   {
     "id": "osm-304076467",
     "name": "Haslach Sindlinger Straße",
-    "lat": 48.5806292,
-    "lon": 8.8396974,
+    "lat": 48.5806406,
+    "lon": 8.8394887,
     "type": "bus"
   },
   {
@@ -24913,6 +24885,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-14204618424",
+    "name": "Hegaustraße",
+    "lat": 48.9667701,
+    "lon": 8.4107754,
+    "type": "bus"
+  },
+  {
     "id": "osm-3111016215",
     "name": "Heidehof",
     "lat": 49.0312249,
@@ -25461,8 +25440,8 @@
   {
     "id": "osm-287070300",
     "name": "Herrenberg Berliner Straße",
-    "lat": 48.5956307,
-    "lon": 8.85456,
+    "lat": 48.5956151,
+    "lon": 8.8546553,
     "type": "bus"
   },
   {
@@ -25496,15 +25475,15 @@
   {
     "id": "osm-287072452",
     "name": "Herrenberg Eichenweg",
-    "lat": 48.5963333,
-    "lon": 8.8582468,
+    "lat": 48.5963318,
+    "lon": 8.8582285,
     "type": "bus"
   },
   {
     "id": "osm-310761708",
     "name": "Herrenberg Finkenweg",
-    "lat": 48.5900463,
-    "lon": 8.8633886,
+    "lat": 48.5900398,
+    "lon": 8.8633853,
     "type": "bus"
   },
   {
@@ -25522,10 +25501,10 @@
     "type": "bus"
   },
   {
-    "id": "osm-310757044",
+    "id": "osm-3521364924",
     "name": "Herrenberg Hallenbad",
-    "lat": 48.5902238,
-    "lon": 8.8762371,
+    "lat": 48.5902656,
+    "lon": 8.8764185,
     "type": "bus"
   },
   {
@@ -25545,8 +25524,8 @@
   {
     "id": "osm-9196088593",
     "name": "Herrenberg Hallenbad",
-    "lat": 48.5902193,
-    "lon": 8.876416,
+    "lat": 48.5902065,
+    "lon": 8.8763144,
     "type": "bus"
   },
   {
@@ -25573,22 +25552,22 @@
   {
     "id": "osm-7596136884",
     "name": "Herrenberg Hindenburgstraße",
-    "lat": 48.5949458,
-    "lon": 8.8682871,
+    "lat": 48.5949973,
+    "lon": 8.8680288,
     "type": "bus"
   },
   {
     "id": "osm-9195439660",
     "name": "Herrenberg Hindenburgstraße",
-    "lat": 48.5949726,
-    "lon": 8.8686367,
+    "lat": 48.5949703,
+    "lon": 8.8686594,
     "type": "bus"
   },
   {
     "id": "osm-9195439661",
     "name": "Herrenberg Hindenburgstraße",
-    "lat": 48.5949288,
-    "lon": 8.8685018,
+    "lat": 48.5949001,
+    "lon": 8.8686161,
     "type": "bus"
   },
   {
@@ -25610,6 +25589,13 @@
     "name": "Herrenberg Johannesstraße",
     "lat": 48.59171,
     "lon": 8.8701541,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14156328441",
+    "name": "Herrenberg Johannesstraße",
+    "lat": 48.5913884,
+    "lon": 8.8701243,
     "type": "bus"
   },
   {
@@ -25671,50 +25657,50 @@
   {
     "id": "osm-290153729",
     "name": "Herrenberg Mühlweg",
-    "lat": 48.5980027,
-    "lon": 8.860691,
+    "lat": 48.5979371,
+    "lon": 8.8607487,
     "type": "bus"
   },
   {
     "id": "osm-290153732",
     "name": "Herrenberg Mühlweg",
-    "lat": 48.597428,
-    "lon": 8.8611664,
+    "lat": 48.5974655,
+    "lon": 8.8611702,
     "type": "bus"
   },
   {
-    "id": "osm-9105516423",
+    "id": "osm-3275006312",
     "name": "Herrenberg Mühlweg",
-    "lat": 48.5974346,
-    "lon": 8.861068,
+    "lat": 48.5974886,
+    "lon": 8.8610637,
     "type": "bus"
   },
   {
     "id": "osm-9105516424",
     "name": "Herrenberg Mühlweg",
-    "lat": 48.5980401,
-    "lon": 8.8607776,
+    "lat": 48.5979589,
+    "lon": 8.8608281,
     "type": "bus"
   },
   {
     "id": "osm-7787574270",
     "name": "Herrenberg Polizeihochschule",
-    "lat": 48.6089653,
-    "lon": 8.8787686,
+    "lat": 48.6089832,
+    "lon": 8.8787222,
     "type": "bus"
   },
   {
     "id": "osm-7787574271",
     "name": "Herrenberg Polizeihochschule",
-    "lat": 48.6097528,
-    "lon": 8.8796702,
+    "lat": 48.6098036,
+    "lon": 8.8797989,
     "type": "bus"
   },
   {
     "id": "osm-11124309116",
     "name": "Herrenberg Polizeihochschule",
-    "lat": 48.6089396,
-    "lon": 8.8788465,
+    "lat": 48.6089229,
+    "lon": 8.8787905,
     "type": "bus"
   },
   {
@@ -25727,22 +25713,22 @@
   {
     "id": "osm-9105899659",
     "name": "Herrenberg Reinhold-Schick-Platz",
-    "lat": 48.5955687,
-    "lon": 8.8657026,
+    "lat": 48.5955417,
+    "lon": 8.8657118,
     "type": "bus"
   },
   {
     "id": "osm-9105899660",
     "name": "Herrenberg Reinhold-Schick-Platz",
-    "lat": 48.5956951,
-    "lon": 8.865769,
+    "lat": 48.5956971,
+    "lon": 8.8656805,
     "type": "bus"
   },
   {
     "id": "osm-9105899661",
     "name": "Herrenberg Reinhold-Schick-Platz",
-    "lat": 48.5957307,
-    "lon": 8.8656856,
+    "lat": 48.5957421,
+    "lon": 8.8657894,
     "type": "bus"
   },
   {
@@ -25783,36 +25769,43 @@
   {
     "id": "osm-273503580",
     "name": "Herrenberg Seniorenzentrum",
-    "lat": 48.5955567,
-    "lon": 8.8785706,
+    "lat": 48.5954709,
+    "lon": 8.8784839,
     "type": "bus"
   },
   {
     "id": "osm-7052539070",
     "name": "Herrenberg Seniorenzentrum",
-    "lat": 48.5954454,
-    "lon": 8.8787399,
+    "lat": 48.5954677,
+    "lon": 8.8786599,
     "type": "bus"
   },
   {
     "id": "osm-9193563147",
     "name": "Herrenberg Silcherstraße",
-    "lat": 48.5911936,
-    "lon": 8.8642465,
+    "lat": 48.5914524,
+    "lon": 8.8643117,
     "type": "bus"
   },
   {
     "id": "osm-9193563148",
     "name": "Herrenberg Silcherstraße",
-    "lat": 48.5911995,
-    "lon": 8.8643604,
+    "lat": 48.5912246,
+    "lon": 8.8643818,
     "type": "bus"
   },
   {
     "id": "osm-9193563149",
     "name": "Herrenberg Silcherstraße",
-    "lat": 48.5911341,
-    "lon": 8.8644416,
+    "lat": 48.5911808,
+    "lon": 8.8644395,
+    "type": "bus"
+  },
+  {
+    "id": "osm-10582918559",
+    "name": "Herrenberg Silcherstraße",
+    "lat": 48.5913934,
+    "lon": 8.8643833,
     "type": "bus"
   },
   {
@@ -25825,8 +25818,8 @@
   {
     "id": "osm-7052539069",
     "name": "Herrenberg Stadtfriedhof",
-    "lat": 48.5942311,
-    "lon": 8.8711113,
+    "lat": 48.594164,
+    "lon": 8.8711038,
     "type": "bus"
   },
   {
@@ -25839,22 +25832,22 @@
   {
     "id": "osm-9193563150",
     "name": "Herrenberg Straßenmeisterei",
-    "lat": 48.5891314,
-    "lon": 8.8645323,
+    "lat": 48.5889448,
+    "lon": 8.8645644,
     "type": "bus"
   },
   {
     "id": "osm-9193563151",
     "name": "Herrenberg Straßenmeisterei",
-    "lat": 48.5891937,
-    "lon": 8.8644581,
+    "lat": 48.589,
+    "lon": 8.8644956,
     "type": "bus"
   },
   {
     "id": "osm-9193563152",
     "name": "Herrenberg Straßenmeisterei",
-    "lat": 48.5887901,
-    "lon": 8.8646988,
+    "lat": 48.5886643,
+    "lon": 8.8647092,
     "type": "bus"
   },
   {
@@ -25923,8 +25916,8 @@
   {
     "id": "osm-9667775274",
     "name": "Herrenberg ZOB Bstg. D",
-    "lat": 48.5941096,
-    "lon": 8.8639827,
+    "lat": 48.5940718,
+    "lon": 8.8639347,
     "type": "bus"
   },
   {
@@ -25944,8 +25937,8 @@
   {
     "id": "osm-9667775273",
     "name": "Herrenberg ZOB Bstg. F",
-    "lat": 48.5943045,
-    "lon": 8.8645594,
+    "lat": 48.5942951,
+    "lon": 8.8645823,
     "type": "bus"
   },
   {
@@ -25979,22 +25972,22 @@
   {
     "id": "osm-9667775272",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 2",
-    "lat": 48.5943235,
-    "lon": 8.861238,
+    "lat": 48.5943359,
+    "lon": 8.8612296,
     "type": "bus"
   },
   {
     "id": "osm-495458424",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 3",
-    "lat": 48.5941698,
-    "lon": 8.8610136,
+    "lat": 48.5941814,
+    "lon": 8.8610235,
     "type": "bus"
   },
   {
     "id": "osm-9664254476",
     "name": "Herrenberg ZOB Kalkofenstraße Bstg. 3",
-    "lat": 48.5942208,
-    "lon": 8.8609549,
+    "lat": 48.5942324,
+    "lon": 8.8609534,
     "type": "bus"
   },
   {
@@ -28471,8 +28464,8 @@
   {
     "id": "osm-519196154",
     "name": "Hügelsheim, Grüner Baum",
-    "lat": 48.7969113,
-    "lon": 8.1100166,
+    "lat": 48.7969193,
+    "lon": 8.109996,
     "type": "bus"
   },
   {
@@ -29304,15 +29297,15 @@
   {
     "id": "osm-301460777",
     "name": "Industriegebiet",
-    "lat": 48.8373419,
-    "lon": 8.8444507,
+    "lat": 48.8373408,
+    "lon": 8.8444227,
     "type": "bus"
   },
   {
     "id": "osm-301460780",
     "name": "Industriegebiet",
-    "lat": 48.8372274,
-    "lon": 8.8443966,
+    "lat": 48.8372239,
+    "lon": 8.8443956,
     "type": "bus"
   },
   {
@@ -30013,6 +30006,20 @@
     "name": "Johanna-Kirchner-Straße",
     "lat": 48.9854502,
     "lon": 8.3594363,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11539719301",
+    "name": "Johannesstraße",
+    "lat": 48.5914233,
+    "lon": 8.8700742,
+    "type": "bus"
+  },
+  {
+    "id": "osm-11539719302",
+    "name": "Johannesstraße",
+    "lat": 48.5916774,
+    "lon": 8.8702,
     "type": "bus"
   },
   {
@@ -31117,15 +31124,15 @@
   {
     "id": "osm-9195720918",
     "name": "Kayh Rathaus",
-    "lat": 48.5766613,
-    "lon": 8.9227454,
+    "lat": 48.5766138,
+    "lon": 8.9226863,
     "type": "bus"
   },
   {
     "id": "osm-9195720919",
     "name": "Kayh Rathaus",
-    "lat": 48.5766936,
-    "lon": 8.9226285,
+    "lat": 48.576671,
+    "lon": 8.9225712,
     "type": "bus"
   },
   {
@@ -31785,6 +31792,20 @@
     "lat": 48.9973487,
     "lon": 8.4619656,
     "type": "tram"
+  },
+  {
+    "id": "osm-14206236299",
+    "name": "Killisfeldstraße",
+    "lat": 48.9971452,
+    "lon": 8.4620232,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14206236300",
+    "name": "Killisfeldstraße",
+    "lat": 48.9970966,
+    "lon": 8.4623199,
+    "type": "bus"
   },
   {
     "id": "osm-3454823893",
@@ -34435,8 +34456,8 @@
   {
     "id": "osm-363313496",
     "name": "Landau, Friedhof",
-    "lat": 49.193084,
-    "lon": 8.1002747,
+    "lat": 49.1931689,
+    "lon": 8.1064459,
     "type": "bus"
   },
   {
@@ -34444,13 +34465,6 @@
     "name": "Landau, Friedhof",
     "lat": 49.1938613,
     "lon": 8.1056871,
-    "type": "bus"
-  },
-  {
-    "id": "osm-13022833676",
-    "name": "Landau, Friedhof",
-    "lat": 49.1931535,
-    "lon": 8.1064805,
     "type": "bus"
   },
   {
@@ -41722,8 +41736,8 @@
   {
     "id": "osm-332754230",
     "name": "Neuburg, Kehlstraße",
-    "lat": 48.9867107,
-    "lon": 8.2536273,
+    "lat": 48.9867275,
+    "lon": 8.2536958,
     "type": "bus"
   },
   {
@@ -43654,29 +43668,29 @@
   {
     "id": "osm-737974486",
     "name": "Oberjesingen Calwer Straße",
-    "lat": 48.6248114,
-    "lon": 8.8337757,
+    "lat": 48.6248026,
+    "lon": 8.833769,
     "type": "bus"
   },
   {
     "id": "osm-9103784165",
     "name": "Oberjesingen Calwer Straße",
-    "lat": 48.6250532,
-    "lon": 8.8336338,
+    "lat": 48.6251051,
+    "lon": 8.8336242,
     "type": "bus"
   },
   {
     "id": "osm-290155414",
     "name": "Oberjesingen Zaberstraße",
-    "lat": 48.6209078,
-    "lon": 8.8360388,
+    "lat": 48.620947,
+    "lon": 8.8360145,
     "type": "bus"
   },
   {
     "id": "osm-2150683746",
     "name": "Oberjesingen Zaberstraße",
-    "lat": 48.6208613,
-    "lon": 8.8362954,
+    "lat": 48.6212306,
+    "lon": 8.8359506,
     "type": "bus"
   },
   {
@@ -43936,6 +43950,13 @@
     "name": "Oberschlettenbach, Hahnenhof",
     "lat": 49.1441733,
     "lon": 7.8775898,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14189180692",
+    "name": "Oberschwandorf (CW), Bürgerhaus",
+    "lat": 48.5516361,
+    "lon": 8.6612466,
     "type": "bus"
   },
   {
@@ -44557,22 +44578,29 @@
   {
     "id": "osm-5143754321",
     "name": "Orgelfelsenhaus",
-    "lat": 48.7353729,
-    "lon": 8.4159233,
+    "lat": 48.7353304,
+    "lon": 8.4159739,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14183809794",
+    "name": "Orgelfelsenhaus",
+    "lat": 48.7352709,
+    "lon": 8.4157714,
     "type": "bus"
   },
   {
     "id": "osm-294936020",
     "name": "Ortsmitte",
-    "lat": 48.8353815,
-    "lon": 8.8339437,
+    "lat": 48.8353786,
+    "lon": 8.8339336,
     "type": "bus"
   },
   {
     "id": "osm-294936027",
     "name": "Ortsmitte",
-    "lat": 48.8354273,
-    "lon": 8.8332683,
+    "lat": 48.8354224,
+    "lon": 8.8332656,
     "type": "bus"
   },
   {
@@ -47399,15 +47427,15 @@
   {
     "id": "osm-336604409",
     "name": "Rankhütte",
-    "lat": 48.7387097,
-    "lon": 8.4141531,
+    "lat": 48.7388618,
+    "lon": 8.4138681,
     "type": "bus"
   },
   {
     "id": "osm-336604413",
     "name": "Rankhütte",
-    "lat": 48.7390829,
-    "lon": 8.4138308,
+    "lat": 48.7390626,
+    "lon": 8.4137027,
     "type": "bus"
   },
   {
@@ -52847,13 +52875,6 @@
     "name": "Scheuern Sternen",
     "lat": 48.7559689,
     "lon": 8.3473741,
-    "type": "bus"
-  },
-  {
-    "id": "osm-287072905",
-    "name": "Schießtäle",
-    "lat": 48.5952061,
-    "lon": 8.8613992,
     "type": "bus"
   },
   {
@@ -59500,6 +59521,20 @@
     "type": "bus"
   },
   {
+    "id": "osm-14191276763",
+    "name": "Überberg, Friedhof",
+    "lat": 48.5986521,
+    "lon": 8.5832423,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14191276765",
+    "name": "Überberg, Lamm",
+    "lat": 48.5989125,
+    "lon": 8.5928969,
+    "type": "bus"
+  },
+  {
     "id": "osm-2672510956",
     "name": "Ubstadt Ort",
     "lat": 49.157231,
@@ -59710,6 +59745,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-287072905",
+    "name": "Unbekannte Haltestelle",
+    "lat": 48.5952061,
+    "lon": 8.8613992,
+    "type": "bus"
+  },
+  {
     "id": "osm-294905593",
     "name": "Unbekannte Haltestelle",
     "lat": 48.8456703,
@@ -59885,6 +59927,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-952054491",
+    "name": "Unbekannte Haltestelle",
+    "lat": 48.5943817,
+    "lon": 8.8644748,
+    "type": "bus"
+  },
+  {
     "id": "osm-999281715",
     "name": "Unbekannte Haltestelle",
     "lat": 48.9246757,
@@ -60011,13 +60060,6 @@
     "type": "bus"
   },
   {
-    "id": "osm-2187817590",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.7455592,
-    "lon": 8.3474559,
-    "type": "bus"
-  },
-  {
     "id": "osm-2198121653",
     "name": "Unbekannte Haltestelle",
     "lat": 48.9524196,
@@ -60036,13 +60078,6 @@
     "name": "Unbekannte Haltestelle",
     "lat": 48.8598095,
     "lon": 8.0866483,
-    "type": "bus"
-  },
-  {
-    "id": "osm-2303294055",
-    "name": "Unbekannte Haltestelle",
-    "lat": 48.7453905,
-    "lon": 8.3472208,
     "type": "bus"
   },
   {
@@ -60582,6 +60617,13 @@
     "name": "Unbekannte Haltestelle",
     "lat": 49.0551694,
     "lon": 8.5321271,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14211645143",
+    "name": "Unbekannte Haltestelle",
+    "lat": 48.7693648,
+    "lon": 8.5861955,
     "type": "bus"
   },
   {
@@ -63233,15 +63275,15 @@
   {
     "id": "osm-442708357",
     "name": "Weil der Stadt Stadtgarten",
-    "lat": 48.7521844,
-    "lon": 8.8693693,
+    "lat": 48.7522728,
+    "lon": 8.8694994,
     "type": "bus"
   },
   {
     "id": "osm-3361382323",
     "name": "Weil der Stadt Stadtgarten",
-    "lat": 48.7523658,
-    "lon": 8.869307,
+    "lat": 48.7523349,
+    "lon": 8.8692762,
     "type": "bus"
   },
   {
@@ -63480,6 +63522,20 @@
     "name": "Weingarten Burgstraße",
     "lat": 49.0573502,
     "lon": 8.5255113,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14196606182",
+    "name": "Weingarten Hauptstraße",
+    "lat": 49.2585922,
+    "lon": 8.2845216,
+    "type": "bus"
+  },
+  {
+    "id": "osm-14196606185",
+    "name": "Weingarten Hauptstraße",
+    "lat": 49.2585915,
+    "lon": 8.2834891,
     "type": "bus"
   },
   {
@@ -65954,6 +66010,13 @@
     "type": "bus"
   },
   {
+    "id": "osm-14211645137",
+    "name": "Würzbach (Württ), Kreuzung Würzbach",
+    "lat": 48.7267826,
+    "lon": 8.6712258,
+    "type": "bus"
+  },
+  {
     "id": "osm-1663263246",
     "name": "Würzbach Kreuzung",
     "lat": 48.726853,
@@ -66504,13 +66567,6 @@
     "name": "ZOB Herrenberg",
     "lat": 48.5942385,
     "lon": 8.8643706,
-    "type": "bus"
-  },
-  {
-    "id": "osm-952054491",
-    "name": "ZOB/Bahnhofstraße",
-    "lat": 48.5943817,
-    "lon": 8.8644748,
     "type": "bus"
   },
   {
