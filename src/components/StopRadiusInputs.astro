@@ -14,48 +14,46 @@ const { showVisibilityControls = false } = Astro.props;
 ---
 
 <div class="radius-grid">
-  {
-    STOP_TYPE_ENTRIES_CONFIG_ORDER.map((entry) => (
-      <div class:list={['radius-row', { 'radius-row--with-visibility': showVisibilityControls }]}>
-        {showVisibilityControls ? (
-          <button
-            type="button"
-            class="radius-row__visibility"
-            data-stop-type-toggle={entry.type}
-            aria-pressed="true"
-            title={`${entry.label} ein- oder ausblenden`}
-          >
-            <span class="radius-row__dot" aria-hidden="true" style={`background:${entry.color}`} />
-            <span class="radius-row__label">{entry.label}</span>
-            <span class="visibility-switch" aria-hidden="true">
-              <span />
-            </span>
-          </button>
-        ) : (
-          <span class="radius-row__meta">
-            <span class="radius-row__dot" aria-hidden="true" style={`background:${entry.color}`} />
-            <span class="radius-row__label">{entry.label}</span>
+  {STOP_TYPE_ENTRIES_CONFIG_ORDER.map((entry) => (
+    <div class:list={['radius-row', { 'radius-row--with-visibility': showVisibilityControls }]}>
+      {showVisibilityControls ? (
+        <button
+          type="button"
+          class="radius-row__visibility"
+          data-stop-type-toggle={entry.type}
+          aria-pressed="true"
+          title={`${entry.label} ein- oder ausblenden`}
+        >
+          <span class="radius-row__dot" aria-hidden="true" style={`background:${entry.color}`} />
+          <span class="radius-row__label">{entry.label}</span>
+          <span class="visibility-switch" aria-hidden="true">
+            <span />
           </span>
-        )}
+        </button>
+      ) : (
+        <span class="radius-row__meta">
+          <span class="radius-row__dot" aria-hidden="true" style={`background:${entry.color}`} />
+          <span class="radius-row__label">{entry.label}</span>
+        </span>
+      )}
 
-        <label class="radius-row__control" for={entry.radiusInputId}>
-          <span class="visually-hidden">Reichweite für {entry.label}</span>
-          <input
-            id={entry.radiusInputId}
-            name={entry.radiusInputName}
-            type="number"
-            inputmode="numeric"
-            enterkeyhint="done"
-            min={MIN_STOP_RADIUS_METERS}
-            max={MAX_STOP_RADIUS_METERS}
-            step={STOP_RADIUS_STEP_METERS}
-            required
-          />
-          <span class="radius-row__unit">m</span>
-        </label>
-      </div>
-    ))
-  }
+      <label class="radius-row__control" for={entry.radiusInputId}>
+        <span class="visually-hidden">Reichweite für {entry.label}</span>
+        <input
+          id={entry.radiusInputId}
+          name={entry.radiusInputName}
+          type="number"
+          inputmode="numeric"
+          enterkeyhint="done"
+          min={MIN_STOP_RADIUS_METERS}
+          max={MAX_STOP_RADIUS_METERS}
+          step={STOP_RADIUS_STEP_METERS}
+          required
+        />
+        <span class="radius-row__unit">m</span>
+      </label>
+    </div>
+  ))}
 </div>
 
 <style>

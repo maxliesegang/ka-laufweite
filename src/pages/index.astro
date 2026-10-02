@@ -9,7 +9,9 @@ import PopupStyles from '../components/PopupStyles.astro';
     <div id="map" aria-label="Karte der Karlsruher Haltestellen"></div>
 
     <div class="brand-card" aria-label="KA Laufweite">
-      <span class="brand-mark" aria-hidden="true">KA</span>
+      <span class="brand-mark" aria-hidden="true">
+        KA
+      </span>
       <span>
         <strong>Laufweite</strong>
         <small>Haltestellen in Karlsruhe</small>
@@ -75,8 +77,12 @@ import PopupStyles from '../components/PopupStyles.astro';
                 Bahninfrastruktur hervorheben
               </label>
               <div class="actions">
-                <button id="reset-radius" type="button">Standardwerte</button>
-                <button id="reset-walkshed-cache" type="button">Kartendaten neu laden</button>
+                <button id="reset-radius" type="button">
+                  Standardwerte
+                </button>
+                <button id="reset-walkshed-cache" type="button">
+                  Kartendaten neu laden
+                </button>
                 <button id="delete-custom-stops" type="button" class="danger">
                   Eigene Haltestellen löschen
                 </button>
@@ -104,7 +110,9 @@ import PopupStyles from '../components/PopupStyles.astro';
       hidden
     >
       <span class="spinner" data-walkshed-spinner aria-hidden="true"></span>
-      <span class="status-icon" data-walkshed-status-icon aria-hidden="true">✓</span>
+      <span class="status-icon" data-walkshed-status-icon aria-hidden="true">
+        ✓
+      </span>
       <span data-walkshed-progress-text></span>
     </div>
   </div>

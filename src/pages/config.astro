@@ -40,11 +40,10 @@ const mapHref = import.meta.env.BASE_URL;
             <h3 id="radius-heading">Gehdistanzen pro Typ (Meter)</h3>
             <StopRadiusInputs />
             <p class="help">
-              Bereich: {MIN_STOP_RADIUS_METERS} m bis {MAX_STOP_RADIUS_METERS} m. Standard: Bahn {
-                DEFAULT_STOP_RADIUS_METERS_BY_TYPE.train
-              } m, Tram {DEFAULT_STOP_RADIUS_METERS_BY_TYPE.tram} m, Bus {
-                DEFAULT_STOP_RADIUS_METERS_BY_TYPE.bus
-              } m.
+              Bereich: {MIN_STOP_RADIUS_METERS} m bis {MAX_STOP_RADIUS_METERS} m. Standard: Bahn{' '}
+              {DEFAULT_STOP_RADIUS_METERS_BY_TYPE.train} m, Tram{' '}
+              {DEFAULT_STOP_RADIUS_METERS_BY_TYPE.tram} m, Bus{' '}
+              {DEFAULT_STOP_RADIUS_METERS_BY_TYPE.bus} m.
             </p>
           </div>
 
@@ -81,13 +80,15 @@ const mapHref = import.meta.env.BASE_URL;
           </p>
 
           <div class="actions">
-            <button id="reset-radius" type="button" class="secondary">Standardwerte setzen</button>
-            <button id="delete-custom-stops" type="button" class="secondary danger"
-              >Eigene Haltestellen loeschen und Polygon-Filter zuruecksetzen</button
-            >
-            <button id="reset-walkshed-cache" type="button" class="secondary"
-              >Nur Polygon-Cache loeschen</button
-            >
+            <button id="reset-radius" type="button" class="secondary">
+              Standardwerte setzen
+            </button>
+            <button id="delete-custom-stops" type="button" class="secondary danger">
+              Eigene Haltestellen loeschen und Polygon-Filter zuruecksetzen
+            </button>
+            <button id="reset-walkshed-cache" type="button" class="secondary">
+              Nur Polygon-Cache loeschen
+            </button>
           </div>
 
           <div class="status-box" aria-live="polite">
@@ -95,7 +96,9 @@ const mapHref = import.meta.env.BASE_URL;
             <p id="cache-status" class="cache-status"></p>
           </div>
 
-          <a class="link-button" href={mapHref}>Zur Karte</a>
+          <a class="link-button" href={mapHref}>
+            Zur Karte
+          </a>
         </aside>
       </div>
     </article>
