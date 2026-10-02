@@ -13,11 +13,11 @@ import {
 import { STOP_TYPES } from './types';
 
 describe('stop radius normalization', () => {
-  it('clamps to 100–2000 m and rounds to 50 m increments', () => {
+  it('clamps to 100–2000 m while preserving manually entered meter values', () => {
     expect(clampStopRadius(1)).toBe(MIN_STOP_RADIUS_METERS);
-    expect(clampStopRadius(124)).toBe(100);
-    expect(clampStopRadius(126)).toBe(150);
-    expect(clampStopRadius(2000)).toBe(MAX_STOP_RADIUS_METERS);
+    expect(clampStopRadius(124)).toBe(124);
+    expect(clampStopRadius(126.4)).toBe(126);
+    expect(clampStopRadius(3000)).toBe(MAX_STOP_RADIUS_METERS);
   });
 });
 

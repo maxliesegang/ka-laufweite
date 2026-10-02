@@ -42,15 +42,14 @@ function invalidRadiusHint(invalidTypes: StopType[]): string {
   return ` Ungültig und unverändert: ${labels}.`;
 }
 
-/** Only complete values inside the configured 50 m steps are saved while typing.
- * Blur normalization snaps a manually entered value to its nearest valid step. */
+/** The step controls the native stepper increment without restricting manually
+ * entered radii, which can still be calculated live when no shipped dataset exists. */
 function hasSavableRadius(input: HTMLInputElement): boolean {
   return (
     !input.validity.valueMissing &&
     !input.validity.badInput &&
     !input.validity.rangeUnderflow &&
-    !input.validity.rangeOverflow &&
-    !input.validity.stepMismatch
+    !input.validity.rangeOverflow
   );
 }
 

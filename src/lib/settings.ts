@@ -55,8 +55,7 @@ export function clampStopRadius(value: unknown, fallback = DEFAULT_STOP_RADIUS_M
 
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed)) return fallback;
-  const stepped = Math.round(parsed / STOP_RADIUS_STEP_METERS) * STOP_RADIUS_STEP_METERS;
-  return Math.min(MAX_STOP_RADIUS_METERS, Math.max(MIN_STOP_RADIUS_METERS, stepped));
+  return Math.min(MAX_STOP_RADIUS_METERS, Math.max(MIN_STOP_RADIUS_METERS, Math.round(parsed)));
 }
 
 function readStoredRadius(stopType: StopType): unknown {
