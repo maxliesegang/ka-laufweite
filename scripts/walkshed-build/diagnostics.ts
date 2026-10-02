@@ -1,35 +1,24 @@
 /**
  * Build metrics and their two renderings: a machine-readable JSON snapshot and
- * the GitHub Actions step summary. The snapshot is rewritten periodically,
- * after every pass, and from the crash/signal handlers, so a build killed by a
- * CI timeout still leaves usable diagnostics behind.
+ * the GitHub Actions step summary. The snapshot is rewritten periodically and
+ * from the crash/signal handlers, so a build killed by a CI timeout still
+ * leaves usable diagnostics behind.
  */
 import { appendFileSync, writeFileSync } from 'node:fs';
 
-import type { Stop, StopType } from '../../src/lib/types.ts';
-import { setOverpassObserver } from '../../src/lib/walkshed/overpass.ts';
-import { averageMs, formatMebibytes, formatSeconds } from './format.ts';
+import type { StopType } from '../../src/lib/types.ts';
+import { formatMebibytes } from './format.ts';
+import type { FootwayExtractMetadata } from './local-footway-network.ts';
 
-export type BuildStatus = 'running' | 'completed' | 'unresolved-stops' | 'crashed' | 'interrupted';
+export type BuildStatus = 'running' | 'completed' | 'crashed' | 'interrupted';
 
-/**
- * Overpass counters. `batchFetches` counts `fetchFootwayNetworkInBounds` calls,
- * whose duration includes the module's internal endpoint fallbacks and backoff
- * sleeps; `httpAttempts` counts individual HTTP requests. Keeping both apart is
- * the difference between "Overpass is slow" and "Overpass is throttling us".
- */
-export interface OverpassMetrics {
-  batchFetches: number;
-  totalBatchFetchMs: number;
-  maxBatchFetchMs: number;
-  httpAttempts: number;
-  httpFailures: number;
-  totalHttpMs: number;
-  maxHttpMs: number;
-  backoffSleeps: number;
-  totalBackoffMs: number;
-  /** Attempt counts keyed by HTTP status, plus `network` for transport failures. */
-  attemptsByOutcome: Record<string, number>;
+/** What the build routed on, so a report shows which OSM snapshot it reflects. */
+export interface FootwayExtractSummary {
+  metadata: FootwayExtractMetadata;
+  wayCount: number;
+  nodeCount: number;
+  missingNodeReferenceCount: number;
+  loadSeconds: number;
 }
 
 export interface DatasetOutput {
@@ -45,10 +34,9 @@ export interface BuildState {
   stopCount: number;
   stopsWithPolygonsCount: number;
   emptyRadiusCount: number;
-  unresolvedStops: Stop[];
-  passesCompleted: number;
   batchCount: number;
-  overpass: OverpassMetrics;
+  completedBatchCount: number;
+  footwayExtract: FootwayExtractSummary | null;
   datasetOutputs: DatasetOutput[];
   startedAt: number;
 }
@@ -65,53 +53,17 @@ export function createBuildState(
     stopCount,
     stopsWithPolygonsCount: 0,
     emptyRadiusCount: 0,
-    unresolvedStops: [],
-    passesCompleted: 0,
     batchCount: 0,
-    overpass: {
-      batchFetches: 0,
-      totalBatchFetchMs: 0,
-      maxBatchFetchMs: 0,
-      httpAttempts: 0,
-      httpFailures: 0,
-      totalHttpMs: 0,
-      maxHttpMs: 0,
-      backoffSleeps: 0,
-      totalBackoffMs: 0,
-      attemptsByOutcome: {},
-    },
+    completedBatchCount: 0,
+    footwayExtract: null,
     datasetOutputs: [],
     startedAt,
   };
 }
 
-/**
- * Record real HTTP attempts, not batch fetches: a single batch fetch can hide
- * several endpoint attempts and backoff sleeps, which is exactly what has to be
- * visible when the build is being throttled.
- */
-export function trackOverpassMetrics(state: BuildState): void {
-  setOverpassObserver({
-    onAttempt(event) {
-      const { overpass } = state;
-      overpass.httpAttempts += 1;
-      overpass.totalHttpMs += event.durationMs;
-      overpass.maxHttpMs = Math.max(overpass.maxHttpMs, event.durationMs);
-      if (event.outcome !== 'ok') overpass.httpFailures += 1;
-      const outcomeKey = event.status === null ? 'network' : String(event.status);
-      overpass.attemptsByOutcome[outcomeKey] = (overpass.attemptsByOutcome[outcomeKey] ?? 0) + 1;
-    },
-    onBackoff(delayMs) {
-      state.overpass.backoffSleeps += 1;
-      state.overpass.totalBackoffMs += delayMs;
-    },
-  });
-}
-
 /** The single source of truth both the JSON diagnostics file and the GitHub
  *  step summary are rendered from. */
 export function createBuildReport(state: BuildState, status: BuildStatus, error?: unknown) {
-  const { overpass } = state;
   return {
     status,
     generatedAt: new Date().toISOString(),
@@ -122,58 +74,32 @@ export function createBuildReport(state: BuildState, status: BuildStatus, error?
     stops: {
       total: state.stopCount,
       withPolygons: state.stopsWithPolygonsCount,
-      unresolved: state.unresolvedStops.length,
       emptyRadiusVariants: state.emptyRadiusCount,
     },
-    passesCompleted: state.passesCompleted,
-    retryPasses: Math.max(0, state.passesCompleted - 1),
-    batchCount: state.batchCount,
-    overpass: {
-      batchFetches: overpass.batchFetches,
-      averageBatchFetchMs: averageMs(overpass.totalBatchFetchMs, overpass.batchFetches),
-      maxBatchFetchMs: overpass.maxBatchFetchMs,
-      httpAttempts: overpass.httpAttempts,
-      httpFailures: overpass.httpFailures,
-      averageHttpMs: averageMs(overpass.totalHttpMs, overpass.httpAttempts),
-      maxHttpMs: overpass.maxHttpMs,
-      backoffSleeps: overpass.backoffSleeps,
-      totalBackoffMs: Math.round(overpass.totalBackoffMs),
-      attemptsByOutcome: overpass.attemptsByOutcome,
-    },
+    batches: { total: state.batchCount, completed: state.completedBatchCount },
+    footwayExtract: state.footwayExtract,
     datasetOutputs: state.datasetOutputs,
     totalGzipBytes: state.datasetOutputs.reduce((total, output) => total + output.gzipBytes, 0),
-    unresolvedStops: state.unresolvedStops.map((stop) => ({
-      id: stop.id,
-      type: stop.type,
-      lat: stop.lat,
-      lon: stop.lon,
-    })),
   };
 }
 
 export type BuildReport = ReturnType<typeof createBuildReport>;
 
 export function renderStepSummary(report: BuildReport): string {
-  const { overpass } = report;
-  const outcomes = Object.entries(overpass.attemptsByOutcome)
-    .map(([outcome, count]) => `${outcome}×${count}`)
-    .join(', ');
+  const { footwayExtract } = report;
   return (
     `## Walkshed build: ${report.stopTypes.join('/')} (${report.status})\n\n` +
     (report.error ? `> ${report.error}\n\n` : '') +
     `- Radii: \`${JSON.stringify(report.radiiByStopType)}\`\n` +
     `- Stops with polygons: ${report.stops.withPolygons}/${report.stops.total}\n` +
     `- Empty radius variants: ${report.stops.emptyRadiusVariants}\n` +
-    `- Unresolved stops: ${report.stops.unresolved}\n` +
-    `- Passes: ${report.passesCompleted} (${report.retryPasses} retries)\n` +
-    `- Batch fetches: ${overpass.batchFetches} across ${report.batchCount} batches, ` +
-    `${formatSeconds(overpass.averageBatchFetchMs)} average, ${formatSeconds(overpass.maxBatchFetchMs)} maximum ` +
-    `(includes endpoint fallbacks and backoff)\n` +
-    `- HTTP attempts: ${overpass.httpAttempts} (${overpass.httpFailures} failed), ` +
-    `${formatSeconds(overpass.averageHttpMs)} average, ${formatSeconds(overpass.maxHttpMs)} maximum` +
-    (outcomes ? ` — ${outcomes}` : '') +
-    `\n` +
-    `- Backoff sleeps: ${overpass.backoffSleeps}, ${formatSeconds(overpass.totalBackoffMs)} total\n` +
+    `- Batches: ${report.batches.completed}/${report.batches.total}\n` +
+    (footwayExtract
+      ? `- OSM extract: ${footwayExtract.metadata.regions.join(', ')} ` +
+        `(prepared ${footwayExtract.metadata.generatedAt}), ` +
+        `${footwayExtract.wayCount} walkable ways, ${footwayExtract.nodeCount} nodes, ` +
+        `${footwayExtract.missingNodeReferenceCount} missing node references\n`
+      : '') +
     `- Output: ${report.datasetOutputs.length} files, ${formatMebibytes(report.totalGzipBytes)} MiB gzip\n` +
     `- Elapsed: ${report.elapsedSeconds} seconds\n\n`
   );

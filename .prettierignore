@@ -3,3 +3,4 @@ dist
 node_modules
 public/data/osm-stops.json
 public/data/walksheds-*.json
+.cache

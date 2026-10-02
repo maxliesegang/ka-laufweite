@@ -1,12 +1,14 @@
 /** Command-line options for `scripts/build-walksheds.ts`. */
 import { SHIPPED_STOP_RADII_METERS_BY_TYPE } from '../../src/lib/settings.ts';
 import { STOP_TYPES, isStopType, type StopType } from '../../src/lib/types.ts';
+import { DEFAULT_OSM_CACHE_DIR } from './local-footway-network.ts';
 
 /** Radii to build per stop type, in meters. */
 export type RadiiMetersByStopType = Record<StopType, readonly number[]>;
 
 export interface BuildOptions {
-  concurrency: number;
+  /** Directory holding the extract written by `npm run prepare:osm-extract`. */
+  osmCacheDir: string;
   stopLimit: number;
   outDir: string;
   /** Stop types to build; other types keep their existing files untouched. */
@@ -19,8 +21,6 @@ export interface BuildOptions {
   /** Machine-readable build metrics and unresolved stops for CI diagnostics. */
   diagnosticsFile: string | null;
 }
-
-export const DEFAULT_CONCURRENCY = 2;
 
 function parseNonNegativeInteger(value: string, option: string): number {
   const parsed = Number(value);
@@ -65,7 +65,7 @@ function resolveRadiiByType(
 }
 
 export function parseBuildOptions(args: string[], defaultOutDir: string): BuildOptions {
-  let concurrency = DEFAULT_CONCURRENCY;
+  let osmCacheDir = DEFAULT_OSM_CACHE_DIR;
   let stopLimit = Number.POSITIVE_INFINITY;
   let outDir = defaultOutDir;
   let stopTypes: StopType[] = [...STOP_TYPES];
@@ -80,9 +80,8 @@ export function parseBuildOptions(args: string[], defaultOutDir: string): BuildO
       throw new Error(`Expected --option value, received ${JSON.stringify(option)}`);
     }
 
-    if (option === '--concurrency') {
-      concurrency = parseNonNegativeInteger(value, option);
-      if (concurrency === 0) throw new Error('--concurrency must be greater than zero');
+    if (option === '--osm-cache-dir') {
+      osmCacheDir = value;
     } else if (option === '--limit') {
       stopLimit = parseNonNegativeInteger(value, option);
     } else if (option === '--out-dir') {
@@ -103,7 +102,7 @@ export function parseBuildOptions(args: string[], defaultOutDir: string): BuildO
   }
 
   return {
-    concurrency,
+    osmCacheDir,
     stopLimit,
     outDir,
     stopTypes,

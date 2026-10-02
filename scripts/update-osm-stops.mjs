@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import { KVV_BOUNDS as KVV_BBOX } from './osm-area.ts';
+
 const outputPath = join(import.meta.dirname, '..', 'public', 'data', 'osm-stops.json');
 
 const OVERPASS_ENDPOINTS = [
@@ -9,7 +11,6 @@ const OVERPASS_ENDPOINTS = [
 ];
 const REQUEST_TIMEOUT_MS = 45_000;
 const MAX_ROUNDS = 2;
-const KVV_BBOX = { south: 48.55, west: 7.75, north: 49.3, east: 8.95 };
 const UNKNOWN_STOP_NAME = 'Unbekannte Haltestelle';
 const METERS_PER_DEGREE_LATITUDE = 111_320;
 const DUPLICATE_RADIUS_METERS = 150;

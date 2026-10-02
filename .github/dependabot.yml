@@ -1,5 +1,7 @@
 version: 2
 
+# Minor and patch updates are grouped into one PR per ecosystem. Major updates
+# arrive as separate PRs so one breaking release cannot block the others.
 updates:
   - package-ecosystem: npm
     directory: /
@@ -9,6 +11,14 @@ updates:
       npm-dependencies:
         patterns:
           - '*'
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # @astrojs/check peers on typescript ^5 || ^6. Remove once it accepts 7.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
@@ -18,3 +28,6 @@ updates:
       github-actions:
         patterns:
           - '*'
+        update-types:
+          - minor
+          - patch

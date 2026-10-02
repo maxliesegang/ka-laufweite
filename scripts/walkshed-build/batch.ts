@@ -1,17 +1,17 @@
 /**
- * One Overpass request, one walk graph, many stops: nearby stops share a padded
- * query area, and every radius of a stop is polygonised from that shared graph.
+ * One footway network query, one walk graph, many stops: nearby stops share a
+ * padded query area, and every radius of a stop is polygonised from that graph.
  */
 import { DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS } from '../../src/lib/settings.ts';
 import type { Stop } from '../../src/lib/types.ts';
 import { buildWalkGraph, findNearestEdgeSeeds } from '../../src/lib/walkshed/graph.ts';
-import { fetchFootwayNetworkInBounds } from '../../src/lib/walkshed/overpass.ts';
 import { buildWalkshedPolygonsFromSeeds } from '../../src/lib/walkshed/polygon.ts';
 import { createWalkshedQueryArea } from '../../src/lib/walkshed/query-area.ts';
 import {
   encodeWalkshedPolygon,
   walkshedDatasetPolygonKey,
 } from '../../src/lib/walkshed/walkshed-codec.ts';
+import type { LocalFootwayNetwork } from './local-footway-network.ts';
 import type { RadiiMetersByStopType } from './options.ts';
 
 const MAX_STOPS_PER_BATCH = 48;
@@ -23,14 +23,6 @@ export interface StopPolygonResult {
   encodedPolygonsByRadiusMeters: Map<number, number[]>;
   /** Radius variants with no reachable footways — legitimately empty, not failures. */
   emptyRadiusCount: number;
-}
-
-export interface StopBatchResult {
-  polygonResultsByPolygonKey: Map<string, StopPolygonResult>;
-  transientFailure: boolean;
-  /** Wall time of the whole `fetchFootwayNetworkInBounds` call — endpoint
-   *  fallbacks and backoff sleeps included. Null when no request was made. */
-  fetchDurationMs: number | null;
 }
 
 /** Group stops into small geographic cells. The shared query is padded by the
@@ -54,12 +46,12 @@ export function createStopBatches(stops: Stop[]): Stop[][] {
 }
 
 /** Build every requested radius of every stop in one batch from a single
- *  Overpass fetch. Transient fetch failures are reported, not thrown, so the
- *  caller can retry the batch in a later pass. */
-export async function computeStopBatch(
+ *  footway network query. */
+export function computeStopBatch(
   stops: Stop[],
   radiiByStopType: RadiiMetersByStopType,
-): Promise<StopBatchResult> {
+  footwayNetwork: LocalFootwayNetwork,
+): Map<string, StopPolygonResult> {
   const queryArea = createWalkshedQueryArea(
     stops.map((stop) => ({
       lat: stop.lat,
@@ -67,22 +59,10 @@ export async function computeStopBatch(
       radiusMeters: Math.max(...radiiByStopType[stop.type]),
     })),
   );
-  if (!queryArea) {
-    return {
-      polygonResultsByPolygonKey: new Map(),
-      transientFailure: false,
-      fetchDurationMs: null,
-    };
-  }
+  if (!queryArea) return new Map();
 
-  const fetchStartedAt = Date.now();
-  const fetchResult = await fetchFootwayNetworkInBounds(queryArea.bounds);
-  const fetchDurationMs = Date.now() - fetchStartedAt;
-  if (fetchResult.status !== 'ok') {
-    return { polygonResultsByPolygonKey: new Map(), transientFailure: true, fetchDurationMs };
-  }
-
-  const graph = buildWalkGraph(fetchResult.networkData, DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS);
+  const networkData = footwayNetwork.footwayNetworkInBounds(queryArea.bounds);
+  const graph = buildWalkGraph(networkData, DEFAULT_ALLOW_REASONABLE_STREET_CROSSINGS);
   const polygonResultsByPolygonKey = new Map<string, StopPolygonResult>();
   if (!graph) {
     for (const stop of stops) {
@@ -92,7 +72,7 @@ export async function computeStopBatch(
         encodedPolygonsByRadiusMeters: new Map(),
       });
     }
-    return { polygonResultsByPolygonKey, transientFailure: false, fetchDurationMs };
+    return polygonResultsByPolygonKey;
   }
 
   for (const stop of stops) {
@@ -117,5 +97,5 @@ export async function computeStopBatch(
     });
   }
 
-  return { polygonResultsByPolygonKey, transientFailure: false, fetchDurationMs };
+  return polygonResultsByPolygonKey;
 }

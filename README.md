@@ -26,6 +26,7 @@ Live site: [maxliesegang.github.io/ka-laufweite](https://maxliesegang.github.io/
 ```sh
 npm install
 npm run update:stops   # fetch stop data from Overpass API
+npm run prepare:osm-extract # needs osmium-tool; downloads the OSM extract walksheds route on
 npm run build:walksheds # optionally refresh the shipped common-radius polygons
 npm run dev            # start dev server
 ```
@@ -94,12 +95,18 @@ npm run update:stops
 
 This queries OSM for `railway=tram_stop`, `railway=station`, `railway=halt`, `highway=bus_stop`, and `amenity=bus_station` in the KVV bounding box.
 
-To rebuild the optional shipped polygon snapshot for the current stops and supported radii, run
-`npm run build:walksheds`. It writes one file per stop type and radius — for example,
+To rebuild the optional shipped polygon snapshot for the current stops and supported radii, first
+run `npm run prepare:osm-extract` (requires `curl` and [osmium-tool](https://osmcode.org/osmium-tool/),
+e.g. `brew install osmium-tool` or `apt-get install osmium-tool`). It downloads the Geofabrik
+extracts covering the KVV area (about 1 GB, reused from `.cache/osm/` on later runs; delete that
+directory to refresh) and reduces them to the area's highways. Then run `npm run build:walksheds`.
+The build routes on that local extract instead of querying Overpass, using the same footway filter
+and query areas as the browser, so it takes minutes and does not depend on public Overpass
+instances. It writes one file per stop type and radius — for example,
 `public/data/walksheds-train-450.json` — so the map only downloads the exact dataset selected by the
 user (bus is hidden by default and loads lazily). Train ships radii from 400 m through 600 m, tram
 from 300 m through 500 m, and bus from 200 m through 300 m, all in 50 m increments. The generator accepts `--types`, `--radius`, `--limit`,
-`--concurrency`, and `--out-dir` options after `--`. Use `--types` to build a subset — e.g.
+`--osm-cache-dir`, and `--out-dir` options after `--`. Use `--types` to build a subset — e.g.
 `--types train,tram` —
 leaving the other types' files untouched (handy because bus has by far the most stops). `--radius`
 can select one configured radius when exactly one type is selected. Its output is versioned,
@@ -107,8 +114,8 @@ validated at runtime, and keyed by stop type and coordinates so stale polygons a
 stop changes.
 
 The stop snapshot is refreshed automatically on the first day of every month. On the second day, a
-separate workflow rebuilds each shipped type/radius combination in parallel and makes one verified
-commit after all jobs succeed. Both workflows can also be started manually from GitHub Actions.
+separate workflow prepares the OSM extract, rebuilds every shipped type/radius combination, and
+makes one verified commit. Both workflows can also be started manually from GitHub Actions.
 
 ## Tech Stack
 
@@ -116,13 +123,14 @@ commit after all jobs succeed. Both workflows can also be started manually from 
 - [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/) — client-side vector map rendering
 - [OpenFreeMap](https://openfreemap.org) — default OpenStreetMap vector basemap
 - [OpenRailwayMap](https://www.openrailwaymap.org) — optional railway-infrastructure overlay
-- [Overpass API](https://overpass-api.de) — OSM data for stops and footpaths
+- [Overpass API](https://overpass-api.de) — OSM data for stops and in-browser footpaths
+- [Geofabrik](https://download.geofabrik.de) and [osmium-tool](https://osmcode.org/osmium-tool/) — OSM extract for shipped walksheds
 - TypeScript
 
 ## How Walksheds Work
 
 1. When stops become visible, matching shipped or browser-cached polygons are loaded first.
-2. Remaining nearby stops are grouped into bounded batches. Each batch shares one padded Overpass query area and one footway network response; endpoints are scored by latency and failures.
+2. Remaining nearby stops are grouped into bounded batches. Each batch shares one padded Overpass query area and one footway network response; endpoints are ordered by latency, and endpoints whose last attempt failed are tried last.
 3. A spatially indexed walk graph is built from the OSM ways and nodes and cached in memory with LRU limits.
 4. Each stop is projected onto its nearest walkable edge and receives its own graph seeds and walking radius.
 5. Dijkstra's shortest-path algorithm computes reachable nodes for every stop independently. Polygon calculation runs in a Web Worker when supported, with a synchronous compatibility fallback.

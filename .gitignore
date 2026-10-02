@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# downloaded OSM extracts (npm run prepare:osm-extract)
+.cache/

@@ -15,7 +15,8 @@
     "format": "prettier --cache --write .",
     "format:check": "prettier --check .",
     "check": "astro check",
-    "update:stops": "node scripts/update-osm-stops.mjs",
+    "update:stops": "tsx scripts/update-osm-stops.mjs",
+    "prepare:osm-extract": "tsx scripts/prepare-osm-extract.ts",
     "build:walksheds": "tsx scripts/build-walksheds.ts",
     "astro": "astro"
   },

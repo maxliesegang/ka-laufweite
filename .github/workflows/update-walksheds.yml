@@ -14,32 +14,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  matrix:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      builds: ${{ steps.builds.outputs.matrix }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Setup project
-        uses: ./.github/actions/setup
-
-      - name: Read configured stop types
-        id: builds
-        run: echo "matrix=$(npm exec -- tsx scripts/list-walkshed-builds.ts)" >> "$GITHUB_OUTPUT"
-
   build:
-    needs: matrix
     runs-on: ubuntu-latest
-    timeout-minutes: 360
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix: ${{ fromJSON(needs.matrix.outputs.builds) }}
+    timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -49,59 +28,32 @@ jobs:
       - name: Setup project
         uses: ./.github/actions/setup
 
-      - name: Build all ${{ matrix.type }} walksheds
-        env:
-          WALKSHED_TYPE: ${{ matrix.type }}
+      - name: Install osmium-tool
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends osmium-tool
+
+      # Walksheds route on a local OSM extract rather than thousands of public
+      # Overpass requests, which throttled and timed out the previous builds.
+      - name: Prepare OSM extract
+        run: npm run prepare:osm-extract
+
+      - name: Build walksheds
         run: >-
           npm run build:walksheds --
-          --types "$WALKSHED_TYPE"
-          --out-dir walkshed-output
           --progress-file walkshed-progress.txt
           --diagnostics-file walkshed-diagnostics.json
 
-      - name: Upload generated dataset
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: walkshed-${{ matrix.type }}
-          path: walkshed-output/walksheds-${{ matrix.type }}-*.json
-          if-no-files-found: error
-          retention-days: 1
-
-      # `always()` so cancelled and timed-out jobs — the ones that leave no other
-      # trace — still publish the checkpointed diagnostics they managed to write.
+      # `always()` so failed, cancelled, and timed-out builds still publish the
+      # checkpointed diagnostics they managed to write.
       - name: Upload build diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: diagnostics-${{ matrix.type }}
+          name: walkshed-diagnostics
           path: |
             walkshed-progress.txt
             walkshed-diagnostics.json
           if-no-files-found: ignore
           retention-days: 7
-
-  commit:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      actions: read
-      contents: write
-    steps:
-      - name: Checkout latest default branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Download generated datasets
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          pattern: walkshed-*
-          path: public/data
-          merge-multiple: true
-
-      - name: Setup project
-        uses: ./.github/actions/setup
 
       - name: Verify generated data
         run: |
@@ -121,4 +73,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update precomputed walkshed data"
+          # Only this workflow writes these files, so rebasing over commits
+          # pushed during the build cannot conflict.
+          git pull --rebase origin "$DEFAULT_BRANCH"
           git push origin "HEAD:$DEFAULT_BRANCH"

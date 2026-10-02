@@ -59,11 +59,22 @@ function endpointScore(endpointUrl: string): number {
   return preferredEndpointUrl === endpointUrl ? baseScore - PREFERRED_ENDPOINT_BONUS_MS : baseScore;
 }
 
+function isEndpointFailing(endpointUrl: string): boolean {
+  return (endpointStatsByUrl.get(endpointUrl)?.failureStreak ?? 0) > 0;
+}
+
+/** Endpoints whose last attempt failed always rank after healthy ones. Comparing
+ *  scores alone let a never-successful endpoint (scored from the unknown-latency
+ *  default) outrank a working but slow one, so every request first waited out a
+ *  dead endpoint's timeout. */
 function orderedEndpointUrls(): string[] {
   const endpoints = uniqueEndpointUrls();
   const defaultOrder = new Map(endpoints.map((endpoint, index) => [endpoint, index]));
 
   return [...endpoints].sort((a, b) => {
+    const failingDelta = Number(isEndpointFailing(a)) - Number(isEndpointFailing(b));
+    if (failingDelta !== 0) return failingDelta;
+
     const scoreDelta = endpointScore(a) - endpointScore(b);
     if (scoreDelta !== 0) return scoreDelta;
 
@@ -96,6 +107,9 @@ function markEndpointFailure(endpointUrl: string): void {
   });
 }
 
+const EXCLUDED_ACCESS_REGEX = 'private|no';
+const EXCLUDED_FOOT_REGEX = 'no';
+
 function overpassFootwayQuery(bounds: BoundingBox): string {
   return `
 [out:json][timeout:25];
@@ -104,13 +118,32 @@ function overpassFootwayQuery(bounds: BoundingBox): string {
     ["highway"!~"${WALKABLE_HIGHWAY_EXCLUDE_REGEX}"]
     ["area"!="yes"]
     ["indoor"!="yes"]
-    ["access"!~"private|no"]
-    ["foot"!~"no"]
+    ["access"!~"${EXCLUDED_ACCESS_REGEX}"]
+    ["foot"!~"${EXCLUDED_FOOT_REGEX}"]
     (${bounds.south},${bounds.west},${bounds.north},${bounds.east});
 );
 (._;>;);
 out body;
 `;
+}
+
+const walkableHighwayExcludePattern = new RegExp(WALKABLE_HIGHWAY_EXCLUDE_REGEX);
+const excludedAccessPattern = new RegExp(EXCLUDED_ACCESS_REGEX);
+const excludedFootPattern = new RegExp(EXCLUDED_FOOT_REGEX);
+
+/** The tag filter of `overpassFootwayQuery`, for builds that read OSM data
+ *  directly. Overpass regex filters are unanchored and case-sensitive, as are
+ *  these, and a `!~`/`!=` filter also matches when the tag is absent. */
+export function isWalkableFootwayTags(tags: Readonly<Record<string, string>>): boolean {
+  const { highway, area, indoor, access, foot } = tags;
+  return (
+    highway !== undefined &&
+    !walkableHighwayExcludePattern.test(highway) &&
+    area !== 'yes' &&
+    indoor !== 'yes' &&
+    (access === undefined || !excludedAccessPattern.test(access)) &&
+    (foot === undefined || !excludedFootPattern.test(foot))
+  );
 }
 
 function isNodeElement(value: unknown): value is OverpassNodeElement {
@@ -155,47 +188,6 @@ export function parseOverpassResponse(payload: unknown): OverpassResponse | null
   );
   if (elements.length !== response.elements.length) return null;
   return { elements };
-}
-
-/** One actual HTTP attempt against one endpoint — not one `fetchFootwayNetworkInBounds`
- *  call, which may span several attempts and backoff sleeps. */
-export interface OverpassAttemptEvent {
-  endpointUrl: string;
-  /** Time spent in the HTTP request itself, excluding any backoff sleep. */
-  durationMs: number;
-  outcome: 'ok' | 'retryable-failure' | 'fatal-failure';
-  /** HTTP status when the attempt reached the server; null for network/timeout/parse errors. */
-  status: number | null;
-}
-
-export interface OverpassObserver {
-  onAttempt?: (event: OverpassAttemptEvent) => void;
-  /** Emitted before sleeping between retry rounds, with the planned delay. */
-  onBackoff?: (delayMs: number) => void;
-}
-
-let activeObserver: OverpassObserver | null = null;
-
-/** Install a diagnostics observer (build script only). Observers are best-effort:
- *  a throwing observer must never fail a request. */
-export function setOverpassObserver(observer: OverpassObserver | null): void {
-  activeObserver = observer;
-}
-
-function notifyAttempt(event: OverpassAttemptEvent): void {
-  try {
-    activeObserver?.onAttempt?.(event);
-  } catch {
-    /* ignore */
-  }
-}
-
-function notifyBackoff(delayMs: number): void {
-  try {
-    activeObserver?.onBackoff?.(delayMs);
-  } catch {
-    /* ignore */
-  }
 }
 
 class OverpassRequestError extends Error {
@@ -297,42 +289,23 @@ export async function fetchFootwayNetworkInBounds(
       const startedAt = Date.now();
       try {
         const networkData = await fetchFromEndpoint(endpointUrl, query, signal);
-        const durationMs = Date.now() - startedAt;
-        markEndpointSuccess(endpointUrl, durationMs);
-        notifyAttempt({ endpointUrl, durationMs, outcome: 'ok', status: 200 });
+        markEndpointSuccess(endpointUrl, Date.now() - startedAt);
         return { status: 'ok', networkData };
       } catch (error) {
         if (signal?.aborted) throw signal.reason;
         markEndpointFailure(endpointUrl);
-        const durationMs = Date.now() - startedAt;
         if (error instanceof OverpassRequestError) {
           if (!RETRYABLE_STATUS_CODES.has(error.status)) {
-            notifyAttempt({
-              endpointUrl,
-              durationMs,
-              outcome: 'fatal-failure',
-              status: error.status,
-            });
             return { status: 'all-endpoints-failed' };
           }
-          notifyAttempt({
-            endpointUrl,
-            durationMs,
-            outcome: 'retryable-failure',
-            status: error.status,
-          });
           retryDelayMs = Math.max(retryDelayMs, error.retryAfterMs ?? 0);
-        } else {
-          notifyAttempt({ endpointUrl, durationMs, outcome: 'retryable-failure', status: null });
         }
         retryableFailure = true;
       }
     }
 
     if (!retryableFailure || round === MAX_REQUEST_ROUNDS - 1) break;
-    const backoffMs = retryDelayMs + Math.random() * RETRY_JITTER_MS;
-    notifyBackoff(backoffMs);
-    await abortableDelay(backoffMs, signal);
+    await abortableDelay(retryDelayMs + Math.random() * RETRY_JITTER_MS, signal);
   }
 
   return { status: 'all-endpoints-failed' };

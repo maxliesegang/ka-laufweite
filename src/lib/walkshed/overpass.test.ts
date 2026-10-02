@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OVERPASS_ENDPOINT_URLS } from './constants';
-import { fetchFootwayNetwork, parseOverpassResponse } from './overpass';
+import { fetchFootwayNetwork, isWalkableFootwayTags, parseOverpassResponse } from './overpass';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -22,6 +22,24 @@ describe('Overpass response validation', () => {
         ],
       }),
     ).toBeNull();
+  });
+});
+
+describe('walkable footway tag filter', () => {
+  it.each([
+    [{ highway: 'footway' }, true],
+    [{ highway: 'residential', access: 'destination', foot: 'yes' }, true],
+    [{}, false],
+    [{ highway: 'motorway' }, false],
+    [{ highway: 'trunk_link' }, false],
+    [{ highway: 'pedestrian', area: 'yes' }, false],
+    [{ highway: 'footway', indoor: 'yes' }, false],
+    [{ highway: 'service', access: 'private' }, false],
+    // Overpass `!~` is an unanchored regex match, so substrings count.
+    [{ highway: 'track', access: 'agricultural;no' }, false],
+    [{ highway: 'cycleway', foot: 'no' }, false],
+  ])('%o → %s', (tags, expected) => {
+    expect(isWalkableFootwayTags(tags)).toBe(expected);
   });
 });
 
@@ -56,6 +74,30 @@ describe('Overpass request resilience', () => {
       status: 'all-endpoints-failed',
     });
     expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it('tries a slow healthy endpoint before a failing one', async () => {
+    vi.resetModules();
+    const { fetchFootwayNetwork: fetchWithFreshStats } = await import('./overpass');
+    vi.useFakeTimers();
+    const slowEndpointUrl = OVERPASS_ENDPOINT_URLS.at(-1);
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      if (input !== slowEndpointUrl) return new Response('', { status: 504 });
+      // Slower than the failure penalty a never-successful endpoint accrues.
+      await new Promise((resolve) => setTimeout(resolve, 12_000));
+      return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const first = fetchWithFreshStats(49, 8, 300);
+    await vi.advanceTimersByTimeAsync(12_000);
+    await expect(first).resolves.toMatchObject({ status: 'ok' });
+
+    fetchMock.mockClear();
+    const second = fetchWithFreshStats(49, 8, 300);
+    await vi.advanceTimersByTimeAsync(12_000);
+    await expect(second).resolves.toMatchObject({ status: 'ok' });
+    expect(fetchMock.mock.calls.map(([input]) => input)).toEqual([slowEndpointUrl]);
   });
 
   it('does not start work with an aborted signal', async () => {

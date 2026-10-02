@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_STOP_RADII_METERS_BY_TYPE } from '../../src/lib/settings.ts';
 import { STOP_TYPES } from '../../src/lib/types.ts';
-import { DEFAULT_CONCURRENCY, parseBuildOptions } from './options.ts';
+import { DEFAULT_OSM_CACHE_DIR } from './local-footway-network.ts';
+import { parseBuildOptions } from './options.ts';
 
 const OUT_DIR = '/tmp/walksheds';
 
@@ -12,7 +13,7 @@ describe('walkshed build options', () => {
 
     expect(options.stopTypes).toEqual([...STOP_TYPES]);
     expect(options.radiiByStopType).toEqual(SHIPPED_STOP_RADII_METERS_BY_TYPE);
-    expect(options.concurrency).toBe(DEFAULT_CONCURRENCY);
+    expect(options.osmCacheDir).toBe(DEFAULT_OSM_CACHE_DIR);
     expect(options.stopLimit).toBe(Number.POSITIVE_INFINITY);
     expect(options.outDir).toBe(OUT_DIR);
     expect(options.progressFile).toBeNull();
@@ -24,8 +25,8 @@ describe('walkshed build options', () => {
       [
         '--types',
         'tram',
-        '--concurrency',
-        '4',
+        '--osm-cache-dir',
+        '/osm',
         '--limit',
         '10',
         '--out-dir',
@@ -40,7 +41,7 @@ describe('walkshed build options', () => {
 
     expect(options).toMatchObject({
       stopTypes: ['tram'],
-      concurrency: 4,
+      osmCacheDir: '/osm',
       stopLimit: 10,
       outDir: '/elsewhere',
       progressFile: 'progress.txt',
@@ -78,7 +79,6 @@ describe('walkshed build options', () => {
     ],
     ['an unknown stop type', ['--types', 'hovercraft']],
     ['an empty type list', ['--types', '']],
-    ['a zero concurrency', ['--concurrency', '0']],
     ['a negative limit', ['--limit', '-1']],
     ['an unknown option', ['--nope', 'value']],
     ['a missing value', ['--types']],
