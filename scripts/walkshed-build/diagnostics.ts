@@ -4,7 +4,8 @@
  * from the crash/signal handlers, so a build killed by a CI timeout still
  * leaves usable diagnostics behind.
  */
-import { appendFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 import type { StopType } from '../../src/lib/types.ts';
 import { formatMebibytes } from './format.ts';
@@ -134,6 +135,13 @@ export function createDiagnosticsWriter(
 ): DiagnosticsWriter {
   let lastWriteAt = 0;
   let summaryWritten = false;
+  if (diagnosticsFile) {
+    try {
+      mkdirSync(dirname(diagnosticsFile), { recursive: true });
+    } catch {
+      /* ignore */
+    }
+  }
 
   const write = (status: BuildStatus, error?: unknown): void => {
     lastWriteAt = Date.now();

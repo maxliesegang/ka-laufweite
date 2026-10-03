@@ -1,4 +1,5 @@
-import { appendFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 /**
  * Emits progress to stdout and, if configured, to a file synchronously.
@@ -15,6 +16,7 @@ export function createProgressReporter(
   const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
   if (progressFile) {
     try {
+      mkdirSync(dirname(progressFile), { recursive: true });
       writeFileSync(progressFile, '');
     } catch {
       /* ignore */
