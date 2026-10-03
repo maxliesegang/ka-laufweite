@@ -104,8 +104,8 @@ The build routes on that local extract instead of querying Overpass, using the s
 and query areas as the browser, so it takes minutes and does not depend on public Overpass
 instances. It writes one file per stop type and radius — for example,
 `public/data/walksheds-train-450.json` — so the map only downloads the exact dataset selected by the
-user (bus is hidden by default and loads lazily). Train ships radii from 400 m through 600 m, tram
-from 300 m through 500 m, and bus from 200 m through 300 m, all in 50 m increments. The generator accepts `--types`, `--radius`, `--limit`,
+user (bus is hidden by default and loads lazily). Train and tram ship every slider radius from 100 m through
+2000 m, and bus from 100 m through 600 m, all in 50 m increments. The generator accepts `--types`, `--radius`, `--limit`,
 `--osm-cache-dir`, and `--out-dir` options after `--`. Use `--types` to build a subset — e.g.
 `--types train,tram` —
 leaving the other types' files untouched (handy because bus has by far the most stops). `--radius`

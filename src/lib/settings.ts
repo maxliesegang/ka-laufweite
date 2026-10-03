@@ -17,16 +17,32 @@ export const DEFAULT_STOP_RADIUS_METERS_BY_TYPE: Record<StopType, number> = {
   bus: 200,
 };
 
-/** Radii covered by the optional precomputed walkshed datasets. */
-export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number[]> = {
-  train: [400, 450, 500, 550, 600, 650],
-  tram: [300, 350, 400, 450, 500, 550],
-  bus: [200, 250, 300, 350, 400, 450],
-};
-
 export const MIN_STOP_RADIUS_METERS = 100;
 export const MAX_STOP_RADIUS_METERS = 2000;
 export const STOP_RADIUS_STEP_METERS = 50;
+/** Bus has ~25x more stops than train and tram combined, so its shipped range
+ * stops at realistic walking distances to keep the datasets small. */
+const MAX_SHIPPED_BUS_STOP_RADIUS_METERS = 600;
+
+function stopRadiusSteps(maxRadiusMeters: number): readonly number[] {
+  const radii: number[] = [];
+  for (
+    let radiusMeters = MIN_STOP_RADIUS_METERS;
+    radiusMeters <= maxRadiusMeters;
+    radiusMeters += STOP_RADIUS_STEP_METERS
+  ) {
+    radii.push(radiusMeters);
+  }
+  return radii;
+}
+
+/** Radii covered by the optional precomputed walkshed datasets: every slider
+ * step for train and tram, and the common range for bus. */
+export const SHIPPED_STOP_RADII_METERS_BY_TYPE: Record<StopType, readonly number[]> = {
+  train: stopRadiusSteps(MAX_STOP_RADIUS_METERS),
+  tram: stopRadiusSteps(MAX_STOP_RADIUS_METERS),
+  bus: stopRadiusSteps(MAX_SHIPPED_BUS_STOP_RADIUS_METERS),
+};
 export const COVERAGE_SHAPE_STORAGE_KEY = 'karlsruhe-opnv-coverage-shape';
 export const STOP_TYPE_VISIBILITY_STORAGE_KEY = 'karlsruhe-opnv-stop-type-visibility-v1';
 export const REASONABLE_STREET_CROSSINGS_STORAGE_KEY =
